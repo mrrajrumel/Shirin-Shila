@@ -96,7 +96,6 @@ export default function AdminHeroPage() {
   return (
     <>
       <header className="adm-header">
-        <h1 className="adm-header-title">Hero Section Settings</h1>
         <div className="adm-header-actions">
           <button
             type="button"
@@ -171,68 +170,6 @@ export default function AdminHeroPage() {
                   onChange={(e) => setHero({ ...hero, intro: e.target.value })}
                   placeholder="Cinematic introductory bio sentence..."
                 />
-              </div>
-
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', marginTop: '16px' }}>
-                <div className="adm-form-group">
-                  <label className="adm-label">Primary Button Label</label>
-                  <input
-                    type="text"
-                    className="adm-input"
-                    value={hero.primaryCta.label}
-                    onChange={(e) =>
-                      setHero({
-                        ...hero,
-                        primaryCta: { ...hero.primaryCta, label: e.target.value },
-                      })
-                    }
-                  />
-                </div>
-                <div className="adm-form-group">
-                  <label className="adm-label">Primary Target (#anchor)</label>
-                  <input
-                    type="text"
-                    className="adm-input"
-                    value={hero.primaryCta.href}
-                    onChange={(e) =>
-                      setHero({
-                        ...hero,
-                        primaryCta: { ...hero.primaryCta, href: e.target.value },
-                      })
-                    }
-                  />
-                </div>
-              </div>
-
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
-                <div className="adm-form-group">
-                  <label className="adm-label">Secondary Button Label</label>
-                  <input
-                    type="text"
-                    className="adm-input"
-                    value={hero.secondaryCta.label}
-                    onChange={(e) =>
-                      setHero({
-                        ...hero,
-                        secondaryCta: { ...hero.secondaryCta, label: e.target.value },
-                      })
-                    }
-                  />
-                </div>
-                <div className="adm-form-group">
-                  <label className="adm-label">Secondary Target (#anchor)</label>
-                  <input
-                    type="text"
-                    className="adm-input"
-                    value={hero.secondaryCta.href}
-                    onChange={(e) =>
-                      setHero({
-                        ...hero,
-                        secondaryCta: { ...hero.secondaryCta, href: e.target.value },
-                      })
-                    }
-                  />
-                </div>
               </div>
             </div>
 

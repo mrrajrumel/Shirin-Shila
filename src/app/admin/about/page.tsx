@@ -162,7 +162,6 @@ export default function AdminAboutPage() {
   return (
     <>
       <header className="adm-header">
-        <h1 className="adm-header-title">About & Profile Highlights Settings</h1>
         <div className="adm-header-actions">
           <button
             type="button"

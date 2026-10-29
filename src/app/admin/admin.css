@@ -270,16 +270,15 @@
   z-index: 40;
 }
 
-/* TailAdmin Page Header / Action Card (Inside Pages) */
+/* TailAdmin Page Header Action Bar (Inside Pages) */
 .adm-header {
-  background: var(--tail-surface);
-  border: 1px solid var(--tail-border);
-  border-radius: 8px;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  padding: 18px 24px;
-  margin-bottom: 24px;
+  justify-content: flex-end;
+  padding: 16px 32px 0;
+  margin-bottom: 12px;
+  background: transparent;
+  border: none;
 }
 
 .adm-header-left {

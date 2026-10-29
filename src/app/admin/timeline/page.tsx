@@ -204,12 +204,6 @@ export default function AdminTimelinePage() {
   return (
     <>
       <header className="adm-header">
-        <div>
-          <h1 className="adm-header-title">Awards & Honors Timeline</h1>
-          <p style={{ margin: '2px 0 0', fontSize: '12px', color: 'var(--adm-text-muted)' }}>
-            Single unified chronological flow (Oldest → Newest). Automatically ordered on public site.
-          </p>
-        </div>
         <div className="adm-header-actions">
           <button
             type="button"

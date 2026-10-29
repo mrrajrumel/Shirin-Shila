@@ -122,15 +122,12 @@ export default function AdminInquiriesPage() {
   return (
     <>
       <header className="adm-header">
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <h1 className="adm-header-title">Contact Inquiries & CRM Table</h1>
+        <div className="adm-header-actions">
           {newCount > 0 && (
             <span className="adm-badge adm-badge-blue">
               {newCount} New Submissions
             </span>
           )}
-        </div>
-        <div className="adm-header-actions">
           <button type="button" onClick={loadInquiries} className="adm-btn adm-btn-secondary adm-btn-sm">
             <RefreshCw size={12} />
             <span>Refresh</span>

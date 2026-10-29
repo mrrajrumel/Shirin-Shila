@@ -68,7 +68,6 @@ export default function AdminContactPage() {
   return (
     <>
       <header className="adm-header">
-        <h1 className="adm-header-title">Contact & Social Channels</h1>
         <div className="adm-header-actions">
           <button
             type="button"

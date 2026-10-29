@@ -237,15 +237,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
           {/* Header Right Actions */}
           <div className="adm-header-actions">
-            <Link
-              href="/"
-              target="_blank"
-              className="adm-btn adm-btn-secondary adm-btn-sm hidden sm:inline-flex"
-            >
-              <span>Live Website</span>
-              <ExternalLink size={13} />
-            </Link>
-
             <div className="adm-user-chip">
               <div className="adm-user-avatar">
                 <span>SS</span>

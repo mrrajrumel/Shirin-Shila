@@ -153,7 +153,6 @@ export default function AdminGalleryPage() {
   return (
     <>
       <header className="adm-header">
-        <h1 className="adm-header-title">Visual Gallery</h1>
         <div className="adm-header-actions">
           <button type="button" onClick={handleOpenAddModal} className="adm-btn adm-btn-primary adm-btn-sm">
             <Plus size={13} />

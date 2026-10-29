@@ -228,7 +228,6 @@ export default function AdminPressPage() {
   return (
     <>
       <header className="adm-header">
-        <h1 className="adm-header-title">Press & Media Archive</h1>
         <div className="adm-header-actions">
           <button
             type="button"

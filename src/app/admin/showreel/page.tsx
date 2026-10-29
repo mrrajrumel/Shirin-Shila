@@ -182,7 +182,6 @@ export default function AdminShowreelPage() {
   return (
     <>
       <header className="adm-header">
-        <h1 className="adm-header-title">Showreel Video Management</h1>
         <div className="adm-header-actions">
           <button type="button" onClick={handleOpenAddModal} className="adm-btn adm-btn-primary adm-btn-sm">
             <Plus size={13} />

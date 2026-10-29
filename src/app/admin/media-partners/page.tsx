@@ -136,7 +136,6 @@ export default function AdminMediaPartnersPage() {
   return (
     <>
       <header className="adm-header">
-        <h1 className="adm-header-title">Television & Media Logos Ticker</h1>
         <div className="adm-header-actions">
           <button type="button" onClick={handleOpenAddModal} className="adm-btn adm-btn-primary adm-btn-sm">
             <Plus size={13} />
