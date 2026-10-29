@@ -486,13 +486,7 @@ export default function AdminTimelinePage() {
                   </div>
                 </div>
 
-                <div
-                  style={{
-                    display: 'grid',
-                    gridTemplateColumns: '1fr 1fr',
-                    gap: '16px',
-                  }}
-                >
+                <div className="adm-grid-2fields">
                   <div className="adm-form-group">
                     <label className="adm-label">Award Year *</label>
                     <input

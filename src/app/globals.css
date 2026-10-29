@@ -2246,7 +2246,7 @@ a {
   }
 }
 
-@media (max-width: 768px) {
+@media (max-width: 860px) {
   .desktop-nav-links,
   .nav-row__center,
   .desktop-inquiry-btn,
@@ -2255,62 +2255,78 @@ a {
   }
 
   .hero {
-    min-height: auto;
+    min-height: 100svh;
     height: auto;
-    padding-top: 105px;
-    padding-bottom: 40px;
+    padding-top: max(105px, 14svh);
+    padding-bottom: 48px;
     padding-left: 20px;
     padding-right: 20px;
     display: flex;
     flex-direction: column;
-    justify-content: flex-start;
-    align-items: center;
-    gap: 28px;
-    background:
-      radial-gradient(ellipse at 50% 20%, #7d153b44 0, transparent 50%),
-      linear-gradient(180deg, #0b080c 0%, #150912 60%, #0b080c 100%);
+    justify-content: flex-end;
+    align-items: flex-start;
+    position: relative;
+    overflow: hidden;
+    background: #0b080c;
   }
 
   .hero:before {
-    display: none;
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      linear-gradient(180deg, rgba(11,8,12,0.45) 0%, rgba(11,8,12,0.72) 48%, #0b080c 100%),
+      radial-gradient(ellipse at 50% 30%, transparent 20%, #0b080c 95%);
+    z-index: 2;
+    display: block !important;
   }
 
   .hero-content {
-    order: 1;
-    position: relative;
-    z-index: 2;
-    width: 100%;
-    max-width: 100%;
+    position: relative !important;
+    z-index: 10 !important;
+    width: 100% !important;
+    max-width: 100% !important;
     text-align: left;
     margin-bottom: 0;
   }
 
   .hero-image {
-    order: 2;
-    position: relative;
-    right: auto;
-    top: auto;
-    width: 100%;
-    max-width: 360px;
-    height: auto;
-    max-height: 480px;
-    margin: 0 auto;
-    object-fit: cover;
-    object-position: center 20%;
-    border-radius: 16px;
-    opacity: 0.95;
-    mask-image: linear-gradient(to bottom, black 82%, transparent 100%);
-    -webkit-mask-image: linear-gradient(to bottom, black 82%, transparent 100%);
-    box-shadow: 0 16px 36px -8px rgba(0, 0, 0, 0.7);
+    position: absolute !important;
+    inset: 0 !important;
+    right: 0 !important;
+    top: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    height: 100% !important;
+    max-height: 100% !important;
+    margin: 0 !important;
+    object-fit: cover !important;
+    object-position: center 20% !important;
+    border-radius: 0 !important;
+    opacity: 0.38 !important;
+    z-index: 1 !important;
+    transform: none !important;
+    filter: brightness(0.85) saturate(0.9) !important;
+    mask-image: linear-gradient(to top, rgba(0,0,0,1) 40%, rgba(0,0,0,0.6) 80%, rgba(0,0,0,0.2) 100%) !important;
+    -webkit-mask-image: linear-gradient(to top, rgba(0,0,0,1) 40%, rgba(0,0,0,0.6) 80%, rgba(0,0,0,0.2) 100%) !important;
+    box-shadow: none !important;
   }
 
   .hero h1 {
-    font-size: clamp(54px, 16vw, 92px);
+    font-size: clamp(48px, 14vw, 84px);
   }
 
   .hero-actions {
     flex-direction: column;
     align-items: stretch;
+  }
+
+  .hero-bottom {
+    position: relative !important;
+    bottom: auto !important;
+    left: auto !important;
+    margin-top: 16px !important;
+    z-index: 10 !important;
   }
 
   .section {
@@ -4807,26 +4823,46 @@ a {
 }
 
 /* ==========================================================================
-   ABOUT SECTION CLEAN
+   ABOUT SECTION - EDITORIAL VIP DOSSIER
    ========================================================================== */
 .about-section-simple {
   position: relative;
-  padding: 100px clamp(24px, 6vw, 100px);
+  padding: 100px clamp(20px, 6vw, 100px);
+}
+
+.about-kicker-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  background: rgba(255, 63, 121, 0.08);
+  border: 1px solid rgba(255, 63, 121, 0.25);
+  border-radius: 999px;
+  margin-bottom: 14px;
+}
+
+.about-kicker-pill span {
+  font-family: var(--font-mono, monospace);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--pink);
 }
 
 .about-content-grid {
   display: grid;
-  grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+  grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
   gap: clamp(32px, 5vw, 64px);
   max-width: 1240px;
   margin: 0 auto;
   align-items: start;
 }
 
-@media (max-width: 900px) {
+@media (max-width: 960px) {
   .about-content-grid {
     grid-template-columns: 1fr;
-    gap: 40px;
+    gap: 36px;
   }
 }
 
@@ -4836,10 +4872,12 @@ a {
 }
 
 .about-heading-simple {
-  font-size: clamp(22px, 2.5vw, 32px);
+  font-size: clamp(24px, 2.8vw, 36px);
   color: #fff;
-  line-height: 1.3;
+  line-height: 1.25;
   margin: 0 0 24px 0;
+  font-weight: 600;
+  letter-spacing: -0.02em;
 }
 
 .about-story-text {
@@ -4855,93 +4893,256 @@ a {
   margin: 0;
 }
 
-.about-card-col {
+/* Prestige Milestone Cards Bar */
+.about-prestige-bar {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-top: 32px;
+  padding-top: 24px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+@media (max-width: 600px) {
+  .about-prestige-bar {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+}
+
+.about-prestige-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 12px;
+  transition: all 0.25s ease;
+}
+
+.about-prestige-card:hover {
+  background: rgba(255, 63, 121, 0.06);
+  border-color: rgba(255, 63, 121, 0.25);
+  transform: translateY(-2px);
+}
+
+.prestige-icon {
+  color: #ff9bb8;
+  flex-shrink: 0;
+}
+
+.prestige-icon.pink {
+  color: var(--pink);
+}
+
+.prestige-info {
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  min-width: 0;
 }
 
-.about-portrait-wrap {
-  width: 100%;
-  height: 380px;
-  border-radius: 16px;
+.prestige-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: #fff;
+  line-height: 1.2;
+}
+
+.prestige-sub {
+  font-size: 11px;
+  color: #9f8a98;
+  white-space: nowrap;
   overflow: hidden;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.6);
-  position: relative;
+  text-overflow: ellipsis;
 }
 
-.about-portrait-image {
+/* Right: Editorial Celebrity Dossier Card */
+.about-dossier-card {
+  background: #140d13;
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 20px 48px -12px rgba(0, 0, 0, 0.65);
+  transition: border-color 0.3s ease;
+}
+
+.about-dossier-card:hover {
+  border-color: rgba(255, 63, 121, 0.3);
+}
+
+/* Dossier Portrait Frame */
+.about-dossier-portrait-wrap {
+  position: relative;
+  width: 100%;
+  height: 320px;
+  overflow: hidden;
+  background: #0b080c;
+}
+
+@media (max-width: 640px) {
+  .about-dossier-portrait-wrap {
+    height: 260px;
+  }
+}
+
+.about-dossier-portrait-img {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  object-position: center top;
-  display: block;
-  transition: transform 0.5s ease;
+  object-position: center 20%;
+  transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  filter: saturate(0.92);
 }
 
-.about-portrait-wrap:hover .about-portrait-image {
+.about-dossier-card:hover .about-dossier-portrait-img {
   transform: scale(1.03);
 }
 
-.about-details-card {
-  padding: 24px 28px;
-  background: #151016;
-  border: 1px solid rgba(255, 63, 121, 0.25);
-  border-radius: 16px;
-  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5), 0 0 25px rgba(255, 63, 121, 0.08);
-}
-
-.about-card-title {
-  font-size: 20px;
-  color: #fff;
-  margin: 0 0 18px 0;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-  padding-bottom: 12px;
-}
-
-.about-details-list {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  margin: 0 0 24px 0;
-}
-
-.about-detail-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 8px 0;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-  gap: 12px;
-}
-
-.about-detail-item.highlight {
-  background: rgba(255, 63, 121, 0.08);
-  border: 1px solid rgba(255, 63, 121, 0.3);
-  padding: 8px 12px;
-  border-radius: 8px;
-}
-
-.about-detail-item .detail-dt {
-  font-size: 12.5px;
-  color: #a4919f;
-  font-weight: 500;
-}
-
-.about-detail-item .detail-dd {
-  font-size: 13.5px;
-  color: #fff;
-  font-weight: 600;
-  text-align: right;
+.about-dossier-badge-top {
+  position: absolute;
+  top: 14px;
+  right: 14px;
   display: inline-flex;
   align-items: center;
   gap: 6px;
+  background: rgba(11, 8, 12, 0.82);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  padding: 5px 11px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #fff;
+  letter-spacing: 0.04em;
+  z-index: 2;
+}
+
+.about-dossier-badge-top .check-icon {
+  color: #10b981;
+}
+
+.about-dossier-badge-bottom {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 24px 18px 14px;
+  background: linear-gradient(180deg, transparent 0%, rgba(20, 13, 19, 0.95) 100%);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  z-index: 2;
+}
+
+.about-dossier-badge-bottom .badge-name {
+  font-family: var(--font-serif, serif);
+  font-size: 17px;
+  font-weight: 700;
+  color: #fff;
+}
+
+.about-dossier-badge-bottom .badge-sub {
+  font-size: 11.5px;
+  color: #e5b3c5;
+  letter-spacing: 0.05em;
+}
+
+/* Dossier Body & Bento Grid */
+.about-dossier-body {
+  padding: 20px 22px 24px;
+}
+
+.about-dossier-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding-bottom: 14px;
+  margin-bottom: 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+.about-dossier-title {
+  font-size: 17px;
+  font-weight: 600;
+  color: #fff;
   margin: 0;
 }
 
-.about-detail-item .award-icon {
+.about-dossier-serial {
+  font-family: var(--font-mono, monospace);
+  font-size: 9.5px;
+  letter-spacing: 0.14em;
+  color: #8b7986;
+  text-transform: uppercase;
+}
+
+.about-dossier-bento-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+@media (max-width: 520px) {
+  .about-dossier-bento-grid {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+}
+
+.about-dossier-pill {
+  background: rgba(255, 255, 255, 0.035);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 10px;
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  transition: all 0.2s ease;
+}
+
+.about-dossier-pill:hover {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.12);
+}
+
+.about-dossier-pill.is-highlight {
+  background: rgba(255, 63, 121, 0.08);
+  border-color: rgba(255, 63, 121, 0.32);
+}
+
+.dossier-pill-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+}
+
+.dossier-pill-label {
+  font-family: var(--font-mono, monospace);
+  font-size: 9.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: #9f8a98;
+  font-weight: 600;
+}
+
+.about-dossier-pill.is-highlight .dossier-pill-label {
+  color: #ff9bb8;
+}
+
+.dossier-highlight-icon {
   color: var(--pink);
+  flex-shrink: 0;
+}
+
+.dossier-pill-val {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #ffffff;
+  line-height: 1.35;
+  word-break: break-word;
 }
 
 .comp-card-download-simple {

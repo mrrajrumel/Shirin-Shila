@@ -65,7 +65,7 @@ export function HeroMotion({ id = "home" }: HeroSectionProps) {
   const orbY = useTransform(smoothY, [-0.5, 0.5], [20, -20]);
 
   const handleMouseMove = (e: React.MouseEvent) => {
-    if (!containerRef.current) return;
+    if (!containerRef.current || (typeof window !== "undefined" && window.innerWidth <= 860)) return;
     const { innerWidth, innerHeight } = window;
     const x = (e.clientX / innerWidth) - 0.5;
     const y = (e.clientY / innerHeight) - 0.5;

@@ -649,6 +649,50 @@
 }
 
 /* ==========================================================================
+   TAILADMIN RESPONSIVE GRID UTILITIES
+   ========================================================================== */
+
+.adm-grid-2col {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+}
+
+@media (min-width: 1024px) {
+  .adm-grid-2col {
+    grid-template-columns: 1.2fr 1fr;
+    gap: 24px;
+  }
+}
+
+.adm-grid-2col-equal {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+}
+
+@media (min-width: 1024px) {
+  .adm-grid-2col-equal {
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+  }
+}
+
+.adm-grid-2fields {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+
+@media (min-width: 640px) {
+  .adm-grid-2fields {
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+  }
+}
+
+
+/* ==========================================================================
    TAILADMIN MODALS
    ========================================================================== */
 

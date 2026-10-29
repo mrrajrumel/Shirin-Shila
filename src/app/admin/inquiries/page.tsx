@@ -319,7 +319,7 @@ export default function AdminInquiriesPage() {
             </div>
 
             <div className="adm-modal-body">
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '16px' }}>
+              <div className="adm-grid-2fields" style={{ marginBottom: '16px' }}>
                 <div>
                   <div style={{ fontSize: '11px', color: 'var(--adm-text-muted)' }}>NAME</div>
                   <div style={{ fontSize: '14px', fontWeight: 600 }}>{selectedInquiry.name}</div>

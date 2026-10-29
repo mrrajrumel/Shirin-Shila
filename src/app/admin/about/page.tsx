@@ -185,14 +185,14 @@ export default function AdminAboutPage() {
 
       <main className="adm-content">
         <form onSubmit={handleSave}>
-          <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '24px' }}>
+          <div className="adm-grid-2col">
             {/* Left: Biography Headings & Story Paragraphs */}
             <div className="adm-card">
               <div className="adm-card-header">
                 <span className="adm-card-title">Biographical Story & Headings</span>
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
+              <div className="adm-grid-2fields">
                 <div className="adm-form-group">
                   <label className="adm-label">Section Title</label>
                   <input
@@ -464,38 +464,6 @@ export default function AdminAboutPage() {
                 </div>
               </div>
             </div>
-          </div>
-
-          {/* Bottom Save Action Bar */}
-          <div
-            style={{
-              marginTop: '24px',
-              display: 'flex',
-              justifyContent: 'flex-end',
-              gap: '12px',
-              background: 'var(--adm-card-bg)',
-              border: '1px solid var(--adm-border)',
-              borderRadius: '10px',
-              padding: '14px 20px',
-            }}
-          >
-            <button
-              type="button"
-              onClick={loadAbout}
-              className="adm-btn adm-btn-secondary"
-            >
-              <RefreshCw size={13} />
-              <span>Reset</span>
-            </button>
-            <button
-              type="submit"
-              disabled={saving}
-              className="adm-btn adm-btn-primary"
-              style={{ minWidth: '160px' }}
-            >
-              {savedSuccess ? <Check size={14} /> : <Save size={14} />}
-              <span>{saving ? 'Saving...' : savedSuccess ? 'Saved Changes!' : 'Save Changes'}</span>
-            </button>
           </div>
         </form>
       </main>

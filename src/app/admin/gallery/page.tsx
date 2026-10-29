@@ -337,7 +337,7 @@ export default function AdminGalleryPage() {
                   />
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                <div className="adm-grid-2fields">
                   <div className="adm-form-group">
                     <label className="adm-label">Category</label>
                     <input

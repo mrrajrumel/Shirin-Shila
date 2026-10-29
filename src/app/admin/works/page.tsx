@@ -589,7 +589,7 @@ export default function AdminWorksPage() {
                   </div>
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                <div className="adm-grid-2fields">
                   <div className="adm-form-group">
                     <label className="adm-label">English Title *</label>
                     <input
@@ -613,7 +613,7 @@ export default function AdminWorksPage() {
                   </div>
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                <div className="adm-grid-2fields">
                   <div className="adm-form-group">
                     <label className="adm-label">Category</label>
                     <select
@@ -640,7 +640,7 @@ export default function AdminWorksPage() {
                   </div>
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                <div className="adm-grid-2fields">
                   <div className="adm-form-group">
                     <label className="adm-label">Director</label>
                     <input
@@ -663,7 +663,7 @@ export default function AdminWorksPage() {
                   </div>
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                <div className="adm-grid-2fields">
                   <div className="adm-form-group">
                     <label className="adm-label">Character / Role Name</label>
                     <input
@@ -720,7 +720,7 @@ export default function AdminWorksPage() {
                   />
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                <div className="adm-grid-2fields">
                   <div className="adm-form-group">
                     <label className="adm-label">Video / YouTube URL (Optional)</label>
                     <input

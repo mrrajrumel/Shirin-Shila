@@ -120,7 +120,7 @@ export default function AdminHeroPage() {
 
       <main className="adm-content">
         <form onSubmit={handleSave}>
-          <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '24px' }}>
+          <div className="adm-grid-2col">
             {/* Left: Text & CTA Form */}
             <div className="adm-card">
               <div className="adm-card-header">
@@ -240,38 +240,6 @@ export default function AdminHeroPage() {
                 />
               </div>
             </div>
-          </div>
-
-          {/* Bottom Save Action Bar */}
-          <div
-            style={{
-              marginTop: '24px',
-              display: 'flex',
-              justifyContent: 'flex-end',
-              gap: '12px',
-              background: 'var(--adm-card-bg)',
-              border: '1px solid var(--adm-border)',
-              borderRadius: '10px',
-              padding: '14px 20px',
-            }}
-          >
-            <button
-              type="button"
-              onClick={loadHero}
-              className="adm-btn adm-btn-secondary"
-            >
-              <RefreshCw size={13} />
-              <span>Reset</span>
-            </button>
-            <button
-              type="submit"
-              disabled={saving}
-              className="adm-btn adm-btn-primary"
-              style={{ minWidth: '160px' }}
-            >
-              {savedSuccess ? <Check size={14} /> : <Save size={14} />}
-              <span>{saving ? 'Saving...' : savedSuccess ? 'Saved Changes!' : 'Save Changes'}</span>
-            </button>
           </div>
         </form>
       </main>
