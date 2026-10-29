@@ -313,8 +313,8 @@ export default function AdminAboutPage() {
                       margin: '0 auto 16px',
                       borderRadius: '12px',
                       overflow: 'hidden',
-                      background: '#1a111a',
-                      border: '2px solid rgba(255, 63, 121, 0.4)',
+                      background: '#f1f5f9',
+                      border: '1px solid #cbd5e1',
                     }}
                   >
                     <img

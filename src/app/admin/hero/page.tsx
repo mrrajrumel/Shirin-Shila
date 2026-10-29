@@ -251,9 +251,8 @@ export default function AdminHeroPage() {
                     margin: '0 auto 16px',
                     borderRadius: '12px',
                     overflow: 'hidden',
-                    background: '#1a111a',
-                    border: '2px solid rgba(255, 63, 121, 0.4)',
-                    boxShadow: '0 12px 32px rgba(0,0,0,0.6), 0 0 20px rgba(255,63,121,0.2)',
+                    background: '#f1f5f9',
+                    border: '1px solid #cbd5e1',
                   }}
                 >
                   <img

@@ -466,16 +466,16 @@ export default function AdminWorksPage() {
                 {/* Auto-Fetch Film / TV Show Details */}
                 <div
                   style={{
-                    background: 'rgba(255, 63, 121, 0.08)',
-                    border: '1px solid rgba(255, 63, 121, 0.28)',
+                    background: '#f8fafc',
+                    border: '1px solid #e2e8f0',
                     borderRadius: '8px',
                     padding: '12px 14px',
                     marginBottom: '16px',
                   }}
                 >
                   <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '6px' }}>
-                    <Search size={14} color="var(--pink)" />
-                    <span style={{ fontSize: '12px', fontWeight: 600, color: '#9f1239' }}>
+                    <Search size={14} color="#3c50e0" />
+                    <span style={{ fontSize: '12px', fontWeight: 600, color: '#1e293b' }}>
                       Auto-Fetch Project Details & Thumbnail (YouTube Link, IMDb URL, or Title)
                     </span>
                   </div>
@@ -527,13 +527,12 @@ export default function AdminWorksPage() {
                         height: '70px',
                         borderRadius: '8px',
                         overflow: 'hidden',
-                        background: '#140c16',
-                        border: '1px solid rgba(255, 63, 121, 0.35)',
+                        background: '#f1f5f9',
+                        border: '1px solid #cbd5e1',
                         flexShrink: 0,
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
-                        boxShadow: '0 4px 12px rgba(0,0,0,0.5)',
                         position: 'relative',
                       }}
                     >

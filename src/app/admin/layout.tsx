@@ -107,7 +107,11 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const currentNav = navGroups
     .flatMap((g) => g.items)
     .find((item) => item.href === pathname);
-  const pageTitle = currentNav ? currentNav.label : "TailAdmin Management";
+  const pageTitle = currentNav
+    ? currentNav.label
+    : pathname === "/admin"
+    ? "Dashboard Overview"
+    : "Management Console";
 
   return (
     <div className="adm-root">
@@ -203,7 +207,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               onClick={handleLogout}
               disabled={isLoggingOut}
               className="adm-btn adm-btn-secondary adm-btn-sm"
-              style={{ backgroundColor: "#262e3f", color: "#ff8cab", borderColor: "rgba(255,255,255,0.1)" }}
+              style={{ backgroundColor: "#262e3f", color: "#e2e8f0", borderColor: "rgba(255,255,255,0.1)" }}
               title="Sign out of admin session"
             >
               <LogOut size={13} />

@@ -126,8 +126,8 @@ export default function CareerJourneyTimeline({
       style={{
         backgroundColor,
         color: textColor,
-        paddingTop: "clamp(60px, 8vw, 100px)",
-        paddingBottom: "clamp(60px, 8vw, 100px)",
+        paddingTop: "clamp(40px, 5vw, 64px)",
+        paddingBottom: "clamp(40px, 5vw, 64px)",
         overflow: "hidden",
         position: "relative",
       }}
