@@ -51,40 +51,27 @@ export function OnePageFilmography({ id = "filmography" }: FilmographySectionPro
   const filteredProjects =
     filter === "All" ? items : items.filter((item) => item.category === filter);
 
-  // Transform ProjectItem to GlassyCarouselItem
+  // Transform ProjectItem to GlassyCarouselItem with rich structured metadata
   const carouselItems: GlassyCarouselItem[] = filteredProjects.map((item) => {
-    const titleWithBangla = item.banglaTitle
-      ? `${item.title} (${item.banglaTitle})`
-      : item.title;
-
-    const subtitleMeta = [
-      item.year,
-      item.category,
-      item.role ? `Role: ${item.role}` : null,
-    ]
-      .filter(Boolean)
-      .join(" • ");
-
-    const fullDescription = [
-      item.description,
-      item.director ? `Director: ${item.director}` : null,
-      item.coStar ? `Co-Star: ${item.coStar}` : null,
-      item.productionHouse ? `Production: ${item.productionHouse}` : null,
-      item.awards ? `Accolade: ${item.awards}` : null,
-    ]
-      .filter(Boolean)
-      .join(" | ");
-
     const trailer =
       item.videoUrl ||
       (item.youtubeId ? `https://www.youtube.com/watch?v=${item.youtubeId}` : undefined);
 
     return {
       id: item.id,
-      title: titleWithBangla,
-      subtitle: subtitleMeta,
+      title: item.title,
+      banglaTitle: item.banglaTitle,
+      category: item.category,
+      year: item.year,
+      director: item.director,
+      coStar: item.coStar,
+      role: item.role,
+      productionHouse: item.productionHouse,
+      awards: item.awards,
+      status: item.status,
+      subtitle: `${item.year} • ${item.category}${item.role ? ` • Role: ${item.role}` : ""}`,
       image: item.image || "/images/poster-begum-jaan.jpg",
-      description: fullDescription,
+      description: item.description,
       accent: "#ff3f79",
       trailerUrl: trailer,
       href: item.imdbUrl || undefined,

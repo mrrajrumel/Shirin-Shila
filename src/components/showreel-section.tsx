@@ -84,12 +84,12 @@ export function ShowreelSection({ id = "showreel" }: ShowreelSectionProps) {
       >
         <CoverflowCarousel
           slides={slides}
-          showCaption
+          showCaption={false}
           showPagination
           showNavigation
-          cardWidth="clamp(270px, 36vw, 480px)"
-          rotate={38}
-          depth={0.52}
+          cardWidth="clamp(300px, 46vw, 640px)"
+          rotate={36}
+          depth={0.5}
           fade={0.12}
         />
       </motion.div>

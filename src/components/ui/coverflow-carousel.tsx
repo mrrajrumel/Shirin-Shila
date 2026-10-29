@@ -83,6 +83,7 @@ export function CoverflowCarousel({
   } | null>(null);
 
   const [selected, setSelected] = React.useState(0);
+  const [playingIndex, setPlayingIndex] = React.useState<number | null>(null);
   const [activeVideoModal, setActiveVideoModal] = React.useState<CoverflowSlide | null>(null);
 
   /** Nearest whole card, folded back into 0..count-1. */
@@ -159,6 +160,7 @@ export function CoverflowCarousel({
   const goTo = React.useCallback(
     (index: number) => {
       if (!count) return;
+      setPlayingIndex(null);
       const target = loop
         ? index + Math.round((targetRef.current - index) / count) * count
         : index;
@@ -168,7 +170,10 @@ export function CoverflowCarousel({
   );
 
   const nudge = React.useCallback(
-    (by: number) => settle(clamp(Math.round(targetRef.current) + by)),
+    (by: number) => {
+      setPlayingIndex(null);
+      settle(clamp(Math.round(targetRef.current) + by));
+    },
     [clamp, settle],
   );
 
@@ -210,6 +215,7 @@ export function CoverflowCarousel({
     const drag = dragRef.current;
     if (!drag || drag.id !== event.pointerId) return;
     dragRef.current = null;
+    setPlayingIndex(null);
     const carried = Math.max(-2, Math.min(2, drag.v * 0.18));
     settle(clamp(Math.round(posRef.current + carried)));
   };
@@ -242,12 +248,16 @@ export function CoverflowCarousel({
 
   const handleCardClick = (slide: CoverflowSlide, index: number) => {
     if (index === selected) {
-      if (onPlayVideo) {
+      if (slide.youtubeId) {
+        // Direct video playback inside the slide
+        setPlayingIndex((prev) => (prev === index ? null : index));
+      } else if (onPlayVideo) {
         onPlayVideo(slide);
       } else {
         setActiveVideoModal(slide);
       }
     } else {
+      setPlayingIndex(null);
       goTo(index);
     }
   };
@@ -292,6 +302,8 @@ export function CoverflowCarousel({
           >
             {slides.map((slide, index) => {
               const isSelected = index === selected;
+              const isPlaying = isSelected && playingIndex === index && Boolean(slide.youtubeId);
+
               return (
                 <div
                   key={index}
@@ -311,47 +323,73 @@ export function CoverflowCarousel({
                   )}
                   style={{ width: "var(--cf-card)" }}
                 >
-                  {/* YouTube Video Thumbnail */}
-                  <img
-                    src={slide.src}
-                    alt={slide.alt || slide.title || "Showreel preview"}
-                    draggable={false}
-                    className="h-full w-full select-none object-cover transition-transform duration-500 group-hover:scale-105 filter brightness-95"
-                    onError={(e) => {
-                      if (slide.youtubeId) {
-                        (e.currentTarget as HTMLImageElement).src = `https://img.youtube.com/vi/${slide.youtubeId}/hqdefault.jpg`;
-                      }
-                    }}
-                  />
-
-                  {/* Gradient vignette */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-transparent pointer-events-none" />
-
-                  {/* Play Button Overlay */}
-                  <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                    <div
-                      className={cn(
-                        "flex items-center justify-center rounded-full transition-all duration-300 shadow-xl",
-                        isSelected
-                          ? "size-14 bg-gradient-to-tr from-pink-600 to-rose-500 text-white scale-100 group-hover:scale-110 shadow-[0_0_24px_rgba(255,63,121,0.8)]"
-                          : "size-10 bg-black/60 backdrop-blur-sm text-white/80 group-hover:scale-105"
-                      )}
-                    >
-                      <Play className={cn("fill-current ml-0.5", isSelected ? "size-6" : "size-4")} />
+                  {isPlaying ? (
+                    <div className="relative w-full h-full bg-black z-30" onClick={(e) => e.stopPropagation()}>
+                      <iframe
+                        src={`https://www.youtube-nocookie.com/embed/${slide.youtubeId}?autoplay=1&rel=0&modestbranding=1&playsinline=1`}
+                        title={slide.title || "Showreel Video"}
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                        allowFullScreen
+                        className="w-full h-full border-0 pointer-events-auto"
+                      />
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setPlayingIndex(null);
+                        }}
+                        className="absolute top-2 right-2 z-40 size-8 rounded-full bg-black/85 hover:bg-pink-600 text-white flex items-center justify-center transition-colors shadow-lg cursor-pointer"
+                        aria-label="Stop video"
+                        title="Stop video"
+                      >
+                        <X className="size-4" />
+                      </button>
                     </div>
-                  </div>
+                  ) : (
+                    <>
+                      {/* YouTube Video Thumbnail */}
+                      <img
+                        src={slide.src}
+                        alt={slide.alt || slide.title || "Showreel preview"}
+                        draggable={false}
+                        className="h-full w-full select-none object-cover transition-transform duration-500 group-hover:scale-105 filter brightness-95"
+                        onError={(e) => {
+                          if (slide.youtubeId) {
+                            (e.currentTarget as HTMLImageElement).src = `https://img.youtube.com/vi/${slide.youtubeId}/hqdefault.jpg`;
+                          }
+                        }}
+                      />
 
-                  {/* Bottom title pill on card */}
-                  <div className="absolute bottom-3 left-3 right-3 pointer-events-none">
-                    {slide.subtitle && (
-                      <span className="text-[10px] uppercase font-mono tracking-wider text-pink-400 block mb-0.5 drop-shadow">
-                        {slide.subtitle}
-                      </span>
-                    )}
-                    <p className="text-[13px] font-semibold text-white truncate drop-shadow">
-                      {slide.title}
-                    </p>
-                  </div>
+                      {/* Gradient vignette */}
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-transparent pointer-events-none" />
+
+                      {/* Play Button Overlay */}
+                      <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                        <div
+                          className={cn(
+                            "flex items-center justify-center rounded-full transition-all duration-300 shadow-xl",
+                            isSelected
+                              ? "size-14 bg-gradient-to-tr from-pink-600 to-rose-500 text-white scale-100 group-hover:scale-110 shadow-[0_0_24px_rgba(255,63,121,0.8)]"
+                              : "size-10 bg-black/60 backdrop-blur-sm text-white/80 group-hover:scale-105"
+                          )}
+                        >
+                          <Play className={cn("fill-current ml-0.5", isSelected ? "size-6" : "size-4")} />
+                        </div>
+                      </div>
+
+                      {/* Bottom title pill on card */}
+                      <div className="absolute bottom-3 left-3 right-3 pointer-events-none">
+                        {slide.subtitle && (
+                          <span className="text-[10px] uppercase font-mono tracking-wider text-pink-400 block mb-0.5 drop-shadow">
+                            {slide.subtitle}
+                          </span>
+                        )}
+                        <p className="text-[13px] font-semibold text-white truncate drop-shadow">
+                          {slide.title}
+                        </p>
+                      </div>
+                    </>
+                  )}
                 </div>
               );
             })}

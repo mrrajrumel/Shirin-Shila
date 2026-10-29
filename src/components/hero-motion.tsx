@@ -5,6 +5,7 @@ import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
 import { motion, useMotionValue, useSpring, useTransform } from "framer-motion";
 import { heroProfile, HeroProfile } from "@/data/hero";
+import { RevealText } from "@/components/ui/reveal-text";
 
 export interface HeroSectionProps {
   id?: string;
@@ -136,15 +137,24 @@ export function HeroMotion({ id = "home" }: HeroSectionProps) {
           <span>{profile.eyebrow}</span>
         </motion.div>
 
-        {/* Large Serif Title */}
-        <motion.h1
-          className="serif"
-          initial={{ opacity: 0, y: 28 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.28, ease: [0.16, 1, 0.3, 1] }}
-        >
-          {firstName} <span className="pink">{lastName}</span>
-        </motion.h1>
+        {/* SEO Heading (Screen Readers & Search Engines) */}
+        <h1 className="sr-only">{profile.name || "Shirin Shila"}</h1>
+
+        {/* Interactive Kinetic Reveal Title */}
+        <div style={{ margin: "0 0 24px" }} aria-hidden="true">
+          <RevealText
+            text={profile.name ? profile.name.toUpperCase() : "SHIRIN SHILA"}
+            textColor="text-white"
+            highlightTextColor="text-[#ff3f79]"
+            overlayColor="text-[#ff3f79]"
+            fontSize="text-[clamp(46px,7.8vw,124px)]"
+            fontClassName="font-serif font-black tracking-tight"
+            letterDelay={0.07}
+            overlayDelay={0.045}
+            overlayDuration={0.4}
+            springDuration={600}
+          />
+        </div>
 
         {/* Roles Banner */}
         <motion.div
