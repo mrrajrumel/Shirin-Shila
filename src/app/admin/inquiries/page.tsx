@@ -214,7 +214,7 @@ export default function AdminInquiriesPage() {
                           {inq.email}
                         </div>
                         {inq.phone && (
-                          <div style={{ fontSize: '11px', color: '#86efac', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                          <div style={{ fontSize: '11px', color: '#16a34a', display: 'flex', alignItems: 'center', gap: '4px', fontWeight: 500 }}>
                             <Phone size={10} />
                             <span>{inq.phone}</span>
                           </div>
@@ -333,7 +333,7 @@ export default function AdminInquiriesPage() {
                 </div>
                 <div>
                   <div style={{ fontSize: '11px', color: 'var(--adm-text-muted)' }}>EMAIL</div>
-                  <a href={`mailto:${selectedInquiry.email}`} style={{ color: '#93c5fd', fontSize: '13px' }}>
+                  <a href={`mailto:${selectedInquiry.email}`} style={{ color: '#2563eb', fontSize: '13px', fontWeight: 500, textDecoration: 'underline' }}>
                     {selectedInquiry.email}
                   </a>
                 </div>

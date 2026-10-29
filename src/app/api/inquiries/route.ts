@@ -59,6 +59,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       success: true,
       id: newId,
+      item: newInquiry,
       message: 'Inquiry received successfully',
     });
   } catch (err: any) {

@@ -475,7 +475,7 @@ export default function AdminWorksPage() {
                 >
                   <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '6px' }}>
                     <Search size={14} color="var(--pink)" />
-                    <span style={{ fontSize: '12px', fontWeight: 600, color: '#fff' }}>
+                    <span style={{ fontSize: '12px', fontWeight: 600, color: '#9f1239' }}>
                       Auto-Fetch Project Details & Thumbnail (YouTube Link, IMDb URL, or Title)
                     </span>
                   </div>
@@ -505,7 +505,7 @@ export default function AdminWorksPage() {
                     </button>
                   </div>
                   {autoFetchNotice && (
-                    <div style={{ marginTop: '6px', fontSize: '11px', color: '#86efac', fontWeight: 500 }}>
+                    <div style={{ marginTop: '6px', fontSize: '11px', color: '#16a34a', fontWeight: 500 }}>
                       {autoFetchNotice}
                     </div>
                   )}

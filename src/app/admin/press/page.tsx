@@ -288,7 +288,7 @@ export default function AdminPressPage() {
           </div>
 
           {scrapeNotice && (
-            <div style={{ marginTop: '10px', fontSize: '12px', color: '#86efac' }}>
+            <div style={{ marginTop: '10px', fontSize: '12px', color: '#16a34a', fontWeight: 500 }}>
               {scrapeNotice}
             </div>
           )}
@@ -378,7 +378,7 @@ export default function AdminPressPage() {
                           href={item.url}
                           target="_blank"
                           rel="noreferrer"
-                          style={{ color: '#93c5fd', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '4px', fontSize: '12px' }}
+                          style={{ color: '#2563eb', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '4px', fontSize: '12px', fontWeight: 500 }}
                         >
                           <span>Open Link</span>
                           <ExternalLink size={11} />

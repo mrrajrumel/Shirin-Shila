@@ -224,7 +224,7 @@ export default function AdminShowreelPage() {
           </div>
 
           {importNotice && (
-            <div style={{ marginTop: '10px', fontSize: '12px', color: '#86efac' }}>
+            <div style={{ marginTop: '10px', fontSize: '12px', color: '#16a34a', fontWeight: 500 }}>
               {importNotice}
             </div>
           )}

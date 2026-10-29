@@ -142,8 +142,8 @@ export default function AdminOverviewPage() {
             <div className="adm-stat-value">
               {loading ? '—' : inquiries.length}
               {newInquiries.length > 0 && (
-                <span style={{ fontSize: '12px', color: '#93c5fd', marginLeft: 8, fontWeight: 500 }}>
-                  ({newInquiries.length} New)
+                <span style={{ fontSize: '12px', color: '#2563eb', marginLeft: 8, fontWeight: 600, background: '#dbeafe', padding: '2px 8px', borderRadius: '12px' }}>
+                  {newInquiries.length} New
                 </span>
               )}
             </div>

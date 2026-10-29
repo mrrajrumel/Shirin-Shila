@@ -397,7 +397,7 @@ export default function AdminAboutPage() {
                         display: 'flex',
                         gap: '8px',
                         alignItems: 'center',
-                        background: 'rgba(255, 255, 255, 0.03)',
+                        background: 'var(--adm-surface-raised)',
                         border: '1px solid var(--adm-border)',
                         padding: '10px 12px',
                         borderRadius: '8px',
@@ -431,8 +431,9 @@ export default function AdminAboutPage() {
                           gap: '4px',
                           cursor: 'pointer',
                           fontSize: '11px',
-                          color: fact.isHighlight ? '#fde047' : 'var(--adm-text-muted)',
+                          color: fact.isHighlight ? '#d97706' : 'var(--adm-text-muted)',
                           flexShrink: 0,
+                          fontWeight: 500,
                         }}
                       >
                         <input
@@ -441,7 +442,7 @@ export default function AdminAboutPage() {
                           onChange={(e) => handleFactChange(idx, 'isHighlight', e.target.checked)}
                           style={{ cursor: 'pointer' }}
                         />
-                        <Star size={13} fill={fact.isHighlight ? '#fde047' : 'none'} />
+                        <Star size={13} fill={fact.isHighlight ? '#f59e0b' : 'none'} color={fact.isHighlight ? '#d97706' : 'currentColor'} />
                       </label>
                       <button
                         type="button"

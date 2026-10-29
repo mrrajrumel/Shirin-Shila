@@ -124,7 +124,8 @@ export default function RootLayout({
                 "https://www.youtube.com/@shirinshilaofficial",
                 "https://www.tiktok.com/@shirinshilaofficial",
                 "https://www.imdb.com/name/nm6897284/",
-                "https://bn.wikipedia.org/wiki/%E0%A6%B6%E0%A6%BF%E0%A6%B0%E0%A6%BF%E0%A6%A8_%E0%A6%B6%E0%A6%BF%E0%A6%B2%E0%A6%BE"
+                "https://bn.wikipedia.org/wiki/%E0%A6%B6%E0%A6%BF%E0%A6%B0%E0%A6%BF%E0%A6%A8_%E0%A6%B6%E0%A6%BF%E0%A6%B2%E0%A6%BE",
+                "https://share.google/t32VCGGg4i72ZQ1nq"
               ]
             })
           }}

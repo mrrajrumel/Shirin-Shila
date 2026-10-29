@@ -46,7 +46,7 @@ function LoginForm() {
     <div
       style={{
         minHeight: '100vh',
-        backgroundColor: '#09090b',
+        backgroundColor: '#f8fafc',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
@@ -58,42 +58,42 @@ function LoginForm() {
         style={{
           width: '100%',
           maxWidth: '400px',
-          background: '#121215',
-          border: '1px solid #27272a',
-          borderRadius: '10px',
-          padding: '32px',
-          boxShadow: '0 20px 40px rgba(0,0,0,0.6)',
+          background: '#ffffff',
+          border: '1px solid #e2e8f0',
+          borderRadius: '12px',
+          padding: '36px 32px',
+          boxShadow: '0 10px 25px -5px rgba(15, 23, 42, 0.08), 0 8px 10px -6px rgba(15, 23, 42, 0.04)',
         }}
       >
         <div style={{ textAlign: 'center', marginBottom: '28px' }}>
           <div
             style={{
-              width: '42px',
-              height: '42px',
-              borderRadius: '8px',
-              background: '#18181b',
-              border: '1px solid #27272a',
+              width: '44px',
+              height: '44px',
+              borderRadius: '10px',
+              background: '#0f172a',
               display: 'inline-flex',
               alignItems: 'center',
               justifyContent: 'center',
-              color: '#f4f4f5',
+              color: '#ffffff',
               marginBottom: '14px',
+              boxShadow: '0 4px 12px rgba(15, 23, 42, 0.15)',
             }}
           >
             <Lock size={18} />
           </div>
           <h1
             style={{
-              fontSize: '18px',
+              fontSize: '20px',
               fontWeight: 700,
-              color: '#f4f4f5',
+              color: '#0f172a',
               margin: '0 0 6px',
-              letterSpacing: '-0.01em',
+              letterSpacing: '-0.02em',
             }}
           >
             Shirin Shila CMS
           </h1>
-          <p style={{ fontSize: '12px', color: '#71717a', margin: 0 }}>
+          <p style={{ fontSize: '13px', color: '#64748b', margin: 0 }}>
             Talent Management & Editorial Desk
           </p>
         </div>
@@ -101,12 +101,12 @@ function LoginForm() {
         {error && (
           <div
             style={{
-              background: '#3b181c',
-              border: '1px solid rgba(239,68,68,0.3)',
-              color: '#fca5a5',
-              padding: '10px 12px',
+              background: '#fee2e2',
+              border: '1px solid #fca5a5',
+              color: '#991b1b',
+              padding: '10px 14px',
               borderRadius: '6px',
-              fontSize: '12px',
+              fontSize: '12.5px',
               display: 'flex',
               alignItems: 'center',
               gap: '8px',
@@ -158,16 +158,16 @@ function LoginForm() {
           style={{
             marginTop: '24px',
             paddingTop: '16px',
-            borderTop: '1px solid #1f1f23',
+            borderTop: '1px solid #f1f5f9',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             gap: '6px',
-            fontSize: '11px',
-            color: '#71717a',
+            fontSize: '11.5px',
+            color: '#64748b',
           }}
         >
-          <ShieldCheck size={13} color="#22c55e" />
+          <ShieldCheck size={14} color="#16a34a" />
           <span>Encrypted Session • Zero-Database Mode</span>
         </div>
       </div>
@@ -182,11 +182,11 @@ export default function AdminLoginPage() {
         <div
           style={{
             minHeight: '100vh',
-            backgroundColor: '#09090b',
+            backgroundColor: '#f8fafc',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            color: '#71717a',
+            color: '#64748b',
             fontSize: '13px',
           }}
         >
