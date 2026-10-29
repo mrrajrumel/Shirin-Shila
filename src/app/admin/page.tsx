@@ -74,11 +74,17 @@ export default function AdminOverviewPage() {
           <div>
             <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "6px" }}>
               <span className="adm-badge adm-badge-blue" style={{ fontSize: "11px", fontWeight: 700 }}>
-                TAILADMIN CMS v2.4
+                TUNE SOUL OCEAN
               </span>
-              <span style={{ fontSize: "12px", color: "var(--tail-text-body)" }}>
-                Zero-Database Live JSON Engine
-              </span>
+              <a
+                href="https://trytso.com/"
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{ fontSize: "12px", color: "var(--tail-text-body)", textDecoration: "none" }}
+                className="hover:underline"
+              >
+                Tune Soul Ocean Management
+              </a>
             </div>
             <h2 style={{ fontSize: "20px", fontWeight: 800, color: "var(--tail-text-dark)", margin: "0 0 4px", letterSpacing: "-0.01em" }}>
               Shirin Shila Portfolio Management

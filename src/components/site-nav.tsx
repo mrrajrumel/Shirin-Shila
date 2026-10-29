@@ -651,21 +651,6 @@ export default function SiteNav() {
             </div>
 
             <div className="menu-content-wrapper">
-              <div className="drawer-nav-top-meta" data-menu-fade>
-                <div>
-                  <span className="drawer-nav-subtitle">Navigation</span>
-                  <span className="drawer-nav-status"> • Dhallywood</span>
-                </div>
-                <button
-                  type="button"
-                  onClick={closeMenu}
-                  className="drawer-close-inline-btn"
-                  aria-label="Close menu"
-                >
-                  ✕ Close
-                </button>
-              </div>
-
               <ul className="menu-list">
                 {menuItems.map((item) => {
                   const isActive = pathname === "/" ? activeSection === item.targetId : false;
@@ -689,31 +674,6 @@ export default function SiteNav() {
                   );
                 })}
               </ul>
-
-              {/* Drawer footer info */}
-              <div className="menu-bottom-meta" data-menu-fade>
-                <div>
-                  <span className="meta-label">Management Desk</span>
-                  <a
-                    href="mailto:support@trytso.com"
-                    className="meta-value"
-                  >
-                    support@trytso.com
-                  </a>
-                </div>
-
-                <div>
-                  <span className="meta-label">Direct Portals</span>
-                  <div className="meta-links">
-                    <a href="#showreel" onClick={closeMenu}>
-                      Showreel
-                    </a>
-                    <a href="#press" onClick={closeMenu}>
-                      Press Kit
-                    </a>
-                  </div>
-                </div>
-              </div>
             </div>
           </nav>
         </div>

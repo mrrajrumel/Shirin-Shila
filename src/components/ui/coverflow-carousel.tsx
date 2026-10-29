@@ -247,18 +247,19 @@ export function CoverflowCarousel({
   const active = slides[selected];
 
   const handleCardClick = (slide: CoverflowSlide, index: number) => {
-    if (index === selected) {
-      if (slide.youtubeId) {
-        // Direct video playback inside the slide
-        setPlayingIndex((prev) => (prev === index ? null : index));
-      } else if (onPlayVideo) {
-        onPlayVideo(slide);
+    if (slide.youtubeId) {
+      if (index !== selected) {
+        goTo(index);
+        setPlayingIndex(index);
       } else {
-        setActiveVideoModal(slide);
+        setPlayingIndex((prev) => (prev === index ? null : index));
       }
+    } else if (onPlayVideo) {
+      if (index !== selected) goTo(index);
+      onPlayVideo(slide);
     } else {
-      setPlayingIndex(null);
-      goTo(index);
+      if (index !== selected) goTo(index);
+      setActiveVideoModal(slide);
     }
   };
 
@@ -375,18 +376,6 @@ export function CoverflowCarousel({
                         >
                           <Play className={cn("fill-current ml-0.5", isSelected ? "size-6" : "size-4")} />
                         </div>
-                      </div>
-
-                      {/* Bottom title pill on card */}
-                      <div className="absolute bottom-3 left-3 right-3 pointer-events-none">
-                        {slide.subtitle && (
-                          <span className="text-[10px] uppercase font-mono tracking-wider text-pink-400 block mb-0.5 drop-shadow">
-                            {slide.subtitle}
-                          </span>
-                        )}
-                        <p className="text-[13px] font-semibold text-white truncate drop-shadow">
-                          {slide.title}
-                        </p>
                       </div>
                     </>
                   )}

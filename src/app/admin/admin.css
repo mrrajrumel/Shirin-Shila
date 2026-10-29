@@ -819,15 +819,23 @@
   }
 
   .adm-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 12px;
-    padding: 16px;
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    padding: 0 0 14px 0;
+    margin-bottom: 12px;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .adm-header .adm-header-title {
+    display: none; /* Eliminated duplicate header - title is already shown in sticky .adm-topbar */
   }
 
   .adm-header-actions {
     width: 100%;
-    justify-content: flex-start;
+    justify-content: flex-end;
     flex-wrap: wrap;
     gap: 8px;
   }

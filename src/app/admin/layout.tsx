@@ -123,10 +123,16 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         {/* Brand Header */}
         <div className="adm-sidebar-brand">
           <div className="adm-brand-left">
-            <div className="adm-brand-logo-icon">S</div>
+            <div className="adm-brand-logo-icon" style={{ background: "transparent", padding: 0 }}>
+              <img
+                src="/assets/logos/tso-logo-white.svg"
+                alt="Tune Soul Ocean"
+                className="w-full h-full object-contain"
+              />
+            </div>
             <div>
-              <span className="adm-brand-title">Shirin Shila</span>
-              <span className="adm-brand-subtitle">TailAdmin CMS v2.4</span>
+              <span className="adm-brand-title">Tune Soul Ocean</span>
+              <span className="adm-brand-subtitle">Management Dashboard</span>
             </div>
           </div>
 
@@ -152,6 +158,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                   <Link
                     key={item.href}
                     href={item.href}
+                    onClick={() => setIsSidebarOpen(false)}
                     className={`adm-nav-item ${isActive ? "active" : ""}`}
                   >
                     <Icon size={18} />
@@ -168,10 +175,16 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
         {/* Sidebar Footer */}
         <div className="adm-sidebar-footer">
-          <div className="adm-status-chip">
+          <a
+            href="https://trytso.com/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="adm-status-chip hover:text-white transition-colors"
+            title="Visit Tune Soul Ocean Management"
+          >
             <span className="adm-status-dot" />
-            <span>Zero-DB JSON Engine: Active</span>
-          </div>
+            <span>Tune Soul Ocean Management</span>
+          </a>
 
           <div style={{ display: "flex", gap: "8px" }}>
             <Link

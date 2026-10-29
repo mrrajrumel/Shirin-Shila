@@ -68,19 +68,23 @@ function LoginForm() {
         <div style={{ textAlign: 'center', marginBottom: '28px' }}>
           <div
             style={{
-              width: '44px',
-              height: '44px',
-              borderRadius: '10px',
-              background: '#0f172a',
+              width: '52px',
+              height: '52px',
+              borderRadius: '12px',
+              background: '#1C2434',
               display: 'inline-flex',
               alignItems: 'center',
               justifyContent: 'center',
-              color: '#ffffff',
+              padding: '8px',
               marginBottom: '14px',
-              boxShadow: '0 4px 12px rgba(15, 23, 42, 0.15)',
+              boxShadow: '0 4px 14px rgba(28, 36, 52, 0.25)',
             }}
           >
-            <Lock size={18} />
+            <img
+              src="/assets/logos/tso-logo-white.svg"
+              alt="Tune Soul Ocean"
+              style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+            />
           </div>
           <h1
             style={{
@@ -168,7 +172,15 @@ function LoginForm() {
           }}
         >
           <ShieldCheck size={14} color="#16a34a" />
-          <span>Encrypted Session • Zero-Database Mode</span>
+          <a
+            href="https://trytso.com/"
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{ color: '#64748b', textDecoration: 'none' }}
+            className="hover:underline"
+          >
+            Tune Soul Ocean Management
+          </a>
         </div>
       </div>
     </div>
