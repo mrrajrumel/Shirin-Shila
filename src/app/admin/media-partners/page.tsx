@@ -250,14 +250,19 @@ export default function AdminMediaPartnersPage() {
 
       {/* Add / Edit Modal */}
       {isModalOpen && (
-        <div className="adm-modal-overlay" onClick={() => setIsModalOpen(false)}>
-          <div className="adm-modal" style={{ maxWidth: '520px' }} onClick={(e) => e.stopPropagation()}>
+        <div className="adm-modal-backdrop" onClick={() => setIsModalOpen(false)}>
+          <div className="adm-modal" style={{ maxWidth: '560px', width: '92vw' }} onClick={(e) => e.stopPropagation()}>
             <div className="adm-modal-header">
               <span className="adm-modal-title">
                 {editingItem ? 'Edit Broadcaster / Studio Logo' : 'Add New Channel / Studio Logo'}
               </span>
-              <button type="button" onClick={() => setIsModalOpen(false)} className="adm-modal-close">
-                <X size={16} />
+              <button
+                type="button"
+                onClick={() => setIsModalOpen(false)}
+                className="adm-modal-close-btn"
+                aria-label="Close dialog"
+              >
+                <X size={18} />
               </button>
             </div>
 

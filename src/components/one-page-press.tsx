@@ -52,6 +52,12 @@ export function OnePagePress({ id = "press" }: PressSectionProps) {
     return item.kind === activeTab;
   });
 
+  useEffect(() => {
+    if (carouselRef.current) {
+      carouselRef.current.scrollTo({ left: 0, behavior: "smooth" });
+    }
+  }, [activeTab]);
+
   const scroll = (direction: "left" | "right") => {
     if (carouselRef.current) {
       const scrollAmount = direction === "left" ? -360 : 360;

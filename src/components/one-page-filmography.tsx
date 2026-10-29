@@ -71,6 +71,12 @@ export function OnePageFilmography({ id = "filmography" }: FilmographySectionPro
   const filteredItems =
     filter === "All" ? items : items.filter((item) => item.category === filter);
 
+  useEffect(() => {
+    if (carouselRef.current) {
+      carouselRef.current.scrollTo({ left: 0, behavior: "smooth" });
+    }
+  }, [filter]);
+
   const scroll = (direction: "left" | "right") => {
     if (carouselRef.current) {
       const scrollAmount = direction === "left" ? -340 : 340;

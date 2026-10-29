@@ -433,9 +433,10 @@ export default function AdminPressPage() {
               <button
                 type="button"
                 onClick={() => setIsModalOpen(false)}
-                className="adm-btn adm-btn-secondary adm-btn-sm"
+                className="adm-modal-close-btn"
+                aria-label="Close dialog"
               >
-                <X size={14} />
+                <X size={18} />
               </button>
             </div>
 

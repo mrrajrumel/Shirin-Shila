@@ -6,6 +6,7 @@ export interface SocialChannels {
   tiktok: string;
   imdb: string;
   wikipedia: string;
+  googleKnowledgePanel?: string;
 }
 
 export interface ContactInfo {
@@ -52,6 +53,7 @@ export const initialContactInfo: ContactInfo = {
     tiktok: 'https://www.tiktok.com/@shirinshilaofficial',
     imdb: 'https://www.imdb.com/name/nm6897284/',
     wikipedia: 'https://bn.wikipedia.org/wiki/%E0%A6%B6%E0%A6%BF%E0%A6%B0%E0%A6%BF%E0%A6%A8_%E0%A6%B6%E0%A6%BF%E0%A6%B2%E0%A6%BE',
+    googleKnowledgePanel: 'https://share.google/t32VCGGg4i72ZQ1nq',
   },
   representationNotes: 'For feature film contracts, commercial endorsements, television appearances, and festival screenings, please send inquiries with detailed project outlines and schedules.',
 };

@@ -263,6 +263,22 @@ export default function AdminContactPage() {
                   placeholder="https://bn.wikipedia.org/wiki/..."
                 />
               </div>
+
+              <div className="adm-form-group">
+                <label className="adm-label">Google Knowledge Panel</label>
+                <input
+                  type="url"
+                  className="adm-input"
+                  value={contact.socials?.googleKnowledgePanel || ''}
+                  onChange={(e) =>
+                    setContact({
+                      ...contact,
+                      socials: { ...contact.socials, googleKnowledgePanel: e.target.value },
+                    })
+                  }
+                  placeholder="https://share.google/... or https://google.com/search?kgmid=..."
+                />
+              </div>
             </div>
           </div>
 

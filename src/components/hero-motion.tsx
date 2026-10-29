@@ -165,42 +165,6 @@ export function HeroMotion({ id = "home" }: HeroSectionProps) {
         >
           {profile.intro}
         </motion.p>
-
-        {/* Clean, Simple CTAs */}
-        <motion.div
-          className="hero-actions"
-          initial={{ opacity: 0, y: 24 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7, delay: 0.66, ease: "easeOut" }}
-        >
-          <a
-            className="button hero-cta-primary"
-            href={profile.primaryCta.href}
-            onClick={(e) => {
-              if (profile.primaryCta.href.startsWith("#")) {
-                e.preventDefault();
-                const el = document.querySelector(profile.primaryCta.href);
-                if (el) el.scrollIntoView({ behavior: "smooth" });
-              }
-            }}
-          >
-            <span>{profile.primaryCta.label}</span>
-            <ArrowUpRight size={15} className="cta-icon" />
-          </a>
-          <a
-            className="button-secondary hero-cta-secondary"
-            href={profile.secondaryCta.href}
-            onClick={(e) => {
-              if (profile.secondaryCta.href.startsWith("#")) {
-                e.preventDefault();
-                const el = document.querySelector(profile.secondaryCta.href);
-                if (el) el.scrollIntoView({ behavior: "smooth" });
-              }
-            }}
-          >
-            <span>{profile.secondaryCta.label}</span>
-          </a>
-        </motion.div>
       </div>
 
       {/* Scroll to Explore with Pulsing Indicator */}
