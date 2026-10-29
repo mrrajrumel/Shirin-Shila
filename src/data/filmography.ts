@@ -13,6 +13,9 @@ export interface ProjectItem {
   featured?: boolean;
   awards?: string;
   status?: 'Released' | 'Upcoming' | 'In Production';
+  videoUrl?: string;
+  youtubeId?: string;
+  imdbUrl?: string;
 }
 
 export const filmographyCategories = [

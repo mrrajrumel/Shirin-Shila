@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
-import { ChevronLeft, ChevronRight, X, Award } from "lucide-react";
+import { ChevronLeft, ChevronRight, X, Award, Play, ExternalLink } from "lucide-react";
 import { getStoredWorks } from "@/data/storage";
 import {
   ProjectItem,
@@ -14,10 +14,27 @@ export interface FilmographySectionProps {
   id?: string;
 }
 
+function getYoutubeId(item?: ProjectItem | null): string | null {
+  if (!item) return null;
+  if (item.youtubeId) return item.youtubeId;
+  if (item.videoUrl) {
+    const match = item.videoUrl.match(
+      /(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=|shorts\/))([\w-]{11})/
+    );
+    if (match && match[1]) return match[1];
+  }
+  if (item.image && item.image.includes("img.youtube.com/vi/")) {
+    const match = item.image.match(/img\.youtube\.com\/vi\/([\w-]{11})/);
+    if (match && match[1]) return match[1];
+  }
+  return null;
+}
+
 export function OnePageFilmography({ id = "filmography" }: FilmographySectionProps) {
   const [items, setItems] = useState<ProjectItem[]>([]);
   const [filter, setFilter] = useState<string>("All");
   const [selectedPoster, setSelectedPoster] = useState<ProjectItem | null>(null);
+  const [isPlayingVideo, setIsPlayingVideo] = useState(false);
   const carouselRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -112,36 +129,79 @@ export function OnePageFilmography({ id = "filmography" }: FilmographySectionPro
         </button>
 
         <div className="poster-carousel-track" ref={carouselRef}>
-          {filteredItems.map((item) => (
-            <div
-              key={item.id}
-              className="poster-card"
-              onClick={() => setSelectedPoster(item)}
-              role="button"
-              tabIndex={0}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" || e.key === " ") setSelectedPoster(item);
-              }}
-            >
-              <div className="poster-image-box">
-                <img
-                  src={item.image || "/images/poster-hitman.jpg"}
-                  alt={item.title}
-                  className="poster-img"
-                  loading="lazy"
-                />
-                <div className="poster-overlay-gradient">
-                  <div className="poster-meta">
-                    <span className="poster-year">{item.year}</span>
-                    <h3 className="poster-title serif">{item.title}</h3>
-                    {item.banglaTitle && (
-                      <span className="poster-bangla">{item.banglaTitle}</span>
-                    )}
+          {filteredItems.map((item) => {
+            const ytId = getYoutubeId(item);
+            const isVideo =
+              item.category === "Music Video" ||
+              item.category === "TV Show Judge" ||
+              Boolean(ytId || item.videoUrl);
+            const isLandscape =
+              Boolean(ytId) ||
+              (item.image && item.image.includes("youtube")) ||
+              item.category === "Music Video";
+
+            return (
+              <div
+                key={item.id}
+                className="poster-card"
+                onClick={() => {
+                  setSelectedPoster(item);
+                  setIsPlayingVideo(false);
+                }}
+                role="button"
+                tabIndex={0}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    setSelectedPoster(item);
+                    setIsPlayingVideo(false);
+                  }
+                }}
+              >
+                {/* Category Badge Pill on Card */}
+                <div className="poster-top-badge">
+                  {item.category === "TV Show Judge" ? "TV Judge" : item.category}
+                </div>
+
+                {/* Video Play Badge for interactive reels */}
+                {isVideo && (
+                  <div className="poster-video-badge" title="Watch Video Reel">
+                    <Play size={13} fill="#ffffff" style={{ marginLeft: "2px" }} />
+                  </div>
+                )}
+
+                <div className="poster-image-box">
+                  {/* Ambient Backdrop Blur for widescreen images */}
+                  <div
+                    className="poster-ambient-backdrop"
+                    style={{
+                      backgroundImage: `url(${item.image || "/images/poster-begum-jaan.jpg"})`,
+                    }}
+                  />
+
+                  {/* Main Poster or Still */}
+                  <img
+                    src={item.image || "/images/poster-begum-jaan.jpg"}
+                    alt={item.title}
+                    className={`poster-img ${isLandscape ? "poster-img-landscape" : ""}`}
+                    loading="lazy"
+                    onError={(e) => {
+                      (e.currentTarget as HTMLImageElement).src = "/images/poster-begum-jaan.jpg";
+                    }}
+                  />
+
+                  <div className="poster-overlay-gradient">
+                    <div className="poster-meta">
+                      <span className="poster-year">{item.year}</span>
+                      <h3 className="poster-title serif">{item.title}</h3>
+                      {item.banglaTitle && (
+                        <span className="poster-bangla">{item.banglaTitle}</span>
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
 
         <button
@@ -158,7 +218,10 @@ export function OnePageFilmography({ id = "filmography" }: FilmographySectionPro
       {selectedPoster && (
         <div
           className="clean-poster-modal"
-          onClick={() => setSelectedPoster(null)}
+          onClick={() => {
+            setSelectedPoster(null);
+            setIsPlayingVideo(false);
+          }}
           role="dialog"
           aria-modal="true"
         >
@@ -168,19 +231,62 @@ export function OnePageFilmography({ id = "filmography" }: FilmographySectionPro
           >
             <button
               type="button"
-              onClick={() => setSelectedPoster(null)}
+              onClick={() => {
+                setSelectedPoster(null);
+                setIsPlayingVideo(false);
+              }}
               className="clean-poster-close"
               aria-label="Close poster"
             >
               <X size={20} />
             </button>
+
             <div className="clean-modal-poster-col">
-              <img
-                src={selectedPoster.image || "/images/poster-hitman.jpg"}
-                alt={selectedPoster.title}
-                className="clean-modal-img"
-              />
+              {isPlayingVideo && getYoutubeId(selectedPoster) ? (
+                <div className="clean-modal-video-frame">
+                  <iframe
+                    src={`https://www.youtube-nocookie.com/embed/${getYoutubeId(
+                      selectedPoster
+                    )}?autoplay=1&rel=0`}
+                    title={selectedPoster.title}
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                    className="clean-modal-iframe"
+                  />
+                </div>
+              ) : (
+                <div className="clean-modal-img-wrap">
+                  <div
+                    className="clean-modal-ambient-backdrop"
+                    style={{
+                      backgroundImage: `url(${
+                        selectedPoster.image || "/images/poster-begum-jaan.jpg"
+                      })`,
+                    }}
+                  />
+                  <img
+                    src={selectedPoster.image || "/images/poster-begum-jaan.jpg"}
+                    alt={selectedPoster.title}
+                    className="clean-modal-img"
+                    onError={(e) => {
+                      (e.currentTarget as HTMLImageElement).src = "/images/poster-begum-jaan.jpg";
+                    }}
+                  />
+                  {getYoutubeId(selectedPoster) && (
+                    <button
+                      type="button"
+                      onClick={() => setIsPlayingVideo(true)}
+                      className="clean-modal-play-overlay-btn"
+                      aria-label="Play video"
+                    >
+                      <Play size={22} fill="#ffffff" style={{ marginLeft: "3px" }} />
+                      <span>Play Video</span>
+                    </button>
+                  )}
+                </div>
+              )}
             </div>
+
             <div className="clean-modal-details-col">
               <div className="clean-modal-header">
                 <div className="clean-modal-badges">
@@ -234,6 +340,49 @@ export function OnePageFilmography({ id = "filmography" }: FilmographySectionPro
                 <div className="modal-synopsis-wrap">
                   <h4 className="modal-synopsis-label">Overview & Synopsis</h4>
                   <p className="modal-synopsis-text">{selectedPoster.description}</p>
+                </div>
+              )}
+
+              {/* Action Buttons: Play video or open external links */}
+              {(getYoutubeId(selectedPoster) ||
+                selectedPoster.videoUrl ||
+                selectedPoster.imdbUrl) && (
+                <div className="modal-action-row">
+                  {getYoutubeId(selectedPoster) && !isPlayingVideo && (
+                    <button
+                      type="button"
+                      onClick={() => setIsPlayingVideo(true)}
+                      className="modal-btn-play"
+                    >
+                      <Play size={14} fill="currentColor" />
+                      <span>Watch Video</span>
+                    </button>
+                  )}
+                  {(selectedPoster.videoUrl || getYoutubeId(selectedPoster)) && (
+                    <a
+                      href={
+                        selectedPoster.videoUrl ||
+                        `https://www.youtube.com/watch?v=${getYoutubeId(selectedPoster)}`
+                      }
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="modal-btn-external"
+                    >
+                      <ExternalLink size={13} />
+                      <span>YouTube</span>
+                    </a>
+                  )}
+                  {selectedPoster.imdbUrl && (
+                    <a
+                      href={selectedPoster.imdbUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="modal-btn-external"
+                    >
+                      <ExternalLink size={13} />
+                      <span>IMDb Profile</span>
+                    </a>
+                  )}
                 </div>
               )}
             </div>

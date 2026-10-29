@@ -46,6 +46,9 @@ export async function POST(request: NextRequest) {
       featured: Boolean(body.featured),
       awards: body.awards?.trim() || undefined,
       status: body.status || 'Released',
+      videoUrl: body.videoUrl?.trim() || undefined,
+      youtubeId: body.youtubeId?.trim() || undefined,
+      imdbUrl: body.imdbUrl?.trim() || undefined,
     };
 
     const updated = [newItem, ...items];

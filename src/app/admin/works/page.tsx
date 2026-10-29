@@ -13,6 +13,9 @@ import {
   Check,
   X,
   ImageIcon,
+  Play,
+  Tv,
+  ExternalLink,
 } from 'lucide-react';
 import { ProjectItem, filmographyCategories } from '@/data/filmography';
 
@@ -32,6 +35,30 @@ export default function AdminWorksPage() {
   const [autoFetchQuery, setAutoFetchQuery] = useState('');
   const [isAutoFetching, setIsAutoFetching] = useState(false);
   const [autoFetchNotice, setAutoFetchNotice] = useState<string | null>(null);
+
+  const handleExtractYoutubeThumbnail = (urlOrId: string) => {
+    const trimmed = urlOrId.trim();
+    let ytId: string | null = null;
+    if (/^[a-zA-Z0-9_-]{11}$/.test(trimmed)) {
+      ytId = trimmed;
+    } else {
+      const match = trimmed.match(
+        /(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=|shorts\/))([\w-]{11})/
+      );
+      if (match && match[1]) ytId = match[1];
+    }
+    if (ytId) {
+      const thumb = `https://img.youtube.com/vi/${ytId}/hqdefault.jpg`;
+      setFormData((prev) => ({
+        ...prev,
+        image: thumb,
+        youtubeId: ytId || undefined,
+        videoUrl: prev.videoUrl || `https://www.youtube.com/watch?v=${ytId}`,
+      }));
+      return thumb;
+    }
+    return null;
+  };
 
   const handleAutoFetchWork = async () => {
     if (!autoFetchQuery.trim()) return;
@@ -57,8 +84,20 @@ export default function AdminWorksPage() {
         description: d.description || prev.description,
         image: d.image || prev.image,
         awards: d.awards || prev.awards,
+        videoUrl: d.videoUrl || prev.videoUrl,
+        youtubeId: d.youtubeId || prev.youtubeId,
+        imdbUrl: d.imdbUrl || prev.imdbUrl,
       }));
-      setAutoFetchNotice(`✓ Auto-imported: "${d.title}" (${d.category})`);
+
+      if (result.source === 'youtube') {
+        setAutoFetchNotice(`✓ YouTube Video Auto-Imported: "${d.title}" (${d.category}) with HD Thumbnail!`);
+      } else if (result.source === 'imdb' || result.source === 'imdb-search') {
+        setAutoFetchNotice(`✓ IMDb Title Auto-Imported: "${d.title}" (${d.year}) with Poster!`);
+      } else if (result.source === 'catalogue') {
+        setAutoFetchNotice(`✓ Loaded from Database: "${d.title}" (${d.category})`);
+      } else {
+        setAutoFetchNotice(`✓ Auto-imported: "${d.title}" (${d.category})`);
+      }
     } catch (err: any) {
       alert(`Auto-fetch error: ${err.message}`);
     } finally {
@@ -80,6 +119,9 @@ export default function AdminWorksPage() {
     featured: false,
     awards: '',
     status: 'Released',
+    videoUrl: '',
+    youtubeId: '',
+    imdbUrl: '',
   });
 
   const loadWorks = async () => {
@@ -425,7 +467,7 @@ export default function AdminWorksPage() {
                   <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '6px' }}>
                     <Search size={14} color="var(--pink)" />
                     <span style={{ fontSize: '12px', fontWeight: 600, color: '#fff' }}>
-                      Auto-Fetch Project Details (Film Name, TV Show Judge, or Link)
+                      Auto-Fetch Project Details & Thumbnail (YouTube Link, IMDb URL, or Title)
                     </span>
                   </div>
                   <div style={{ display: 'flex', gap: '8px' }}>
@@ -440,7 +482,7 @@ export default function AdminWorksPage() {
                           handleAutoFetchWork();
                         }
                       }}
-                      placeholder="e.g. Hitman, Begum Jaan, Nodir Shesh Kotha, Bicharok, or IMDb link..."
+                      placeholder="Paste YouTube Video URL, IMDb Title Link, or Film Name..."
                       style={{ fontSize: '12px' }}
                     />
                     <button
@@ -454,7 +496,7 @@ export default function AdminWorksPage() {
                     </button>
                   </div>
                   {autoFetchNotice && (
-                    <div style={{ marginTop: '6px', fontSize: '11px', color: '#86efac' }}>
+                    <div style={{ marginTop: '6px', fontSize: '11px', color: '#86efac', fontWeight: 500 }}>
                       {autoFetchNotice}
                     </div>
                   )}
@@ -462,45 +504,71 @@ export default function AdminWorksPage() {
 
                 {/* Direct Image Upload Field */}
                 <div className="adm-form-group">
-                  <label className="adm-label">Theatrical Poster / Promotional Still</label>
+                  <label className="adm-label">
+                    Visual Poster / Video Thumbnail / Promotional Still
+                    <span style={{ opacity: 0.6, fontSize: '11px', marginLeft: '6px' }}>
+                      (Supports Portrait Posters & 16:9 Landscape YouTube Video Thumbnails)
+                    </span>
+                  </label>
                   
-                  <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+                  <div style={{ display: 'flex', gap: '14px', alignItems: 'center' }}>
                     <div
                       style={{
-                        width: '56px',
-                        height: '80px',
-                        borderRadius: '6px',
+                        width: '84px',
+                        height: '70px',
+                        borderRadius: '8px',
                         overflow: 'hidden',
-                        background: '#18181b',
-                        border: '1px solid var(--adm-border)',
+                        background: '#140c16',
+                        border: '1px solid rgba(255, 63, 121, 0.35)',
                         flexShrink: 0,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        boxShadow: '0 4px 12px rgba(0,0,0,0.5)',
+                        position: 'relative',
                       }}
                     >
                       <img
                         src={formData.image || '/images/poster-begum-jaan.jpg'}
                         alt="Poster Preview"
+                        onError={(e) => {
+                          (e.currentTarget as HTMLImageElement).src = '/images/poster-begum-jaan.jpg';
+                        }}
                         style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                       />
                     </div>
 
                     <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                      <input
-                        type="file"
-                        ref={fileInputRef}
-                        accept="image/*"
-                        onChange={handleFileUpload}
-                        style={{ display: 'none' }}
-                      />
-                      <button
-                        type="button"
-                        onClick={() => fileInputRef.current?.click()}
-                        disabled={isUploading}
-                        className="adm-btn adm-btn-secondary adm-btn-sm"
-                        style={{ alignSelf: 'flex-start' }}
-                      >
-                        <Upload size={13} />
-                        <span>{isUploading ? 'Uploading Image...' : 'Upload Image from Computer'}</span>
-                      </button>
+                      <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                        <input
+                          type="file"
+                          ref={fileInputRef}
+                          accept="image/*"
+                          onChange={handleFileUpload}
+                          style={{ display: 'none' }}
+                        />
+                        <button
+                          type="button"
+                          onClick={() => fileInputRef.current?.click()}
+                          disabled={isUploading}
+                          className="adm-btn adm-btn-secondary adm-btn-sm"
+                        >
+                          <Upload size={13} />
+                          <span>{isUploading ? 'Uploading...' : 'Upload Image File'}</span>
+                        </button>
+
+                        {formData.videoUrl && (
+                          <button
+                            type="button"
+                            onClick={() => handleExtractYoutubeThumbnail(formData.videoUrl || '')}
+                            className="adm-btn adm-btn-secondary adm-btn-sm"
+                            title="Extract YouTube Thumbnail from the video link"
+                          >
+                            <Play size={12} />
+                            <span>Use YouTube Thumbnail</span>
+                          </button>
+                        )}
+                      </div>
                       
                       <input
                         type="text"
@@ -508,7 +576,7 @@ export default function AdminWorksPage() {
                         style={{ fontSize: '12px', padding: '6px 10px' }}
                         value={formData.image || ''}
                         onChange={(e) => setFormData({ ...formData, image: e.target.value })}
-                        placeholder="Or enter existing path (/images/... or /uploads/...)"
+                        placeholder="Image URL or local path (/images/... or https://img.youtube.com/...)"
                       />
                     </div>
                   </div>
@@ -643,6 +711,40 @@ export default function AdminWorksPage() {
                     onChange={(e) => setFormData({ ...formData, awards: e.target.value })}
                     placeholder="e.g. Babisas Award Winner (Best Actress)"
                   />
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                  <div className="adm-form-group">
+                    <label className="adm-label">Video / YouTube URL (Optional)</label>
+                    <input
+                      type="text"
+                      className="adm-input"
+                      value={formData.videoUrl || ''}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        setFormData((prev) => ({
+                          ...prev,
+                          videoUrl: val,
+                        }));
+                      }}
+                      onBlur={(e) => {
+                        if (e.target.value && (!formData.image || formData.image === '/images/poster-begum-jaan.jpg')) {
+                          handleExtractYoutubeThumbnail(e.target.value);
+                        }
+                      }}
+                      placeholder="e.g. https://www.youtube.com/watch?v=..."
+                    />
+                  </div>
+                  <div className="adm-form-group">
+                    <label className="adm-label">IMDb URL / Title Link (Optional)</label>
+                    <input
+                      type="text"
+                      className="adm-input"
+                      value={formData.imdbUrl || ''}
+                      onChange={(e) => setFormData({ ...formData, imdbUrl: e.target.value })}
+                      placeholder="e.g. https://www.imdb.com/title/tt4049876/"
+                    />
+                  </div>
                 </div>
 
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '10px' }}>
