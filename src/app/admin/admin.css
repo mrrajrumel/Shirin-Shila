@@ -439,6 +439,24 @@
   padding: 24px;
 }
 
+/* Fallback padding if .adm-card-body wrapper is omitted */
+.adm-card > .adm-form-group,
+.adm-card > .adm-grid-2fields,
+.adm-card > .adm-grid-2col,
+.adm-card > .adm-grid-2col-equal {
+  padding-left: 24px;
+  padding-right: 24px;
+}
+
+.adm-card > .adm-card-header + .adm-form-group,
+.adm-card > .adm-card-header + .adm-grid-2fields {
+  padding-top: 20px;
+}
+
+.adm-card > .adm-form-group:last-child {
+  padding-bottom: 24px;
+}
+
 /* ==========================================================================
    TAILADMIN DATA TABLES
    ========================================================================== */
@@ -877,5 +895,63 @@
   .adm-modal {
     width: 96vw;
     max-height: 94vh;
+  }
+}
+
+@media (max-width: 640px) {
+  .adm-topbar {
+    padding: 0 14px;
+    height: 60px;
+  }
+
+  .adm-header-title {
+    font-size: 16px;
+  }
+
+  .adm-content {
+    padding: 12px 10px 40px;
+  }
+
+  .adm-card-header {
+    padding: 14px 16px;
+  }
+
+  .adm-card-body {
+    padding: 16px 14px;
+  }
+
+  .adm-card > .adm-form-group,
+  .adm-card > .adm-grid-2fields,
+  .adm-card > .adm-grid-2col,
+  .adm-card > .adm-grid-2col-equal {
+    padding-left: 14px;
+    padding-right: 14px;
+  }
+
+  .adm-modal-header {
+    padding: 14px 16px;
+  }
+
+  .adm-modal-body {
+    padding: 16px 14px;
+  }
+
+  .adm-modal-footer {
+    padding: 12px 14px;
+  }
+
+  .adm-stat-card {
+    padding: 16px 16px;
+  }
+
+  .adm-table th,
+  .adm-table td {
+    padding: 10px 12px;
+    font-size: 12.5px;
+  }
+
+  .adm-btn {
+    padding: 8px 14px;
+    font-size: 12.5px;
   }
 }

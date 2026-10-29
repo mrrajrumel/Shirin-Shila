@@ -193,6 +193,7 @@ export default function AdminAboutPage() {
               <div className="adm-card-header">
                 <span className="adm-card-title">Biographical Story & Headings</span>
               </div>
+              <div className="adm-card-body">
 
               <div className="adm-grid-2fields">
                 <div className="adm-form-group">
@@ -295,6 +296,7 @@ export default function AdminAboutPage() {
                   ))}
                 </div>
               </div>
+              </div>
             </div>
 
             {/* Right: Portrait Photo & Profile Highlights Facts */}
@@ -304,6 +306,7 @@ export default function AdminAboutPage() {
                 <div className="adm-card-header">
                   <span className="adm-card-title">About Section Portrait Photo</span>
                 </div>
+                <div className="adm-card-body">
 
                 <div style={{ textAlign: 'center', marginBottom: '16px' }}>
                   <div
@@ -385,6 +388,7 @@ export default function AdminAboutPage() {
                     }
                   />
                 </div>
+                </div>
               </div>
 
               {/* Profile Highlights Management */}
@@ -400,6 +404,7 @@ export default function AdminAboutPage() {
                     <span>Add Highlight</span>
                   </button>
                 </div>
+                <div className="adm-card-body">
 
                 <div className="adm-form-group" style={{ marginBottom: '14px' }}>
                   <label className="adm-label">Highlights Card Header Title</label>
@@ -490,6 +495,7 @@ export default function AdminAboutPage() {
                     </div>
                   ))}
                 </div>
+              </div>
               </div>
             </div>
           </div>

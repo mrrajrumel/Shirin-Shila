@@ -97,51 +97,52 @@ export default function AdminContactPage() {
               <div className="adm-card-header">
                 <span className="adm-card-title">Official Inquiries & Management Desks</span>
               </div>
+              <div className="adm-card-body">
+                <div className="adm-form-group">
+                  <label className="adm-label">Talent Management Email *</label>
+                  <input
+                    type="email"
+                    className="adm-input"
+                    value={contact.managementEmail}
+                    onChange={(e) => setContact({ ...contact, managementEmail: e.target.value })}
+                    placeholder="e.g. support@trytso.com"
+                    required
+                  />
+                </div>
 
-              <div className="adm-form-group">
-                <label className="adm-label">Talent Management Email *</label>
-                <input
-                  type="email"
-                  className="adm-input"
-                  value={contact.managementEmail}
-                  onChange={(e) => setContact({ ...contact, managementEmail: e.target.value })}
-                  placeholder="e.g. support@trytso.com"
-                  required
-                />
-              </div>
+                <div className="adm-form-group">
+                  <label className="adm-label">Press & Media Desk Email *</label>
+                  <input
+                    type="email"
+                    className="adm-input"
+                    value={contact.pressEmail}
+                    onChange={(e) => setContact({ ...contact, pressEmail: e.target.value })}
+                    placeholder="e.g. press@shirinshila.com"
+                    required
+                  />
+                </div>
 
-              <div className="adm-form-group">
-                <label className="adm-label">Press & Media Desk Email *</label>
-                <input
-                  type="email"
-                  className="adm-input"
-                  value={contact.pressEmail}
-                  onChange={(e) => setContact({ ...contact, pressEmail: e.target.value })}
-                  placeholder="e.g. press@shirinshila.com"
-                  required
-                />
-              </div>
+                <div className="adm-form-group">
+                  <label className="adm-label">Talent Desk / Agency Title</label>
+                  <input
+                    type="text"
+                    className="adm-input"
+                    value={contact.agencyName || ''}
+                    onChange={(e) => setContact({ ...contact, agencyName: e.target.value })}
+                    placeholder="e.g. Shirin Shila Talent & Media Desk"
+                  />
+                </div>
 
-              <div className="adm-form-group">
-                <label className="adm-label">Talent Desk / Agency Title</label>
-                <input
-                  type="text"
-                  className="adm-input"
-                  value={contact.agencyName || ''}
-                  onChange={(e) => setContact({ ...contact, agencyName: e.target.value })}
-                  placeholder="e.g. Shirin Shila Talent & Media Desk"
-                />
-              </div>
-
-              <div className="adm-form-group">
-                <label className="adm-label">Representation & Submission Protocol</label>
-                <textarea
-                  className="adm-textarea"
-                  rows={4}
-                  value={contact.representationNotes}
-                  onChange={(e) => setContact({ ...contact, representationNotes: e.target.value })}
-                  placeholder="Instructions for film producers, casting calls, and commercial campaigns..."
-                />
+                <div className="adm-form-group" style={{ marginBottom: 0 }}>
+                  <label className="adm-label">Representation & Submission Protocol</label>
+                  <textarea
+                    className="adm-textarea"
+                    rows={4}
+                    value={contact.representationNotes}
+                    onChange={(e) => setContact({ ...contact, representationNotes: e.target.value })}
+                    placeholder="Instructions for film producers, casting calls, and commercial campaigns..."
+                  />
+                </div>
               </div>
             </div>
 
@@ -150,6 +151,7 @@ export default function AdminContactPage() {
               <div className="adm-card-header">
                 <span className="adm-card-title">Official Channels & Social Portals</span>
               </div>
+              <div className="adm-card-body">
 
               <div className="adm-form-group">
                 <label className="adm-label">Facebook Profile (ID)</label>
@@ -277,6 +279,7 @@ export default function AdminContactPage() {
                   }
                   placeholder="https://share.google/... or https://google.com/search?kgmid=..."
                 />
+              </div>
               </div>
             </div>
           </div>

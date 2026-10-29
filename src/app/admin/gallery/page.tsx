@@ -178,7 +178,7 @@ export default function AdminGalleryPage() {
             </button>
           </div>
 
-          <div style={{ padding: '20px' }}>
+          <div className="adm-card-body">
             <div
               style={{
                 display: 'grid',

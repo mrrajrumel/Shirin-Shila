@@ -223,55 +223,57 @@ export default function AdminMediaPage() {
     <main className="adm-content">
       {/* Header bar */}
       <div className="adm-card mb-6">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div>
-            <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2">
-              <FolderKanban className="text-primary" size={20} />
-              Central Media Library & Asset Registry
-            </h2>
-            <p className="text-xs text-slate-500 mt-1">
-              Persistent, deduplicated media repository powering Hero, Filmography, Gallery,
-              Timeline, Press, and SEO.
-            </p>
+        <div className="adm-card-body">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2">
+                <FolderKanban className="text-primary" size={20} />
+                Central Media Library & Asset Registry
+              </h2>
+              <p className="text-xs text-slate-500 mt-1">
+                Persistent, deduplicated media repository powering Hero, Filmography, Gallery,
+                Timeline, Press, and SEO.
+              </p>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={handleReindex}
+                disabled={refreshing}
+                className="adm-btn adm-btn-secondary text-xs"
+                title="Rescan filesystem and sync manifest"
+              >
+                <RefreshCw size={13} className={refreshing ? "animate-spin" : ""} />
+                <span>Resync Files</span>
+              </button>
+
+              <label className="adm-btn adm-btn-primary text-xs cursor-pointer">
+                <Upload size={13} />
+                <span>Upload New Media</span>
+                <input
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp,image/gif,image/svg+xml"
+                  style={{ display: "none" }}
+                  onChange={handleUploadNew}
+                />
+              </label>
+            </div>
           </div>
 
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={handleReindex}
-              disabled={refreshing}
-              className="adm-btn adm-btn-secondary text-xs"
-              title="Rescan filesystem and sync manifest"
+          {feedback && (
+            <div
+              className={`mt-4 p-3 rounded-lg text-xs flex items-center gap-2 ${
+                feedback.type === "success"
+                  ? "bg-green-50 text-green-700 border border-green-200"
+                  : "bg-red-50 text-red-700 border border-red-200"
+              }`}
             >
-              <RefreshCw size={13} className={refreshing ? "animate-spin" : ""} />
-              <span>Resync Files</span>
-            </button>
-
-            <label className="adm-btn adm-btn-primary text-xs cursor-pointer">
-              <Upload size={13} />
-              <span>Upload New Media</span>
-              <input
-                type="file"
-                accept="image/jpeg,image/png,image/webp,image/gif,image/svg+xml"
-                style={{ display: "none" }}
-                onChange={handleUploadNew}
-              />
-            </label>
-          </div>
+              {feedback.type === "success" ? <ShieldCheck size={14} /> : <AlertTriangle size={14} />}
+              <span>{feedback.message}</span>
+            </div>
+          )}
         </div>
-
-        {feedback && (
-          <div
-            className={`mt-4 p-3 rounded-lg text-xs flex items-center gap-2 ${
-              feedback.type === "success"
-                ? "bg-green-50 text-green-700 border border-green-200"
-                : "bg-red-50 text-red-700 border border-red-200"
-            }`}
-          >
-            {feedback.type === "success" ? <ShieldCheck size={14} /> : <AlertTriangle size={14} />}
-            <span>{feedback.message}</span>
-          </div>
-        )}
       </div>
 
       {/* Filter / Search Toolbar */}

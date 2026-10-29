@@ -75,7 +75,7 @@ export function ParallaxGallery({ id = "gallery" }: GallerySectionProps) {
   const columns = [col1, col2, col3];
 
   return (
-    <section ref={ref} className="gallery-scroll" id={id}>
+    <section ref={ref} className="gallery-scroll" id={id} style={{ position: "relative" }}>
       <div className="gallery-sticky">
         {/* Normal Text Heading with Awards Focus */}
         <div className="gallery-heading">
