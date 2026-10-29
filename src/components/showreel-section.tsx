@@ -1,17 +1,16 @@
 "use client";
 
-import React, { useRef, useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { ChevronLeft, ChevronRight } from "lucide-react";
-import { showreelVideos, showreelMeta } from "@/data/showreel";
+import { showreelVideos, showreelMeta, ShowreelItem } from "@/data/showreel";
+import { CoverflowCarousel, CoverflowSlide } from "@/components/ui/coverflow-carousel";
 
 export interface ShowreelSectionProps {
   id?: string;
 }
 
 export function ShowreelSection({ id = "showreel" }: ShowreelSectionProps) {
-  const [videos, setVideos] = useState(showreelVideos);
-  const carouselRef = useRef<HTMLDivElement>(null);
+  const [videos, setVideos] = useState<ShowreelItem[]>(showreelVideos);
 
   useEffect(() => {
     const loadVideos = () => {
@@ -39,18 +38,33 @@ export function ShowreelSection({ id = "showreel" }: ShowreelSectionProps) {
     };
   }, []);
 
-  const scroll = (direction: "left" | "right") => {
-    if (carouselRef.current) {
-      const scrollAmount = direction === "left" ? -460 : 460;
-      carouselRef.current.scrollBy({ left: scrollAmount, behavior: "smooth" });
-    }
-  };
+  const slides: CoverflowSlide[] = videos.map((v) => {
+    // User explicitly requested YouTube video thumbnails for showreels
+    const ytThumb = v.youtubeId
+      ? `https://img.youtube.com/vi/${v.youtubeId}/hqdefault.jpg`
+      : v.thumbnail || "/images/gallery-3.jpg";
+
+    return {
+      src: ytThumb,
+      alt: v.title,
+      title: v.title,
+      subtitle: v.category || (v.year ? `${v.year} Showreel` : "Cinematic Performance"),
+      youtubeId: v.youtubeId,
+      description: v.description || v.sceneHighlight,
+      meta: [
+        { label: "Year", value: v.year || "2026" },
+        { label: "Duration", value: v.duration || "HD Reel" },
+        ...(v.director ? [{ label: "Director", value: v.director }] : []),
+        ...(v.coStar ? [{ label: "Co-Star", value: v.coStar }] : []),
+      ],
+    };
+  });
 
   return (
     <section id={id} className="section notable-works-section showreel-carousel-section">
       <motion.div
         className="section-head text-center"
-        style={{ marginBottom: "28px" }}
+        style={{ marginBottom: "16px" }}
         initial={{ opacity: 0, y: 28 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, margin: "-50px" }}
@@ -63,52 +77,24 @@ export function ShowreelSection({ id = "showreel" }: ShowreelSectionProps) {
       </motion.div>
 
       <motion.div
-        className="poster-carousel-wrapper"
-        initial={{ opacity: 0, y: 36 }}
+        initial={{ opacity: 0, y: 32 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, margin: "-50px" }}
         transition={{ duration: 0.75, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
       >
-        <button
-          type="button"
-          onClick={() => scroll("left")}
-          className="poster-nav-btn prev"
-          aria-label="Previous showreels"
-        >
-          <ChevronLeft size={22} />
-        </button>
-
-        <div className="poster-carousel-track" ref={carouselRef}>
-          {videos.map((video) => (
-            <article key={video.id} className="showreel-carousel-card">
-              <div className="showreel-video-frame">
-                <iframe
-                  src={`https://www.youtube-nocookie.com/embed/${video.youtubeId}?rel=0&modestbranding=1`}
-                  title={video.title}
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                  allowFullScreen
-                  loading="lazy"
-                />
-              </div>
-              <div className="showreel-card-caption">
-                <h3 className="serif showreel-card-title">{video.title}</h3>
-              </div>
-            </article>
-          ))}
-        </div>
-
-        <button
-          type="button"
-          onClick={() => scroll("right")}
-          className="poster-nav-btn next"
-          aria-label="Next showreels"
-        >
-          <ChevronRight size={22} />
-        </button>
+        <CoverflowCarousel
+          slides={slides}
+          showCaption
+          showPagination
+          showNavigation
+          cardWidth="clamp(270px, 36vw, 480px)"
+          rotate={38}
+          depth={0.52}
+          fade={0.12}
+        />
       </motion.div>
     </section>
   );
 }
 
 export default ShowreelSection;
-
