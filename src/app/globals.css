@@ -29,7 +29,7 @@ body {
   margin: 0;
   background: var(--bg);
   color: var(--text);
-  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-family: 'Plus Jakarta Sans', 'Hind Siliguri', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   overflow-x: hidden;
   max-width: 100vw;
   width: 100%;
@@ -46,7 +46,13 @@ a {
 }
 
 .serif {
-  font-family: 'Playfair Display', Georgia, serif;
+  font-family: 'Playfair Display', 'Noto Serif Bengali', Georgia, serif;
+}
+
+.font-bangla,
+[lang="bn"],
+.bangla-text {
+  font-family: 'Hind Siliguri', 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
 .pink {
@@ -4829,26 +4835,6 @@ a {
 .about-section-simple {
   position: relative;
   padding: 100px clamp(20px, 6vw, 100px);
-}
-
-.about-kicker-pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 6px 14px;
-  background: rgba(255, 63, 121, 0.08);
-  border: 1px solid rgba(255, 63, 121, 0.25);
-  border-radius: 999px;
-  margin-bottom: 14px;
-}
-
-.about-kicker-pill span {
-  font-family: var(--font-mono, monospace);
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  color: var(--pink);
 }
 
 .about-content-grid {

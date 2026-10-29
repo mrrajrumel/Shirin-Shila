@@ -55,15 +55,12 @@ export function OnePageAbout({ id = "about" }: AboutSectionProps) {
     <section id={id} className="section about-section-simple">
       <motion.div
         className="section-head text-center"
-        style={{ marginBottom: "36px" }}
-        initial={{ opacity: 0, y: 24 }}
+        initial={{ opacity: 0, y: 28 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, margin: "-50px" }}
-        transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+        transition={{ duration: 0.65, ease: [0.16, 1, 0.3, 1] }}
       >
-        <div className="about-kicker-pill">
-          <span>Official Biography &amp; Talent Profile</span>
-        </div>
+        <div className="section-kicker">BIOGRAPHY &amp; PROFILE</div>
         <h2 className="serif">
           {aboutMeta.sectionTitle} <span className="pink">{aboutMeta.sectionHighlight}</span>
         </h2>
