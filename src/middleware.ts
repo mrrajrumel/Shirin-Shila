@@ -1,6 +1,18 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
+function decodeBase64Url(str: string): string {
+  try {
+    let base64 = str.replace(/-/g, '+').replace(/_/g, '/');
+    while (base64.length % 4) {
+      base64 += '=';
+    }
+    return atob(base64);
+  } catch {
+    return '';
+  }
+}
+
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
@@ -13,11 +25,12 @@ export function middleware(request: NextRequest) {
       try {
         const [encodedPayload] = sessionCookie.split('.');
         if (encodedPayload) {
-          const payload = JSON.parse(
-            Buffer.from(encodedPayload, 'base64url').toString('utf-8')
-          );
-          if (payload && payload.exp && Date.now() < payload.exp && payload.role === 'admin') {
-            isAuthenticated = true;
+          const decoded = decodeBase64Url(encodedPayload);
+          if (decoded) {
+            const payload = JSON.parse(decoded);
+            if (payload && payload.exp && Date.now() < payload.exp && payload.role === 'admin') {
+              isAuthenticated = true;
+            }
           }
         }
       } catch {

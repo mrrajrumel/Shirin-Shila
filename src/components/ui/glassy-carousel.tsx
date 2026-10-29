@@ -124,7 +124,7 @@ const glassyCarouselStyles = `
   display: block;
   position: relative;
   width: 100%;
-  aspect-ratio: 16/10;
+  aspect-ratio: 2/3;
   overflow: hidden;
   border-radius: 9px;
   background: var(--gc-card);
@@ -132,8 +132,8 @@ const glassyCarouselStyles = `
 .gc-poster > img {
   width: 100%;
   height: 100%;
-  object-fit: contain;
-  object-position: center;
+  object-fit: cover;
+  object-position: center top;
   display: block;
   pointer-events: none;
 }

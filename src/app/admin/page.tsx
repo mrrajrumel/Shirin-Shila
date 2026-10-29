@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
-import Link from 'next/link';
+import React, { useState, useEffect } from "react";
+import Link from "next/link";
 import {
   Film,
   Video,
@@ -11,7 +11,6 @@ import {
   Inbox,
   ArrowRight,
   Plus,
-  CheckCircle2,
   ExternalLink,
   MessageCircle,
   Mail,
@@ -19,13 +18,15 @@ import {
   User,
   Tv,
   Share2,
-} from 'lucide-react';
-import { ProjectItem } from '@/data/filmography';
-import { ShowreelItem } from '@/data/showreel';
-import { PressItem } from '@/data/press';
-import { GalleryImage } from '@/data/gallery';
-import { InquiryItem } from '@/data/contact';
-import { MediaPartner } from '@/data/media-partners';
+  TrendingUp,
+  Sparkles,
+} from "lucide-react";
+import { ProjectItem } from "@/data/filmography";
+import { ShowreelItem } from "@/data/showreel";
+import { PressItem } from "@/data/press";
+import { GalleryImage } from "@/data/gallery";
+import { InquiryItem } from "@/data/contact";
+import { MediaPartner } from "@/data/media-partners";
 
 export default function AdminOverviewPage() {
   const [works, setWorks] = useState<ProjectItem[]>([]);
@@ -39,13 +40,13 @@ export default function AdminOverviewPage() {
 
   useEffect(() => {
     Promise.all([
-      fetch('/api/works', { cache: 'no-store' }).then((r) => r.json()).catch(() => ({ items: [] })),
-      fetch('/api/showreels', { cache: 'no-store' }).then((r) => r.json()).catch(() => ({ items: [] })),
-      fetch('/api/press', { cache: 'no-store' }).then((r) => r.json()).catch(() => ({ items: [] })),
-      fetch('/api/gallery', { cache: 'no-store' }).then((r) => r.json()).catch(() => ({ items: [] })),
-      fetch('/api/media-partners', { cache: 'no-store' }).then((r) => r.json()).catch(() => ({ items: [] })),
-      fetch('/api/timeline', { cache: 'no-store' }).then((r) => r.json()).catch(() => ({ data: { top: [], bottom: [] } })),
-      fetch('/api/inquiries', { cache: 'no-store' }).then((r) => (r.ok ? r.json() : { items: [] })).catch(() => ({ items: [] })),
+      fetch("/api/works", { cache: "no-store" }).then((r) => r.json()).catch(() => ({ items: [] })),
+      fetch("/api/showreels", { cache: "no-store" }).then((r) => r.json()).catch(() => ({ items: [] })),
+      fetch("/api/press", { cache: "no-store" }).then((r) => r.json()).catch(() => ({ items: [] })),
+      fetch("/api/gallery", { cache: "no-store" }).then((r) => r.json()).catch(() => ({ items: [] })),
+      fetch("/api/media-partners", { cache: "no-store" }).then((r) => r.json()).catch(() => ({ items: [] })),
+      fetch("/api/timeline", { cache: "no-store" }).then((r) => r.json()).catch(() => ({ data: { top: [], bottom: [] } })),
+      fetch("/api/inquiries", { cache: "no-store" }).then((r) => (r.ok ? r.json() : { items: [] })).catch(() => ({ items: [] })),
     ])
       .then(([worksData, showreelData, pressData, galleryData, mediaData, timelineData, inqData]) => {
         if (worksData.items) setWorks(worksData.items);
@@ -63,221 +64,238 @@ export default function AdminOverviewPage() {
       .finally(() => setLoading(false));
   }, []);
 
-  const newInquiries = inquiries.filter((i) => i.status === 'New');
+  const newInquiries = inquiries.filter((i) => i.status === "New");
 
   return (
-    <>
-      <header className="adm-header">
-        <h1 className="adm-header-title">Portfolio Overview</h1>
-        <div className="adm-header-actions">
-          <Link href="/" target="_blank" className="adm-btn adm-btn-secondary adm-btn-sm">
-            <span>Live Portfolio</span>
-            <ExternalLink size={13} />
-          </Link>
-        </div>
-      </header>
-
-      <main className="adm-content">
-        {/* Metric Cards Grid */}
-        <div className="adm-stats-grid">
-          <div className="adm-stat-card">
-            <div className="adm-stat-top">
-              <span>NOTABLE WORKS</span>
-              <Film size={15} />
+    <main className="adm-content">
+      {/* TailAdmin Welcome Banner Card */}
+      <div className="adm-card" style={{ marginBottom: "24px", background: "linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)" }}>
+        <div style={{ padding: "24px 28px", display: "flex", flexWrap: "wrap", alignItems: "center", justifyContent: "space-between", gap: "16px" }}>
+          <div>
+            <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "6px" }}>
+              <span className="adm-badge adm-badge-blue" style={{ fontSize: "11px", fontWeight: 700 }}>
+                TAILADMIN CMS v2.4
+              </span>
+              <span style={{ fontSize: "12px", color: "var(--tail-text-body)" }}>
+                Zero-Database Live JSON Engine
+              </span>
             </div>
-            <div className="adm-stat-value">{loading ? '—' : works.length}</div>
-            <div className="adm-stat-desc">Films, Dramas & TV Shows</div>
+            <h2 style={{ fontSize: "20px", fontWeight: 800, color: "var(--tail-text-dark)", margin: "0 0 4px", letterSpacing: "-0.01em" }}>
+              Shirin Shila Portfolio Management
+            </h2>
+            <p style={{ margin: 0, fontSize: "13px", color: "var(--tail-text-body)" }}>
+              Manage films, showreels, high-resolution galleries, media coverage, and talent booking inquiries in real time.
+            </p>
           </div>
 
-          <div className="adm-stat-card">
-            <div className="adm-stat-top">
-              <span>SHOWREEL</span>
-              <Video size={15} />
-            </div>
-            <div className="adm-stat-value">{loading ? '—' : showreels.length}</div>
-            <div className="adm-stat-desc">Video Embeds</div>
-          </div>
-
-          <div className="adm-stat-card">
-            <div className="adm-stat-top">
-              <span>AWARDS & HONORS</span>
-              <Clock size={15} />
-            </div>
-            <div className="adm-stat-value">{loading ? '—' : awardsCount}</div>
-            <div className="adm-stat-desc">Milestone Timeline Items</div>
-          </div>
-
-          <div className="adm-stat-card">
-            <div className="adm-stat-top">
-              <span>PRESS & MEDIA</span>
-              <Newspaper size={15} />
-            </div>
-            <div className="adm-stat-value">{loading ? '—' : press.length}</div>
-            <div className="adm-stat-desc">Articles & Clippings</div>
-          </div>
-
-          <div className="adm-stat-card">
-            <div className="adm-stat-top">
-              <span>MEDIA & TV LOGOS</span>
-              <Tv size={15} />
-            </div>
-            <div className="adm-stat-value">{loading ? '—' : mediaPartners.length}</div>
-            <div className="adm-stat-desc">Broadcaster & Studio Logos</div>
-          </div>
-
-          <div className="adm-stat-card">
-            <div className="adm-stat-top">
-              <span>VISUAL GALLERY</span>
-              <ImageIcon size={15} />
-            </div>
-            <div className="adm-stat-value">{loading ? '—' : gallery.length}</div>
-            <div className="adm-stat-desc">Portfolio Images</div>
-          </div>
-
-          <div className="adm-stat-card" style={{ borderColor: newInquiries.length > 0 ? '#3b82f6' : undefined }}>
-            <div className="adm-stat-top">
-              <span>CRM INQUIRIES</span>
-              <Inbox size={15} color={newInquiries.length > 0 ? '#3b82f6' : undefined} />
-            </div>
-            <div className="adm-stat-value">
-              {loading ? '—' : inquiries.length}
-              {newInquiries.length > 0 && (
-                <span style={{ fontSize: '12px', color: '#2563eb', marginLeft: 8, fontWeight: 600, background: '#dbeafe', padding: '2px 8px', borderRadius: '12px' }}>
-                  {newInquiries.length} New
-                </span>
-              )}
-            </div>
-            <div className="adm-stat-desc">Public Form Submissions</div>
-          </div>
-        </div>
-
-        {/* Quick Management Shortcuts */}
-        <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', marginBottom: '28px' }}>
-          <Link href="/admin/hero" className="adm-btn adm-btn-secondary">
-            <LayoutTemplate size={14} />
-            <span>Edit Hero Section</span>
-          </Link>
-          <Link href="/admin/about" className="adm-btn adm-btn-secondary">
-            <User size={14} />
-            <span>Edit About Us</span>
-          </Link>
-          <Link href="/admin/works" className="adm-btn adm-btn-primary">
-            <Plus size={14} />
-            <span>Add Notable Work</span>
-          </Link>
-          <Link href="/admin/showreel" className="adm-btn adm-btn-secondary">
-            <Video size={14} />
-            <span>Import Showreel</span>
-          </Link>
-          <Link href="/admin/media-partners" className="adm-btn adm-btn-secondary">
-            <Tv size={14} />
-            <span>Manage TV Logos</span>
-          </Link>
-          <Link href="/admin/press" className="adm-btn adm-btn-secondary">
-            <Newspaper size={14} />
-            <span>Import News Article</span>
-          </Link>
-          <Link href="/admin/gallery" className="adm-btn adm-btn-secondary">
-            <ImageIcon size={14} />
-            <span>Upload Gallery</span>
-          </Link>
-          <Link href="/admin/contact" className="adm-btn adm-btn-secondary">
-            <Share2 size={14} />
-            <span>Manage Contact & Socials</span>
-          </Link>
-        </div>
-
-        {/* Recent Inquiries CRM Section */}
-        <div className="adm-card">
-          <div className="adm-card-header">
-            <div>
-              <span className="adm-card-title">Recent Inquiries & Bookings</span>
-              <p style={{ margin: '3px 0 0', fontSize: '12px', color: 'var(--adm-text-muted)' }}>
-                Direct submissions from the public portfolio contact form.
-              </p>
-            </div>
-            <Link href="/admin/inquiries" className="adm-btn adm-btn-secondary adm-btn-sm">
-              <span>View All CRM ({inquiries.length})</span>
-              <ArrowRight size={13} />
+          <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
+            <Link href="/" target="_blank" className="adm-btn adm-btn-secondary">
+              <ExternalLink size={14} />
+              <span>Live Website</span>
+            </Link>
+            <Link href="/admin/works" className="adm-btn adm-btn-primary">
+              <Plus size={14} />
+              <span>Add Notable Project</span>
             </Link>
           </div>
+        </div>
+      </div>
 
-          <div className="adm-table-wrap">
-            <table className="adm-table">
-              <thead>
-                <tr>
-                  <th>Sender</th>
-                  <th>Inquiry Type</th>
-                  <th>Date</th>
-                  <th>Status</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {inquiries.slice(0, 5).map((inq) => {
-                  const whatsappClean = inq.phone ? inq.phone.replace(/[^0-9]/g, '') : '';
-                  return (
-                    <tr key={inq.id}>
-                      <td className="strong">
-                        <div>{inq.name}</div>
-                        <div style={{ fontSize: '11px', color: 'var(--adm-text-muted)', fontFamily: 'var(--adm-font-mono)' }}>
-                          {inq.email}
-                        </div>
-                      </td>
-                      <td>
-                        <span className="adm-badge adm-badge-neutral">{inq.inquiryType}</span>
-                      </td>
-                      <td>{inq.date}</td>
-                      <td>
-                        <span
-                          className={`adm-badge ${
-                            inq.status === 'New'
-                              ? 'adm-badge-blue'
-                              : inq.status === 'Replied'
-                              ? 'adm-badge-green'
-                              : 'adm-badge-neutral'
-                          }`}
-                        >
-                          {inq.status}
-                        </span>
-                      </td>
-                      <td>
-                        <div style={{ display: 'flex', gap: '6px' }}>
-                          {whatsappClean && (
-                            <a
-                              href={`https://wa.me/${whatsappClean}?text=Hello%20${encodeURIComponent(inq.name)},%20thank%20you%20for%20contacting%20Shirin%20Shila%20Management.`}
-                              target="_blank"
-                              rel="noreferrer"
-                              className="adm-btn adm-btn-secondary adm-btn-sm"
-                              title="Chat on WhatsApp"
-                            >
-                              <MessageCircle size={12} color="#22c55e" />
-                            </a>
-                          )}
-                          <a
-                            href={`mailto:${inq.email}?subject=Regarding%20your%20inquiry%20to%20Shirin%20Shila`}
-                            className="adm-btn adm-btn-secondary adm-btn-sm"
-                            title="Reply by Email"
-                          >
-                            <Mail size={12} />
-                          </a>
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })}
-                {inquiries.length === 0 && !loading && (
-                  <tr>
-                    <td colSpan={5} style={{ textAlign: 'center', padding: '30px', color: 'var(--adm-text-muted)' }}>
-                      No contact inquiries received yet.
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
+      {/* TailAdmin 4-Metric Stats Grid */}
+      <div className="adm-stats-grid">
+        {/* Metric 1: Notable Works */}
+        <div className="adm-stat-card">
+          <div className="adm-stat-top">
+            <div className="adm-stat-icon-wrap" style={{ background: "#eff2f7", color: "#3c50e0" }}>
+              <Film size={22} />
+            </div>
+            <span className="adm-badge adm-badge-blue">Filmography</span>
+          </div>
+          <div>
+            <div className="adm-stat-value">{loading ? "—" : works.length}</div>
+            <div className="adm-stat-desc">Films, Dramas &amp; Shows</div>
           </div>
         </div>
-      </main>
-    </>
+
+        {/* Metric 2: Video Showreels */}
+        <div className="adm-stat-card">
+          <div className="adm-stat-top">
+            <div className="adm-stat-icon-wrap" style={{ background: "#fdf2f8", color: "#ec4899" }}>
+              <Video size={22} />
+            </div>
+            <span className="adm-badge adm-badge-amber">YouTube HD</span>
+          </div>
+          <div>
+            <div className="adm-stat-value">{loading ? "—" : showreels.length}</div>
+            <div className="adm-stat-desc">Video Performance Reels</div>
+          </div>
+        </div>
+
+        {/* Metric 3: Media & Press */}
+        <div className="adm-stat-card">
+          <div className="adm-stat-top">
+            <div className="adm-stat-icon-wrap" style={{ background: "#fef3c7", color: "#d97706" }}>
+              <Newspaper size={22} />
+            </div>
+            <span className="adm-badge adm-badge-amber">Press Archive</span>
+          </div>
+          <div>
+            <div className="adm-stat-value">{loading ? "—" : press.length}</div>
+            <div className="adm-stat-desc">Articles &amp; Print Clippings</div>
+          </div>
+        </div>
+
+        {/* Metric 4: CRM Inquiries */}
+        <div className="adm-stat-card">
+          <div className="adm-stat-top">
+            <div className="adm-stat-icon-wrap" style={{ background: "#e1f9ee", color: "#10b981" }}>
+              <Inbox size={22} />
+            </div>
+            {newInquiries.length > 0 ? (
+              <span className="adm-badge adm-badge-green font-bold">
+                {newInquiries.length} New
+              </span>
+            ) : (
+              <span className="adm-badge adm-badge-neutral">Up to date</span>
+            )}
+          </div>
+          <div>
+            <div className="adm-stat-value">{loading ? "—" : inquiries.length}</div>
+            <div className="adm-stat-desc">Public Booking Inquiries</div>
+          </div>
+        </div>
+      </div>
+
+      {/* Quick CMS Navigation Ribbon */}
+      <div style={{ display: "flex", gap: "10px", flexWrap: "wrap", marginBottom: "28px" }}>
+        <Link href="/admin/hero" className="adm-btn adm-btn-secondary">
+          <LayoutTemplate size={14} />
+          <span>Hero Banner</span>
+        </Link>
+        <Link href="/admin/about" className="adm-btn adm-btn-secondary">
+          <User size={14} />
+          <span>About Biography</span>
+        </Link>
+        <Link href="/admin/works" className="adm-btn adm-btn-secondary">
+          <Film size={14} />
+          <span>Notable Works ({works.length})</span>
+        </Link>
+        <Link href="/admin/showreel" className="adm-btn adm-btn-secondary">
+          <Video size={14} />
+          <span>Showreels ({showreels.length})</span>
+        </Link>
+        <Link href="/admin/timeline" className="adm-btn adm-btn-secondary">
+          <Clock size={14} />
+          <span>Awards &amp; Honors ({awardsCount})</span>
+        </Link>
+        <Link href="/admin/press" className="adm-btn adm-btn-secondary">
+          <Newspaper size={14} />
+          <span>Press Coverage ({press.length})</span>
+        </Link>
+        <Link href="/admin/media-partners" className="adm-btn adm-btn-secondary">
+          <Tv size={14} />
+          <span>TV Logos ({mediaPartners.length})</span>
+        </Link>
+        <Link href="/admin/gallery" className="adm-btn adm-btn-secondary">
+          <ImageIcon size={14} />
+          <span>Photo Gallery ({gallery.length})</span>
+        </Link>
+        <Link href="/admin/contact" className="adm-btn adm-btn-secondary">
+          <Share2 size={14} />
+          <span>Contact &amp; Portals</span>
+        </Link>
+      </div>
+
+      {/* TailAdmin Recent Inquiries Table Card */}
+      <div className="adm-card">
+        <div className="adm-card-header">
+          <div>
+            <span className="adm-card-title">Recent Inquiries &amp; Booking Submissions</span>
+            <p style={{ margin: "4px 0 0", fontSize: "12px", color: "var(--tail-text-body)" }}>
+              Messages submitted through the public casting and booking inquiry desk.
+            </p>
+          </div>
+          <Link href="/admin/inquiries" className="adm-btn adm-btn-secondary adm-btn-sm">
+            <span>View All ({inquiries.length})</span>
+            <ArrowRight size={13} />
+          </Link>
+        </div>
+
+        <div className="adm-table-wrap">
+          <table className="adm-table">
+            <thead>
+              <tr>
+                <th>Client / Production</th>
+                <th>Inquiry Type</th>
+                <th>Date</th>
+                <th>Status</th>
+                <th>Quick Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {inquiries.slice(0, 5).map((inq) => {
+                const whatsappClean = inq.phone ? inq.phone.replace(/[^0-9]/g, "") : "";
+                return (
+                  <tr key={inq.id}>
+                    <td className="strong">
+                      <div>{inq.name}</div>
+                      <div style={{ fontSize: "11px", color: "var(--tail-text-body)", fontFamily: "var(--adm-font-mono)" }}>
+                        {inq.email}
+                      </div>
+                    </td>
+                    <td>
+                      <span className="adm-badge adm-badge-neutral">{inq.inquiryType}</span>
+                    </td>
+                    <td>{inq.date}</td>
+                    <td>
+                      <span
+                        className={`adm-badge ${
+                          inq.status === "New"
+                            ? "adm-badge-blue"
+                            : inq.status === "Replied"
+                            ? "adm-badge-green"
+                            : "adm-badge-neutral"
+                        }`}
+                      >
+                        {inq.status}
+                      </span>
+                    </td>
+                    <td>
+                      <div style={{ display: "flex", gap: "6px" }}>
+                        {whatsappClean && (
+                          <a
+                            href={`https://wa.me/${whatsappClean}?text=Hello%20${encodeURIComponent(inq.name)},%20thank%20you%20for%20contacting%20Shirin%20Shila%20Management.`}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="adm-btn adm-btn-secondary adm-btn-sm"
+                            title="Chat on WhatsApp"
+                          >
+                            <MessageCircle size={13} color="#10b981" />
+                          </a>
+                        )}
+                        <a
+                          href={`mailto:${inq.email}?subject=Regarding%20your%20inquiry%20to%20Shirin%20Shila`}
+                          className="adm-btn adm-btn-secondary adm-btn-sm"
+                          title="Reply by Email"
+                        >
+                          <Mail size={13} />
+                        </a>
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
+              {inquiries.length === 0 && !loading && (
+                <tr>
+                  <td colSpan={5} style={{ textAlign: "center", padding: "36px", color: "var(--tail-text-body)" }}>
+                    No contact inquiries received yet.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </main>
   );
 }

@@ -87,9 +87,9 @@ export function ShowreelSection({ id = "showreel" }: ShowreelSectionProps) {
           showCaption={false}
           showPagination
           showNavigation
-          cardWidth="clamp(300px, 46vw, 640px)"
-          rotate={36}
-          depth={0.5}
+          cardWidth="clamp(250px, 70vw, 620px)"
+          rotate={30}
+          depth={0.45}
           fade={0.12}
         />
       </motion.div>

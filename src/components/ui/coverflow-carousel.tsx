@@ -402,17 +402,17 @@ export function CoverflowCarousel({
               type="button"
               aria-label="Previous slide"
               onClick={() => nudge(-1)}
-              className="absolute left-4 top-1/2 z-[200] -translate-y-1/2 rounded-full bg-black/60 border border-white/10 p-3 text-white backdrop-blur transition hover:bg-pink-600 hover:border-pink-500"
+              className="absolute left-1 sm:left-4 top-1/2 z-[200] -translate-y-1/2 rounded-full bg-black/75 border border-white/15 p-2 sm:p-3 text-white backdrop-blur transition hover:bg-pink-600 hover:border-pink-500 shadow-lg"
             >
-              <ChevronLeft className="size-5" />
+              <ChevronLeft className="size-4 sm:size-5" />
             </button>
             <button
               type="button"
               aria-label="Next slide"
               onClick={() => nudge(1)}
-              className="absolute right-4 top-1/2 z-[200] -translate-y-1/2 rounded-full bg-black/60 border border-white/10 p-3 text-white backdrop-blur transition hover:bg-pink-600 hover:border-pink-500"
+              className="absolute right-1 sm:right-4 top-1/2 z-[200] -translate-y-1/2 rounded-full bg-black/75 border border-white/15 p-2 sm:p-3 text-white backdrop-blur transition hover:bg-pink-600 hover:border-pink-500 shadow-lg"
             >
-              <ChevronRight className="size-5" />
+              <ChevronRight className="size-4 sm:size-5" />
             </button>
           </>
         )}
