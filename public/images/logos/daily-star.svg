@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 170 50" fill="none">
+    <rect width="170" height="50" rx="8" fill="#18121a" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
+    <polygon points="28,12 32,22 43,22 34,28 37,38 28,32 19,38 22,28 13,22 24,22" fill="#38bdf8"/>
+    <text x="50" y="29" fill="#ffffff" font-family="Georgia, serif" font-weight="bold" font-size="13.5">The Daily Star</text>
+    <text x="51" y="40" fill="#7dd3fc" font-family="Arial, sans-serif" font-size="7.5" letter-spacing="1.5">NATIONAL JOURNAL</text>
+  </svg>

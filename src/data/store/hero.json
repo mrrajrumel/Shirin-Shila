@@ -1,0 +1,18 @@
+{
+  "name": "SHIRIN SHILA",
+  "eyebrow": "Dhallywood Cinema & Fashion",
+  "roles": "Film Actress • Television Star & Reality Judge • Fashion Model",
+  "intro": "A recognized screen presence in Dhallywood cinema, television drama serials, and commercial fashion.",
+  "image": "/images/shirin-akter.png",
+  "imageAlt": "Shirin Shila - Bangladeshi Film Actress & Model",
+  "indexTag": "OFFICIAL PORTFOLIO • 2026 • DHALLYWOOD",
+  "primaryCta": {
+    "label": "Watch Showreel",
+    "href": "#showreel"
+  },
+  "secondaryCta": {
+    "label": "Get in Touch",
+    "href": "#contact"
+  },
+  "scrollIndicatorText": "SCROLL TO EXPLORE"
+}

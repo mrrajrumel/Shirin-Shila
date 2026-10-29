@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 50" fill="none">
+    <rect width="160" height="50" rx="8" fill="#18121a" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
+    <path d="M32 11L44 25L32 39L20 25Z" fill="#7c3aed"/>
+    <circle cx="32" cy="25" r="5" fill="#f59e0b"/>
+    <text x="54" y="29" fill="#ffffff" font-family="Arial, sans-serif" font-weight="800" font-size="16">দীপ্ত টিভি</text>
+    <text x="55" y="41" fill="#a78bfa" font-family="Arial, sans-serif" font-size="8.5" letter-spacing="1">DEEPTO TV</text>
+  </svg>

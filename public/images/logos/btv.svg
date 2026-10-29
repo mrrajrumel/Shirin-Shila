@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 50" fill="none">
+    <rect width="160" height="50" rx="8" fill="#18121a" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
+    <circle cx="30" cy="25" r="14" stroke="#eab308" stroke-width="2.5" fill="#15803d"/>
+    <circle cx="30" cy="25" r="5.5" fill="#ef4444"/>
+    <text x="54" y="30" fill="#ffffff" font-family="Arial, sans-serif" font-weight="800" font-size="18" letter-spacing="1">BTV</text>
+    <text x="55" y="41" fill="#facc15" font-family="Arial, sans-serif" font-size="8.5" letter-spacing="1">বাংলাদেশ টেলিভিশন</text>
+  </svg>

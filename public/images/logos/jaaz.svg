@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 170 50" fill="none">
+    <rect width="170" height="50" rx="8" fill="#18121a" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
+    <path d="M22 15H40V20H33V35H27V20H22V15Z" fill="#ff3f79"/>
+    <text x="48" y="29" fill="#ffffff" font-family="Arial, sans-serif" font-weight="900" font-size="17" letter-spacing="1">JAAZ</text>
+    <text x="49" y="41" fill="#ff3f79" font-family="Arial, sans-serif" font-weight="600" font-size="8" letter-spacing="1.5">MULTIMEDIA CINEMA</text>
+  </svg>

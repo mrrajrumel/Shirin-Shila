@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 50" fill="none">
+    <rect width="160" height="50" rx="8" fill="#18121a" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
+    <circle cx="30" cy="25" r="14" stroke="#f43f5e" stroke-width="2.5" fill="none"/>
+    <circle cx="30" cy="25" r="7" fill="#fbbf24"/>
+    <text x="52" y="29" fill="#ffffff" font-family="Arial, sans-serif" font-weight="700" font-size="15">বৈশাখী টিভি</text>
+    <text x="53" y="41" fill="#fb7185" font-family="Arial, sans-serif" font-size="8.5" letter-spacing="1">BOISHAKHI TV</text>
+  </svg>

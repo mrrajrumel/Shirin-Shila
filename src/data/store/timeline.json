@@ -1,0 +1,92 @@
+{
+  "top": [
+    {
+      "id": "2014-july",
+      "year": "2014",
+      "month": "July",
+      "title": "Meril-Prothom Alo Nominee",
+      "content": "Meril-Prothom Alo Awards Nominee — Best Newcomer for silver-screen debut Hitman",
+      "image": "/images/poster-hitman.jpg"
+    },
+    {
+      "id": "2019-november",
+      "year": "2019",
+      "month": "November",
+      "title": "Babisas Best Actress Award",
+      "content": "Babisas Award Winner — Best Actress in a Leading Role for Begum Jaan",
+      "image": "/images/award-trophy-stage.jpg"
+    },
+    {
+      "id": "2024-january",
+      "year": "2024",
+      "month": "January",
+      "title": "DIFF Best Actress Trophy",
+      "content": "Dhaka International Film Festival (DIFF) — Best Actress Trophy & Honors Presentation",
+      "image": "/images/award-diff-stage.jpg"
+    },
+    {
+      "id": "2025-december",
+      "year": "2025",
+      "month": "December",
+      "title": "National Star Excellence Crest",
+      "content": "National Star Excellence Crest — Celebrating 15 Years of Dhallywood Cinema & Acting",
+      "image": "/images/award-trophy-gala.jpg"
+    }
+  ],
+  "bottom": [
+    {
+      "id": "2016-april",
+      "year": "2016",
+      "month": "April",
+      "title": "Box Office Hit Laurel",
+      "content": "Commercial Box Office Laurel — Mainstream theatrical success in Miya Bibi Raji",
+      "image": "/images/gallery-1.jpg"
+    },
+    {
+      "id": "2022-december",
+      "year": "2022",
+      "month": "December",
+      "title": "1971 Liberation War Acclaim",
+      "content": "Liberation War Heritage Cinema Acclaim — Acclaimed lead role as 1971 war heroine in Birangona 71",
+      "image": "/images/poster-birangona71.jpg"
+    },
+    {
+      "id": "2024-march",
+      "year": "2024",
+      "month": "March",
+      "title": "Film Artistes' Guild Crest",
+      "content": "Bangladesh Film Artistes' Guild Crest — Honored for continuous artistic dedication & industry support",
+      "image": "/images/gallery-2.jpg"
+    },
+    {
+      "id": "2024-november",
+      "year": "2024",
+      "month": "November",
+      "title": "Crystal Trophy & Star of Year",
+      "content": "Crystal Trophy & Star of the Year — Gala red-carpet felicitation & cultural excellence crest",
+      "image": "/images/gallery-4.jpg"
+    }
+  ],
+  "milestones": [
+    {
+      "year": "2014",
+      "title": "Meril-Prothom Alo Nominee",
+      "description": "Silver-screen debut in Hitman with Shakib Khan & Meril-Prothom Alo nomination"
+    },
+    {
+      "year": "2019",
+      "title": "Babisas Best Actress Award",
+      "description": "Won the prestigious Babisas Award for Best Actress for her lead performance in Begum Jaan"
+    },
+    {
+      "year": "2024",
+      "title": "DIFF Best Actress Trophy",
+      "description": "Dhaka International Film Festival Best Actress Trophy presentation"
+    },
+    {
+      "year": "2025",
+      "title": "National Star Excellence Crest",
+      "description": "Honored with the National Star Excellence Crest for contributions to Dhallywood cinema"
+    }
+  ]
+}

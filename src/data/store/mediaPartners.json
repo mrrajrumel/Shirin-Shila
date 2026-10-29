@@ -1,0 +1,17 @@
+[
+  { "id": "channel-i", "name": "Channel i", "banglaName": "চ্যানেল আই", "logo": "/images/logos/channel-i.svg", "website": "https://www.channeli.tv" },
+  { "id": "atn-bangla", "name": "ATN Bangla", "banglaName": "এটিএন বাংলা", "logo": "/images/logos/atn-bangla.svg", "website": "https://www.atnbangla.tv" },
+  { "id": "ntv", "name": "NTV", "banglaName": "এনটিভি", "logo": "/images/logos/ntv.svg", "website": "https://www.ntvbd.com" },
+  { "id": "rtv", "name": "RTV", "banglaName": "আরটিভি", "logo": "/images/logos/rtv.svg", "website": "https://www.rtvonline.com" },
+  { "id": "banglavision", "name": "Banglavision", "banglaName": "বাংলাভিশন", "logo": "/images/logos/banglavision.svg", "website": "https://www.bvnews24.com" },
+  { "id": "deepto-tv", "name": "Deepto TV", "banglaName": "দীপ্ত টিভি", "logo": "/images/logos/deepto-tv.svg", "website": "https://www.deepto.tv" },
+  { "id": "boishakhi-tv", "name": "Boishakhi TV", "banglaName": "বৈশাখী টিভি", "logo": "/images/logos/boishakhi-tv.svg", "website": "https://www.boishakhionline.com" },
+  { "id": "maasranga-tv", "name": "Maasranga TV", "banglaName": "মাছরাঙা টেলিভিশন", "logo": "/images/logos/maasranga-tv.svg", "website": "https://www.maasranga.tv" },
+  { "id": "gtv", "name": "GTV (Gazi TV)", "banglaName": "গাজী টিভি", "logo": "/images/logos/gtv.svg", "website": "https://www.gazitv.com" },
+  { "id": "btv", "name": "Bangladesh Television", "banglaName": "বিটিভি", "logo": "/images/logos/btv.svg", "website": "https://www.btv.gov.bd" },
+  { "id": "jaaz-multimedia", "name": "Jaaz Multimedia", "banglaName": "জাজ মাল্টিমিডিয়া", "logo": "/images/logos/jaaz.svg", "website": "https://www.jaazmultimedia.com" },
+  { "id": "impress-telefilm", "name": "Impress Telefilm", "banglaName": "ইমপ্রেস টেলিফিল্ম", "logo": "/images/logos/impress.svg", "website": "https://www.impresstelefilm.com" },
+  { "id": "prothom-alo", "name": "Prothom Alo", "banglaName": "প্রথম আলো", "logo": "/images/logos/prothom-alo.svg", "website": "https://www.prothomalo.com" },
+  { "id": "daily-star", "name": "The Daily Star", "banglaName": "দ্য ডেইলি স্টার", "logo": "/images/logos/daily-star.svg", "website": "https://www.thedailystar.net" },
+  { "id": "babisas", "name": "Babisas Awards", "banglaName": "বাচসাস চলচ্চিত্র সাংবাদিক", "logo": "/images/logos/babisas.svg" }
+]

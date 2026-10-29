@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 50" fill="none">
+    <rect width="160" height="50" rx="8" fill="#18121a" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
+    <circle cx="28" cy="25" r="13" stroke="#fbbf24" stroke-width="2" fill="none"/>
+    <path d="M24 31L28 19L32 31Z" fill="#fbbf24"/>
+    <text x="50" y="29" fill="#ffffff" font-family="Arial, sans-serif" font-weight="800" font-size="16" letter-spacing="1">বাচসাস</text>
+    <text x="51" y="40" fill="#fde68a" font-family="Arial, sans-serif" font-size="8" letter-spacing="1">FILM AWARDS GUILD</text>
+  </svg>

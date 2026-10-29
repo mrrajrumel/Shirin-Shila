@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 170 50" fill="none">
+    <rect width="170" height="50" rx="8" fill="#18121a" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
+    <path d="M20 35C22 22 34 14 42 20C40 27 32 35 20 35Z" fill="#06b6d4"/>
+    <circle cx="36" cy="21" r="2.5" fill="#ffffff"/>
+    <text x="54" y="29" fill="#ffffff" font-family="Arial, sans-serif" font-weight="700" font-size="15">মাছরাঙা</text>
+    <text x="55" y="41" fill="#22d3ee" font-family="Arial, sans-serif" font-size="8.5" letter-spacing="1">MAASRANGA TV</text>
+  </svg>

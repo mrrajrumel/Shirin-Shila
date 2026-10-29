@@ -1,0 +1,78 @@
+"use client";
+
+import React, { useState, useEffect } from "react";
+import { defaultMediaPartners, MediaPartner, mediaPartnersMeta } from "@/data/media-partners";
+
+export function MediaTickerSection({ id = "media-ticker" }: { id?: string }) {
+  const [partners, setPartners] = useState<MediaPartner[]>(defaultMediaPartners);
+
+  useEffect(() => {
+    fetch("/api/media-partners", { cache: "no-store" })
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (data && Array.isArray(data.items) && data.items.length > 0) {
+          setPartners(data.items);
+        }
+      })
+      .catch(() => {});
+  }, []);
+
+  // Duplicate list to achieve continuous seamless loop
+  const tickerItems = [...partners, ...partners];
+
+  return (
+    <section id={id} className="media-ticker-section">
+      <div className="media-ticker-header">
+        <div className="section-kicker">{mediaPartnersMeta.kicker}</div>
+        <h3 className="serif media-ticker-title">
+          {mediaPartnersMeta.title}
+        </h3>
+        <p className="muted media-ticker-desc">
+          {mediaPartnersMeta.subtitle}
+        </p>
+      </div>
+
+      <div className="media-ticker-track-wrapper">
+        <div className="media-ticker-fade-left" />
+        <div className="media-ticker-fade-right" />
+
+        <div className="media-ticker-track">
+          {tickerItems.map((partner, idx) => (
+            <div
+              key={`${partner.id}-${idx}`}
+              className="media-logo-card"
+              title={`${partner.name}${partner.banglaName ? ` (${partner.banglaName})` : ""}`}
+            >
+              {partner.website ? (
+                <a
+                  href={partner.website}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="media-logo-link"
+                >
+                  <img
+                    src={partner.logo}
+                    alt={partner.name}
+                    className="media-logo-img"
+                    loading="lazy"
+                  />
+                </a>
+              ) : (
+                <div className="media-logo-link">
+                  <img
+                    src={partner.logo}
+                    alt={partner.name}
+                    className="media-logo-img"
+                    loading="lazy"
+                  />
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+export default MediaTickerSection;

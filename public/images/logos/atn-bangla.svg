@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 50" fill="none">
+    <rect width="160" height="50" rx="8" fill="#18121a" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
+    <path d="M22 36L34 14L46 36H38L34 28L30 36H22Z" fill="#f59e0b"/>
+    <circle cx="34" cy="22" r="3.5" fill="#ef4444"/>
+    <text x="58" y="30" fill="#ffffff" font-family="Arial, sans-serif" font-weight="800" font-size="17">ATN</text>
+    <text x="100" y="30" fill="#f59e0b" font-family="Arial, sans-serif" font-weight="700" font-size="14">বাংলা</text>
+    <text x="59" y="41" fill="#9ca3af" font-family="Arial, sans-serif" font-size="8" letter-spacing="1.5">SATELLITE TV</text>
+  </svg>

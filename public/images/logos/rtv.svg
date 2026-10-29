@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 50" fill="none">
+    <rect width="160" height="50" rx="8" fill="#18121a" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
+    <rect x="18" y="12" width="28" height="26" rx="6" fill="#dc2626"/>
+    <text x="32" y="30" fill="#ffffff" font-family="Arial, sans-serif" font-weight="900" font-size="16" text-anchor="middle">R</text>
+    <text x="56" y="31" fill="#ffffff" font-family="Arial, sans-serif" font-weight="800" font-size="20">rtv</text>
+    <text x="90" y="31" fill="#ef4444" font-family="Arial, sans-serif" font-weight="700" font-size="12">HD</text>
+    <text x="57" y="42" fill="#9ca3af" font-family="Arial, sans-serif" font-size="8" letter-spacing="1">BENGAL MEDIA</text>
+  </svg>

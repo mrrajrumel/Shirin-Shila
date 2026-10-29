@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 50" fill="none">
+    <rect width="160" height="50" rx="8" fill="#18121a" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
+    <circle cx="34" cy="25" r="16" fill="#e11d48"/>
+    <text x="34" y="32" fill="#ffffff" font-family="Arial, sans-serif" font-weight="bold" font-size="20" text-anchor="middle">i</text>
+    <text x="60" y="29" fill="#ffffff" font-family="Arial, sans-serif" font-weight="700" font-size="16">Channel</text>
+    <text x="126" y="29" fill="#e11d48" font-family="Arial, sans-serif" font-weight="900" font-size="20">i</text>
+    <text x="61" y="41" fill="#9ca3af" font-family="Arial, sans-serif" font-size="8.5" letter-spacing="1">HD BROADCAST</text>
+  </svg>
