@@ -6,7 +6,7 @@ import { defaultMediaPartners, MediaPartner, mediaPartnersMeta } from "@/data/me
 export function MediaTickerSection({ id = "media-ticker" }: { id?: string }) {
   const [partners, setPartners] = useState<MediaPartner[]>(defaultMediaPartners);
 
-  useEffect(() => {
+  const loadPartners = () => {
     fetch("/api/media-partners", { cache: "no-store" })
       .then((res) => (res.ok ? res.json() : null))
       .then((data) => {
@@ -15,6 +15,25 @@ export function MediaTickerSection({ id = "media-ticker" }: { id?: string }) {
         }
       })
       .catch(() => {});
+  };
+
+  useEffect(() => {
+    loadPartners();
+
+    const handleUpdate = () => {
+      loadPartners();
+    };
+
+    window.addEventListener("shirin_shila_partners_updated", handleUpdate);
+    window.addEventListener("shirin_shila_reset", handleUpdate);
+    window.addEventListener("storage", (e) => {
+      if (e.key === "shirin_shila_sync_partners") loadPartners();
+    });
+
+    return () => {
+      window.removeEventListener("shirin_shila_partners_updated", handleUpdate);
+      window.removeEventListener("shirin_shila_reset", handleUpdate);
+    };
   }, []);
 
   // Duplicate list to achieve continuous seamless loop

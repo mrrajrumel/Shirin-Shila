@@ -45,6 +45,10 @@ export default function AdminContactPage() {
       if (!res.ok) throw new Error(data.error || 'Save failed');
 
       setSavedSuccess(true);
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('shirin_shila_contact_info_updated'));
+        localStorage.setItem('shirin_shila_sync_contact', Date.now().toString());
+      }
       setTimeout(() => setSavedSuccess(false), 3000);
     } catch (err: any) {
       alert(`Save error: ${err.message}`);
@@ -102,7 +106,7 @@ export default function AdminContactPage() {
                   className="adm-input"
                   value={contact.managementEmail}
                   onChange={(e) => setContact({ ...contact, managementEmail: e.target.value })}
-                  placeholder="e.g. management@shirinshila.com"
+                  placeholder="e.g. support@trytso.com"
                   required
                 />
               </div>
@@ -260,6 +264,37 @@ export default function AdminContactPage() {
                 />
               </div>
             </div>
+          </div>
+
+          <div
+            style={{
+              marginTop: '24px',
+              display: 'flex',
+              justifyContent: 'flex-end',
+              gap: '12px',
+              background: 'var(--adm-card-bg)',
+              border: '1px solid var(--adm-border)',
+              borderRadius: '10px',
+              padding: '14px 20px',
+            }}
+          >
+            <button
+              type="button"
+              onClick={loadContact}
+              className="adm-btn adm-btn-secondary"
+            >
+              <RefreshCw size={13} />
+              <span>Reset</span>
+            </button>
+            <button
+              type="submit"
+              disabled={saving}
+              className="adm-btn adm-btn-primary"
+              style={{ minWidth: '160px' }}
+            >
+              {savedSuccess ? <Check size={14} /> : <Save size={14} />}
+              <span>{saving ? 'Saving...' : savedSuccess ? 'Saved Changes!' : 'Save Changes'}</span>
+            </button>
           </div>
         </form>
       </main>

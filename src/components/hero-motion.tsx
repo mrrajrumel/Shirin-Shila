@@ -15,8 +15,7 @@ export function HeroMotion({ id = "home" }: HeroSectionProps) {
   const [isClient, setIsClient] = useState(false);
   const [profile, setProfile] = useState<HeroProfile>(heroProfile);
 
-  useEffect(() => {
-    setIsClient(true);
+  const loadHeroData = () => {
     fetch("/api/hero", { cache: "no-store" })
       .then((res) => (res.ok ? res.json() : null))
       .then((data) => {
@@ -25,6 +24,26 @@ export function HeroMotion({ id = "home" }: HeroSectionProps) {
         }
       })
       .catch(() => {});
+  };
+
+  useEffect(() => {
+    setIsClient(true);
+    loadHeroData();
+
+    const handleUpdate = () => {
+      loadHeroData();
+    };
+
+    window.addEventListener("shirin_shila_hero_updated", handleUpdate);
+    window.addEventListener("shirin_shila_reset", handleUpdate);
+    window.addEventListener("storage", (e) => {
+      if (e.key === "shirin_shila_sync_hero") loadHeroData();
+    });
+
+    return () => {
+      window.removeEventListener("shirin_shila_hero_updated", handleUpdate);
+      window.removeEventListener("shirin_shila_reset", handleUpdate);
+    };
   }, []);
 
   // Mouse Parallax Values

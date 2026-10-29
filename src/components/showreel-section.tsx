@@ -30,6 +30,9 @@ export function ShowreelSection({ id = "showreel" }: ShowreelSectionProps) {
     const handleUpdate = () => loadVideos();
     window.addEventListener("shirin_shila_showreels_updated", handleUpdate);
     window.addEventListener("shirin_shila_reset", handleUpdate);
+    window.addEventListener("storage", (e) => {
+      if (e.key === "shirin_shila_sync_showreels") loadVideos();
+    });
     return () => {
       window.removeEventListener("shirin_shila_showreels_updated", handleUpdate);
       window.removeEventListener("shirin_shila_reset", handleUpdate);

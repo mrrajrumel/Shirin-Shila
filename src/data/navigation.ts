@@ -19,11 +19,11 @@ export const navigationItems: NavigationItem[] = [
 
 export const navigationMeta = {
   brandName: "SHIRIN SHILA",
-  representationEmail: "management@shirinshila.com",
+  representationEmail: "support@trytso.com",
   subtitle: "Navigation",
   status: "Dhallywood Cinema",
   directPortals: [
     { label: "Press Kit", href: "#press" },
-    { label: "Comp Card", href: "#about" },
+    { label: "Showreel", href: "#showreel" },
   ],
 };

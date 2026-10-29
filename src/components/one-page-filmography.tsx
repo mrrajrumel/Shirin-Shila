@@ -59,6 +59,9 @@ export function OnePageFilmography({ id = "filmography" }: FilmographySectionPro
 
     window.addEventListener("shirin_shila_works_updated", handleUpdate);
     window.addEventListener("shirin_shila_reset", handleUpdate);
+    window.addEventListener("storage", (e) => {
+      if (e.key === "shirin_shila_sync_works") loadItems();
+    });
     return () => {
       window.removeEventListener("shirin_shila_works_updated", handleUpdate);
       window.removeEventListener("shirin_shila_reset", handleUpdate);

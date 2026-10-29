@@ -121,6 +121,10 @@ export default function AdminGalleryPage() {
       }
 
       setIsModalOpen(false);
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('shirin_shila_gallery_updated'));
+        localStorage.setItem('shirin_shila_sync_gallery', Date.now().toString());
+      }
       loadGallery();
     } catch (err: any) {
       alert(`Save failed: ${err.message}`);
@@ -135,6 +139,10 @@ export default function AdminGalleryPage() {
       if (!res.ok) {
         const data = await res.json();
         throw new Error(data.error);
+      }
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('shirin_shila_gallery_updated'));
+        localStorage.setItem('shirin_shila_sync_gallery', Date.now().toString());
       }
       loadGallery();
     } catch (err: any) {

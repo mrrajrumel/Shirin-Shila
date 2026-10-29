@@ -38,6 +38,9 @@ export function ParallaxGallery({ id = "gallery" }: GallerySectionProps) {
     const handleUpdate = () => loadImages();
     window.addEventListener("shirin_shila_gallery_updated", handleUpdate);
     window.addEventListener("shirin_shila_reset", handleUpdate);
+    window.addEventListener("storage", (e) => {
+      if (e.key === "shirin_shila_sync_gallery") loadImages();
+    });
     return () => {
       window.removeEventListener("shirin_shila_gallery_updated", handleUpdate);
       window.removeEventListener("shirin_shila_reset", handleUpdate);

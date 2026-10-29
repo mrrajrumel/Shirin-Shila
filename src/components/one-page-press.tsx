@@ -38,6 +38,9 @@ export function OnePagePress({ id = "press" }: PressSectionProps) {
 
     window.addEventListener("shirin_shila_press_updated", handleUpdate);
     window.addEventListener("shirin_shila_reset", handleUpdate);
+    window.addEventListener("storage", (e) => {
+      if (e.key === "shirin_shila_sync_press") loadItems();
+    });
     return () => {
       window.removeEventListener("shirin_shila_press_updated", handleUpdate);
       window.removeEventListener("shirin_shila_reset", handleUpdate);

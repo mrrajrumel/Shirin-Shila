@@ -41,9 +41,9 @@ export interface InquiryItem {
 }
 
 export const initialContactInfo: ContactInfo = {
-  managementEmail: 'management@shirinshila.com',
+  managementEmail: 'support@trytso.com',
   pressEmail: 'press@shirinshila.com',
-  agencyName: 'Shirin Shila Talent & Media Desk',
+  agencyName: 'Tune Soul Ocean',
   socials: {
     facebookProfile: 'https://www.facebook.com/shirin.shila.5',
     facebookPage: 'https://www.facebook.com/shirinshilaofficial',

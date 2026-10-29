@@ -693,12 +693,12 @@ export default function SiteNav() {
               {/* Drawer footer info */}
               <div className="menu-bottom-meta" data-menu-fade>
                 <div>
-                  <span className="meta-label">Representation</span>
+                  <span className="meta-label">Management Desk</span>
                   <a
-                    href="mailto:management@shirinshila.com"
+                    href="mailto:support@trytso.com"
                     className="meta-value"
                   >
-                    management@shirinshila.com
+                    support@trytso.com
                   </a>
                 </div>
 

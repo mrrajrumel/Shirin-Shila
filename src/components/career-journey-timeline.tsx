@@ -147,6 +147,9 @@ export default function CareerJourneyTimeline({
     const handleUpdate = () => loadTimeline();
     window.addEventListener("shirin_shila_timeline_updated", handleUpdate);
     window.addEventListener("shirin_shila_reset", handleUpdate);
+    window.addEventListener("storage", (e) => {
+      if (e.key === "shirin_shila_sync_timeline") loadTimeline();
+    });
     return () => {
       window.removeEventListener("shirin_shila_timeline_updated", handleUpdate);
       window.removeEventListener("shirin_shila_reset", handleUpdate);

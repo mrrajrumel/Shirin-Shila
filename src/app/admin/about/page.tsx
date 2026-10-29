@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from 'react';
-import { User, Upload, Save, RefreshCw, Check, Plus, Trash2 } from 'lucide-react';
+import { User, Upload, Save, RefreshCw, Check, Plus, Trash2, Award, Star } from 'lucide-react';
 
 export default function AdminAboutPage() {
   const [about, setAbout] = useState<any>(null);
@@ -16,7 +16,15 @@ export default function AdminAboutPage() {
     try {
       const res = await fetch('/api/about', { cache: 'no-store' });
       const data = await res.json();
-      if (data.about) setAbout(data.about);
+      if (data.about) {
+        // Filter out obsolete email/representation facts
+        if (Array.isArray(data.about.profileFacts)) {
+          data.about.profileFacts = data.about.profileFacts.filter(
+            (f: any) => !/representation|email/i.test(f.label || '')
+          );
+        }
+        setAbout(data.about);
+      }
     } catch (err) {
       console.error('Error fetching about data:', err);
     } finally {
@@ -75,6 +83,10 @@ export default function AdminAboutPage() {
       if (!res.ok) throw new Error(data.error || 'Save failed');
 
       setSavedSuccess(true);
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('shirin_shila_about_updated'));
+        localStorage.setItem('shirin_shila_sync_about', Date.now().toString());
+      }
       setTimeout(() => setSavedSuccess(false), 3000);
     } catch (err: any) {
       alert(`Save error: ${err.message}`);
@@ -112,6 +124,33 @@ export default function AdminAboutPage() {
     }));
   };
 
+  // Profile Highlights Fact Management
+  const handleAddFact = () => {
+    setAbout((prev: any) => ({
+      ...prev,
+      profileFacts: [
+        ...(prev.profileFacts || []),
+        { label: 'New Highlight', value: 'Details...', isHighlight: false },
+      ],
+    }));
+  };
+
+  const handleRemoveFact = (index: number) => {
+    setAbout((prev: any) => ({
+      ...prev,
+      profileFacts: prev.profileFacts.filter((_: any, i: number) => i !== index),
+    }));
+  };
+
+  const handleFactChange = (index: number, field: string, val: any) => {
+    const updated = [...(about.profileFacts || [])];
+    updated[index] = { ...updated[index], [field]: val };
+    setAbout((prev: any) => ({
+      ...prev,
+      profileFacts: updated,
+    }));
+  };
+
   if (loading || !about) {
     return (
       <div style={{ padding: '40px', color: 'var(--adm-text-muted)' }}>
@@ -123,7 +162,7 @@ export default function AdminAboutPage() {
   return (
     <>
       <header className="adm-header">
-        <h1 className="adm-header-title">About Section Settings</h1>
+        <h1 className="adm-header-title">About & Profile Highlights Settings</h1>
         <div className="adm-header-actions">
           <button
             type="button"
@@ -140,7 +179,7 @@ export default function AdminAboutPage() {
             className="adm-btn adm-btn-primary adm-btn-sm"
           >
             {savedSuccess ? <Check size={13} /> : <Save size={13} />}
-            <span>{saving ? 'Saving...' : savedSuccess ? 'Saved!' : 'Save Changes'}</span>
+            <span>{saving ? 'Saving...' : savedSuccess ? 'Saved Changes!' : 'Save Changes'}</span>
           </button>
         </div>
       </header>
@@ -202,8 +241,17 @@ export default function AdminAboutPage() {
               </div>
 
               <div style={{ marginTop: '20px' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
-                  <label className="adm-label" style={{ margin: 0 }}>Story Paragraphs ({about.biography.paragraphs.length})</label>
+                <div
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    marginBottom: '10px',
+                  }}
+                >
+                  <label className="adm-label" style={{ margin: 0 }}>
+                    Story Paragraphs ({about.biography.paragraphs.length})
+                  </label>
                   <button
                     type="button"
                     onClick={handleAddParagraph}
@@ -248,8 +296,9 @@ export default function AdminAboutPage() {
               </div>
             </div>
 
-            {/* Right: About Portrait Photo & Profile Facts */}
+            {/* Right: Portrait Photo & Profile Highlights Facts */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+              {/* Portrait Photo */}
               <div className="adm-card">
                 <div className="adm-card-header">
                   <span className="adm-card-title">About Section Portrait Photo</span>
@@ -259,8 +308,8 @@ export default function AdminAboutPage() {
                   <div
                     style={{
                       position: 'relative',
-                      width: '200px',
-                      height: '250px',
+                      width: '180px',
+                      height: '230px',
                       margin: '0 auto 16px',
                       borderRadius: '12px',
                       overflow: 'hidden',
@@ -311,28 +360,142 @@ export default function AdminAboutPage() {
                 </div>
               </div>
 
+              {/* Profile Highlights Management */}
               <div className="adm-card">
-                <div className="adm-card-header">
-                  <span className="adm-card-title">Comp Card (PDF) Download</span>
+                <div className="adm-card-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span className="adm-card-title">Profile Highlights ({(about.profileFacts || []).length})</span>
+                  <button
+                    type="button"
+                    onClick={handleAddFact}
+                    className="adm-btn adm-btn-secondary adm-btn-sm"
+                  >
+                    <Plus size={12} />
+                    <span>Add Highlight</span>
+                  </button>
                 </div>
 
-                <div className="adm-form-group">
-                  <label className="adm-label">Comp Card Download URL</label>
+                <div className="adm-form-group" style={{ marginBottom: '14px' }}>
+                  <label className="adm-label">Highlights Card Header Title</label>
                   <input
                     type="text"
                     className="adm-input"
-                    value={about.compCardData.downloadUrl}
+                    value={about.meta.cardTitle || 'Profile Highlights'}
                     onChange={(e) =>
                       setAbout({
                         ...about,
-                        compCardData: { ...about.compCardData, downloadUrl: e.target.value },
+                        meta: { ...about.meta, cardTitle: e.target.value },
                       })
                     }
-                    placeholder="/documents/Shirin_Shila_Comp_Card_2026.pdf"
                   />
+                </div>
+
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                  {(about.profileFacts || []).map((fact: any, idx: number) => (
+                    <div
+                      key={idx}
+                      style={{
+                        display: 'flex',
+                        gap: '8px',
+                        alignItems: 'center',
+                        background: 'rgba(255, 255, 255, 0.03)',
+                        border: '1px solid var(--adm-border)',
+                        padding: '10px 12px',
+                        borderRadius: '8px',
+                      }}
+                    >
+                      <div style={{ flex: '1 1 38%' }}>
+                        <input
+                          type="text"
+                          className="adm-input"
+                          style={{ fontSize: '12px', padding: '6px 8px' }}
+                          value={fact.label}
+                          onChange={(e) => handleFactChange(idx, 'label', e.target.value)}
+                          placeholder="Label (e.g. Origin)"
+                        />
+                      </div>
+                      <div style={{ flex: '2 1 50%' }}>
+                        <input
+                          type="text"
+                          className="adm-input"
+                          style={{ fontSize: '12px', padding: '6px 8px' }}
+                          value={fact.value}
+                          onChange={(e) => handleFactChange(idx, 'value', e.target.value)}
+                          placeholder="Value (e.g. Dhaka, Bangladesh)"
+                        />
+                      </div>
+                      <label
+                        title="Highlight this fact with golden star badge"
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '4px',
+                          cursor: 'pointer',
+                          fontSize: '11px',
+                          color: fact.isHighlight ? '#fde047' : 'var(--adm-text-muted)',
+                          flexShrink: 0,
+                        }}
+                      >
+                        <input
+                          type="checkbox"
+                          checked={Boolean(fact.isHighlight)}
+                          onChange={(e) => handleFactChange(idx, 'isHighlight', e.target.checked)}
+                          style={{ cursor: 'pointer' }}
+                        />
+                        <Star size={13} fill={fact.isHighlight ? '#fde047' : 'none'} />
+                      </label>
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveFact(idx)}
+                        style={{
+                          background: 'rgba(239, 68, 68, 0.15)',
+                          border: 'none',
+                          color: '#ef4444',
+                          borderRadius: '4px',
+                          padding: '6px',
+                          cursor: 'pointer',
+                          flexShrink: 0,
+                        }}
+                        title="Remove highlight"
+                      >
+                        <Trash2 size={13} />
+                      </button>
+                    </div>
+                  ))}
                 </div>
               </div>
             </div>
+          </div>
+
+          {/* Bottom Save Action Bar */}
+          <div
+            style={{
+              marginTop: '24px',
+              display: 'flex',
+              justifyContent: 'flex-end',
+              gap: '12px',
+              background: 'var(--adm-card-bg)',
+              border: '1px solid var(--adm-border)',
+              borderRadius: '10px',
+              padding: '14px 20px',
+            }}
+          >
+            <button
+              type="button"
+              onClick={loadAbout}
+              className="adm-btn adm-btn-secondary"
+            >
+              <RefreshCw size={13} />
+              <span>Reset</span>
+            </button>
+            <button
+              type="submit"
+              disabled={saving}
+              className="adm-btn adm-btn-primary"
+              style={{ minWidth: '160px' }}
+            >
+              {savedSuccess ? <Check size={14} /> : <Save size={14} />}
+              <span>{saving ? 'Saving...' : savedSuccess ? 'Saved Changes!' : 'Save Changes'}</span>
+            </button>
           </div>
         </form>
       </main>

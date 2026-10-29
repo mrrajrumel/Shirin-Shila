@@ -230,6 +230,10 @@ export default function AdminWorksPage() {
       }
 
       setIsModalOpen(false);
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('shirin_shila_works_updated'));
+        localStorage.setItem('shirin_shila_sync_works', Date.now().toString());
+      }
       loadWorks();
     } catch (err: any) {
       alert(`Save failed: ${err.message}`);
@@ -244,6 +248,10 @@ export default function AdminWorksPage() {
       if (!res.ok) {
         const data = await res.json();
         throw new Error(data.error);
+      }
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('shirin_shila_works_updated'));
+        localStorage.setItem('shirin_shila_sync_works', Date.now().toString());
       }
       loadWorks();
     } catch (err: any) {

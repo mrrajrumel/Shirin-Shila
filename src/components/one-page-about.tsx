@@ -2,8 +2,8 @@
 
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Download, Award } from "lucide-react";
-import { biography as defaultBio, profileFacts as defaultFacts, aboutMeta as defaultMeta, compCardData as defaultCompCard } from "@/data/about";
+import { Award } from "lucide-react";
+import { biography as defaultBio, profileFacts as defaultFacts, aboutMeta as defaultMeta } from "@/data/about";
 
 export interface AboutSectionProps {
   id?: string;
@@ -13,21 +13,45 @@ export function OnePageAbout({ id = "about" }: AboutSectionProps) {
   const [aboutMeta, setAboutMeta] = useState(defaultMeta);
   const [biography, setBiography] = useState(defaultBio);
   const [profileFacts, setProfileFacts] = useState(defaultFacts);
-  const [compCardData, setCompCardData] = useState(defaultCompCard);
 
-  useEffect(() => {
+  const loadAboutData = () => {
     fetch("/api/about", { cache: "no-store" })
       .then((res) => (res.ok ? res.json() : null))
       .then((data) => {
         if (data && data.about) {
           if (data.about.meta) setAboutMeta(data.about.meta);
           if (data.about.biography) setBiography(data.about.biography);
-          if (data.about.profileFacts) setProfileFacts(data.about.profileFacts);
-          if (data.about.compCardData) setCompCardData(data.about.compCardData);
+          if (Array.isArray(data.about.profileFacts)) {
+            // Filter out any obsolete representation/email facts if left in cache
+            const cleanFacts = data.about.profileFacts.filter(
+              (f: any) => !/representation|email/i.test(f.label || "")
+            );
+            setProfileFacts(cleanFacts);
+          }
         }
       })
       .catch(() => {});
+  };
+
+  useEffect(() => {
+    loadAboutData();
+
+    const handleUpdate = () => {
+      loadAboutData();
+    };
+
+    window.addEventListener("shirin_shila_about_updated", handleUpdate);
+    window.addEventListener("shirin_shila_reset", handleUpdate);
+    window.addEventListener("storage", (e) => {
+      if (e.key === "shirin_shila_sync_about") loadAboutData();
+    });
+
+    return () => {
+      window.removeEventListener("shirin_shila_about_updated", handleUpdate);
+      window.removeEventListener("shirin_shila_reset", handleUpdate);
+    };
   }, []);
+
   return (
     <section id={id} className="section about-section-simple">
       <motion.div
@@ -96,17 +120,6 @@ export function OnePageAbout({ id = "about" }: AboutSectionProps) {
                 </div>
               ))}
             </dl>
-
-            <a
-              href={compCardData.downloadUrl}
-              download="Shirin_Shila_Comp_Card_2026.pdf"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="button-secondary comp-card-download-simple"
-            >
-              <Download size={14} />
-              <span>{aboutMeta.compCardDownloadText}</span>
-            </a>
           </div>
         </motion.div>
       </div>

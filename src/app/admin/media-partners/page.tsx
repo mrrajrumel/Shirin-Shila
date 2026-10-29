@@ -104,6 +104,10 @@ export default function AdminMediaPartnersPage() {
       if (!res.ok) throw new Error(data.error);
 
       setIsModalOpen(false);
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('shirin_shila_partners_updated'));
+        localStorage.setItem('shirin_shila_sync_partners', Date.now().toString());
+      }
       loadPartners();
     } catch (err: any) {
       alert(`Save failed: ${err.message}`);
@@ -118,6 +122,10 @@ export default function AdminMediaPartnersPage() {
       if (!res.ok) {
         const data = await res.json();
         throw new Error(data.error);
+      }
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('shirin_shila_partners_updated'));
+        localStorage.setItem('shirin_shila_sync_partners', Date.now().toString());
       }
       loadPartners();
     } catch (err: any) {

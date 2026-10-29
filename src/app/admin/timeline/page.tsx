@@ -109,6 +109,14 @@ export default function AdminTimelinePage() {
       if (!res.ok) throw new Error(data.error);
 
       setIsModalOpen(false);
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('shirin_shila_timeline_updated'));
+        localStorage.setItem('shirin_shila_sync_timeline', Date.now().toString());
+      }
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('shirin_shila_timeline_updated'));
+        localStorage.setItem('shirin_shila_sync_timeline', Date.now().toString());
+      }
       loadTimeline();
     } catch (err: any) {
       alert(`Save failed: ${err.message}`);
@@ -123,6 +131,10 @@ export default function AdminTimelinePage() {
       if (!res.ok) {
         const data = await res.json();
         throw new Error(data.error);
+      }
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('shirin_shila_timeline_updated'));
+        localStorage.setItem('shirin_shila_sync_timeline', Date.now().toString());
       }
       loadTimeline();
     } catch (err: any) {

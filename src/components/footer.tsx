@@ -72,19 +72,6 @@ export function Footer() {
               Rumel Ahmed
             </a>
           </span>
-          <span
-            className="footer-management-text"
-            style={{ display: "block", marginTop: "4px", fontSize: "11px", color: "var(--muted)" }}
-          >
-            Management Team: Tune Soul Ocean • Email:{" "}
-            <a
-              href="mailto:support@trytso.com"
-              className="footer-credit-link"
-              style={{ color: "#ff8cad" }}
-            >
-              support@trytso.com
-            </a>
-          </span>
         </div>
 
         <div className="footer-bottom-right-cluster">

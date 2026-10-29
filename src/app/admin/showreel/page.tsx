@@ -146,6 +146,14 @@ export default function AdminShowreelPage() {
       }
 
       setIsModalOpen(false);
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('shirin_shila_showreels_updated'));
+        localStorage.setItem('shirin_shila_sync_showreels', Date.now().toString());
+      }
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('shirin_shila_showreels_updated'));
+        localStorage.setItem('shirin_shila_sync_showreels', Date.now().toString());
+      }
       loadShowreels();
     } catch (err: any) {
       alert(`Save failed: ${err.message}`);
@@ -160,6 +168,10 @@ export default function AdminShowreelPage() {
       if (!res.ok) {
         const data = await res.json();
         throw new Error(data.error);
+      }
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('shirin_shila_showreels_updated'));
+        localStorage.setItem('shirin_shila_sync_showreels', Date.now().toString());
       }
       loadShowreels();
     } catch (err: any) {

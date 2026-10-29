@@ -13,16 +13,9 @@ export const profileFacts: ProfileFact[] = [
   { label: 'Silver Screen Debut', value: 'Hitman (2014)' },
   { label: 'Key Award', value: 'Babisas Best Actress (Begum Jaan)', isHighlight: true },
   { label: 'Languages', value: 'Bengali, English, Hindi' },
-  { label: 'Representation', value: 'management@shirinshila.com' },
+  { label: 'Height', value: '5 ft 4 in (163 cm)' },
+  { label: 'Disciplines', value: 'Acting, Classical Dance, TV Judge' },
 ];
-
-export const compCardData = {
-  title: 'Official Comp Card (2026)',
-  fileName: 'Shirin_Shila_Comp_Card_2026.pdf',
-  fileSize: 'PDF Document',
-  lastUpdated: 'Season 2026',
-  downloadUrl: '/documents/Shirin_Shila_Comp_Card_2026.pdf',
-};
 
 export const aboutMeta = {
   sectionTitle: 'About',
@@ -30,7 +23,6 @@ export const aboutMeta = {
   portraitSrc: '/images/gallery-3.jpg',
   portraitAlt: 'Shirin Shila Portrait',
   cardTitle: 'Profile Highlights',
-  compCardDownloadText: 'Download Comp Card (PDF)',
 };
 
 export const biography = {
@@ -48,7 +40,6 @@ export const aboutData = {
   meta: aboutMeta,
   biography,
   profileFacts,
-  compCardData,
   timeline,
 };
 

@@ -191,6 +191,10 @@ export default function AdminPressPage() {
       }
 
       setIsModalOpen(false);
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('shirin_shila_press_updated'));
+        localStorage.setItem('shirin_shila_sync_press', Date.now().toString());
+      }
       loadPress();
     } catch (err: any) {
       alert(`Save failed: ${err.message}`);
@@ -205,6 +209,10 @@ export default function AdminPressPage() {
       if (!res.ok) {
         const data = await res.json();
         throw new Error(data.error);
+      }
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('shirin_shila_press_updated'));
+        localStorage.setItem('shirin_shila_sync_press', Date.now().toString());
       }
       loadPress();
     } catch (err: any) {

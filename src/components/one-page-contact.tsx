@@ -93,6 +93,9 @@ export function OnePageContact({ id = "contact" }: ContactSectionProps) {
     window.addEventListener("shirin_shila_contact_info_updated", handleUpdate);
     window.addEventListener("shirin_shila_reset", handleUpdate);
     window.addEventListener("shirin_shila_prefill_inquiry", handlePrefill);
+    window.addEventListener("storage", (e) => {
+      if (e.key === "shirin_shila_sync_contact") loadContactInfo();
+    });
     return () => {
       window.removeEventListener("shirin_shila_contact_info_updated", handleUpdate);
       window.removeEventListener("shirin_shila_reset", handleUpdate);
@@ -211,10 +214,12 @@ export function OnePageContact({ id = "contact" }: ContactSectionProps) {
                 </div>
                 <div style={{ flex: 1 }}>
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                    <span className="detail-label">Talent Management Email</span>
+                    <span className="detail-label">
+                      Management Team: {contactInfo?.agencyName || "Tune Soul Ocean"}
+                    </span>
                     <button
                       type="button"
-                      onClick={() => handleCopyEmail(contactInfo?.managementEmail || "management@shirinshila.com")}
+                      onClick={() => handleCopyEmail(contactInfo?.managementEmail || "support@trytso.com")}
                       className="contact-copy-btn"
                       title="Copy email to clipboard"
                     >
@@ -222,10 +227,10 @@ export function OnePageContact({ id = "contact" }: ContactSectionProps) {
                     </button>
                   </div>
                   <a
-                    href={`mailto:${contactInfo?.managementEmail || "management@shirinshila.com"}`}
+                    href={`mailto:${contactInfo?.managementEmail || "support@trytso.com"}`}
                     className="detail-value"
                   >
-                    {contactInfo?.managementEmail || "management@shirinshila.com"}
+                    {contactInfo?.managementEmail || "support@trytso.com"}
                   </a>
                 </div>
               </div>
