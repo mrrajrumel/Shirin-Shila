@@ -355,8 +355,9 @@ export function CoverflowCarousel({
                         draggable={false}
                         className="h-full w-full select-none object-cover transition-transform duration-500 group-hover:scale-105 filter brightness-95"
                         onError={(e) => {
-                          if (slide.youtubeId) {
-                            (e.currentTarget as HTMLImageElement).src = `https://img.youtube.com/vi/${slide.youtubeId}/hqdefault.jpg`;
+                          const target = e.currentTarget as HTMLImageElement;
+                          if (!target.src.endsWith("/images/gallery-3.jpg")) {
+                            target.src = "/images/gallery-3.jpg";
                           }
                         }}
                       />

@@ -131,8 +131,8 @@ export function OnePageAbout({ id = "about" }: AboutSectionProps) {
                 className="about-dossier-portrait-img"
               />
               <div className="about-dossier-badge-top">
-                <CheckCircle2 size={12} className="check-icon" />
-                <span>Verified Dhallywood Artist</span>
+                <Film size={12} className="check-icon" style={{ color: "var(--pink)" }} />
+                <span>Film &amp; Television</span>
               </div>
               <div className="about-dossier-badge-bottom">
                 <span className="badge-name">Shirin Shila</span>

@@ -39,10 +39,13 @@ export function ShowreelSection({ id = "showreel" }: ShowreelSectionProps) {
   }, []);
 
   const slides: CoverflowSlide[] = videos.map((v) => {
-    // User explicitly requested YouTube video thumbnails for showreels
-    const ytThumb = v.youtubeId
-      ? `https://img.youtube.com/vi/${v.youtubeId}/hqdefault.jpg`
-      : v.thumbnail || "/images/gallery-3.jpg";
+    // Prefer valid custom/local poster thumbnail if provided, otherwise YouTube thumbnail
+    const ytThumb =
+      v.thumbnail && v.thumbnail.trim() !== ""
+        ? v.thumbnail
+        : v.youtubeId
+        ? `https://img.youtube.com/vi/${v.youtubeId}/hqdefault.jpg`
+        : "/images/gallery-3.jpg";
 
     return {
       src: ytThumb,

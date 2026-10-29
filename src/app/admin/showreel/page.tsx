@@ -267,9 +267,12 @@ export default function AdminShowreelPage() {
                         }}
                       >
                         <img
-                          src={item.thumbnail || `https://img.youtube.com/vi/${item.youtubeId}/hqdefault.jpg`}
+                          src={item.thumbnail || (item.youtubeId ? `https://img.youtube.com/vi/${item.youtubeId}/hqdefault.jpg` : '/images/gallery-3.jpg')}
                           alt={item.title}
                           style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                          onError={(e) => {
+                            (e.currentTarget as HTMLImageElement).src = '/images/gallery-3.jpg';
+                          }}
                         />
                         <a
                           href={`https://www.youtube.com/watch?v=${item.youtubeId}`}

@@ -40,7 +40,14 @@ export default function CareerJourneyTimeline({
   topData = defaultTopJourneyData,
   bottomData = defaultBottomJourneyData,
 }: TimelineProps) {
-  const [liveItems, setLiveItems] = useState<JourneyItem[]>([]);
+  const initialSorted = [...topData, ...bottomData].sort((a, b) => {
+    const yA = parseInt(a.year, 10) || 0;
+    const yB = parseInt(b.year, 10) || 0;
+    if (yA !== yB) return yA - yB;
+    return (monthOrder[a.month as Month] || 0) - (monthOrder[b.month as Month] || 0);
+  });
+
+  const [liveItems, setLiveItems] = useState<JourneyItem[]>(initialSorted);
   const trackRef = useRef<HTMLDivElement>(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(true);
@@ -235,7 +242,7 @@ export default function CareerJourneyTimeline({
             {liveItems.map((item, idx) => (
               <div
                 key={item.id || idx}
-                className="w-[270px] sm:w-[310px] flex-shrink-0 snap-start rounded-2xl bg-[#150f18]/90 border border-white/10 hover:border-pink-500/40 p-5 flex flex-col justify-between transition-all duration-300 hover:shadow-[0_12px_36px_rgba(255,63,121,0.15)] group"
+                className="w-[280px] sm:w-[320px] flex-shrink-0 snap-start rounded-2xl bg-[#140e16]/95 border border-white/10 hover:border-pink-500/50 p-5 flex flex-col justify-between transition-all duration-300 hover:shadow-[0_22px_45px_rgba(0,0,0,0.85),0_0_24px_rgba(255,63,121,0.2)] hover:-translate-y-1.5 group backdrop-blur-md"
               >
                 {/* Milestone Top Indicator */}
                 <div>
@@ -253,19 +260,18 @@ export default function CareerJourneyTimeline({
                     </span>
                   </div>
 
-                  {/* Milestone Photo */}
+                  {/* Milestone Photo - Preserves Natural Size & Proportions with Deep 3D Frame */}
                   {item.image && (
-                    <div className="w-full h-[170px] rounded-xl overflow-hidden border border-white/10 bg-[#0e0810] relative mb-3.5 group-hover:border-pink-500/30 transition-colors">
+                    <div className="w-full h-[185px] rounded-xl overflow-hidden border border-white/10 bg-[#09050b] relative mb-3.5 group-hover:border-pink-500/40 transition-all duration-300 flex items-center justify-center p-2 shadow-[inset_0_2px_10px_rgba(0,0,0,0.7)]">
                       <img
                         src={item.image}
                         alt={item.title || item.content}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                        className="max-w-full max-h-full w-auto h-auto object-contain rounded-lg transition-transform duration-500 group-hover:scale-105 filter drop-shadow-[0_8px_16px_rgba(0,0,0,0.8)]"
                         loading="lazy"
                         onError={(e) => {
                           (e.currentTarget as HTMLImageElement).src = "/images/award-trophy-gala.jpg";
                         }}
                       />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none" />
                     </div>
                   )}
 
@@ -282,13 +288,14 @@ export default function CareerJourneyTimeline({
                   </p>
                 </div>
 
-                {/* Milestone Bottom Tag */}
+                {/* Milestone Natural Editorial Footer (No AI Verified Tag) */}
                 <div className="mt-4 pt-3 border-t border-white/10 flex items-center justify-between text-[11px] text-zinc-400">
-                  <span className="inline-flex items-center gap-1 text-pink-400/90 font-medium">
-                    <Award size={12} />
-                    <span>Verified Milestone</span>
+                  <span className="font-serif italic text-pink-300/90 font-medium">
+                    {item.month} {item.year}
                   </span>
-                  <span className="font-mono text-[10px] text-zinc-400">{item.year}</span>
+                  <span className="font-mono text-[10px] text-zinc-500 uppercase tracking-wider">
+                    Archive Record
+                  </span>
                 </div>
               </div>
             ))}

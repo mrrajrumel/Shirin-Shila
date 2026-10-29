@@ -268,7 +268,7 @@ export default function AdminTimelinePage() {
               className="adm-badge adm-badge-neutral"
               style={{ padding: '6px 12px', fontSize: '12px' }}
             >
-              Total: {items.length} Milestones
+              Total: {items.length} Honors
             </span>
           </div>
         </div>
@@ -312,7 +312,7 @@ export default function AdminTimelinePage() {
                         <img
                           src={item.image || '/images/award-trophy-gala.jpg'}
                           alt={item.title || item.year}
-                          style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                          style={{ width: '100%', height: '100%', objectFit: 'contain', padding: '3px' }}
                           onError={(e) => {
                             (e.currentTarget as HTMLImageElement).src =
                               '/images/award-trophy-gala.jpg';
@@ -369,7 +369,7 @@ export default function AdminTimelinePage() {
                           type="button"
                           onClick={() => handleOpenEditModal(item)}
                           className="adm-btn adm-btn-secondary adm-btn-sm"
-                          title="Edit Award Milestone"
+                          title="Edit Award"
                         >
                           <Edit2 size={13} />
                         </button>
@@ -379,7 +379,7 @@ export default function AdminTimelinePage() {
                             handleDelete(item.id, item.title || `${item.year} ${item.month}`)
                           }
                           className="adm-btn adm-btn-danger adm-btn-sm"
-                          title="Delete Milestone"
+                          title="Delete Award"
                         >
                           <Trash2 size={13} />
                         </button>
@@ -397,7 +397,7 @@ export default function AdminTimelinePage() {
                         color: 'var(--adm-text-muted)',
                       }}
                     >
-                      No award milestones found matching &ldquo;{searchQuery}&rdquo;.
+                      No awards found matching &ldquo;{searchQuery}&rdquo;.
                     </td>
                   </tr>
                 )}
@@ -407,7 +407,7 @@ export default function AdminTimelinePage() {
         </div>
       </main>
 
-      {/* Add / Edit Award Milestone Modal */}
+      {/* Add / Edit Award Modal */}
       {isModalOpen && (
         <div className="adm-modal-backdrop" onClick={() => setIsModalOpen(false)}>
           <div
@@ -417,7 +417,7 @@ export default function AdminTimelinePage() {
           >
             <div className="adm-modal-header">
               <span className="adm-modal-title">
-                {editingItem ? 'Edit Award & Honor Milestone' : 'Add Award & Honor Milestone'}
+                {editingItem ? 'Edit Award & Honor' : 'Add Award & Honor'}
               </span>
               <button
                 type="button"
@@ -449,7 +449,7 @@ export default function AdminTimelinePage() {
                       <img
                         src={formData.image || '/images/award-trophy-gala.jpg'}
                         alt="Preview"
-                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                        style={{ width: '100%', height: '100%', objectFit: 'contain', padding: '4px' }}
                         onError={(e) => {
                           (e.currentTarget as HTMLImageElement).src =
                             '/images/award-trophy-gala.jpg';
@@ -556,7 +556,7 @@ export default function AdminTimelinePage() {
                   Cancel
                 </button>
                 <button type="submit" className="adm-btn adm-btn-primary">
-                  {editingItem ? 'Save Changes' : 'Add Milestone'}
+                  {editingItem ? 'Save Changes' : 'Add Award'}
                 </button>
               </div>
             </form>

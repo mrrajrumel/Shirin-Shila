@@ -121,21 +121,31 @@ const glassyCarouselStyles = `
 }
 .gc-stage[data-dragging] .gc-card { transition: none; }
 .gc-poster {
-  display: block;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   position: relative;
   width: 100%;
   aspect-ratio: 2/3;
   overflow: hidden;
   border-radius: 9px;
-  background: var(--gc-card);
+  background: #09050c;
+  box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.7);
 }
 .gc-poster > img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: center top;
+  max-width: 100%;
+  max-height: 100%;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  object-position: center;
   display: block;
   pointer-events: none;
+  filter: drop-shadow(0 8px 18px rgba(0, 0, 0, 0.8));
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.gc-card:hover .gc-poster > img {
+  transform: scale(1.04);
 }
 .gc-poster-shade {
   position: absolute;
@@ -485,9 +495,16 @@ const glassyCarouselStyles = `
 
 .gc-shell[data-layout=poster] .gc-poster {
   aspect-ratio: 2/3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 .gc-shell[data-layout=poster] .gc-poster > img {
-  object-fit: cover;
+  max-width: 100%;
+  max-height: 100%;
+  width: auto;
+  height: auto;
+  object-fit: contain;
   object-position: center;
 }
 .gc-watch {
