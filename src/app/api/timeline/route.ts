@@ -47,7 +47,7 @@ function splitAlternating(sorted: JourneyItem[]) {
 
 function checkAuth(request: NextRequest): boolean {
   const token = request.cookies.get(SESSION_COOKIE_NAME)?.value;
-  return verifySessionToken(token);
+  return Boolean(verifySessionToken(token));
 }
 
 export async function GET() {

@@ -5,17 +5,19 @@ export const dynamic = 'force-dynamic';
 
 export async function GET(request: NextRequest) {
   const token = request.cookies.get(SESSION_COOKIE_NAME)?.value;
-  const isAuthenticated = verifySessionToken(token);
+  const user = verifySessionToken(token);
 
-  if (!isAuthenticated) {
+  if (!user) {
     return NextResponse.json({ authenticated: false }, { status: 401 });
   }
 
   return NextResponse.json({
     authenticated: true,
     user: {
-      email: process.env.ADMIN_EMAIL || 'admin@shirinshila.com',
-      role: 'admin',
+      id: user.id,
+      username: user.username,
+      displayName: user.displayName,
+      role: user.role,
     },
   });
 }

@@ -22,6 +22,7 @@ import {
 import { heroProfile as defaultHero, HeroProfile } from '../data/hero';
 import { aboutData as defaultAbout } from '../data/about';
 import { defaultMediaPartners, MediaPartner } from '../data/media-partners';
+import { defaultSeoData, SiteSeoData } from '../data/seo';
 
 const STORE_DIR = path.join(process.cwd(), 'src', 'data', 'store');
 
@@ -47,7 +48,8 @@ export type StoreKey =
   | 'contactInfo'
   | 'hero'
   | 'about'
-  | 'mediaPartners';
+  | 'mediaPartners'
+  | 'seo';
 
 function getFilePath(key: StoreKey): string {
   return path.join(STORE_DIR, `${key}.json`);
@@ -79,6 +81,8 @@ function getDefaultData(key: StoreKey): any {
       return defaultAbout;
     case 'mediaPartners':
       return defaultMediaPartners;
+    case 'seo':
+      return defaultSeoData;
   }
 }
 

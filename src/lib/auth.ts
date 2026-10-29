@@ -1,23 +1,193 @@
 import crypto from 'crypto';
+import fs from 'fs';
+import path from 'path';
+import bcrypt from 'bcryptjs';
 
-const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'admin@shirinshila.com';
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'shirinshila2026';
-const ADMIN_SECRET = process.env.ADMIN_SECRET || 'shirin_shila_secret_session_token_2026_secured';
+const ADMIN_SECRET =
+  process.env.ADMIN_SECRET || 'shirin_shila_secret_session_token_2026_secured_tso';
 
 export const SESSION_COOKIE_NAME = 'shirin_shila_admin_session';
 
-export function verifyAdminCredentials(email?: string, password?: string): boolean {
-  if (!email || !password) return false;
-  return (
-    email.trim().toLowerCase() === ADMIN_EMAIL.trim().toLowerCase() &&
-    password === ADMIN_PASSWORD
-  );
+export interface AdminUserRecord {
+  id: string;
+  username: string;
+  displayName: string;
+  role: 'admin';
+  passwordHash: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
-export function createSessionToken(): string {
+export interface SessionUser {
+  id: string;
+  username: string;
+  displayName: string;
+  role: 'admin';
+}
+
+const STORE_DIR = path.join(process.cwd(), 'src', 'data', 'store');
+const USERS_FILE = path.join(STORE_DIR, 'admin-users.json');
+
+// In-memory rate limiting map: identifier -> { count, lockedUntil }
+const loginAttempts = new Map<string, { count: number; lockedUntil: number }>();
+const MAX_ATTEMPTS = 5;
+const LOCKOUT_DURATION_MS = 15 * 60 * 1000; // 15 minutes
+
+/**
+ * Initializes and ensures exactly the two authorized administrator accounts:
+ * 1. Shirin (password: Shirin@tso)
+ * 2. Rumel (password: Rumel@tso)
+ * Stored safely with bcrypt password hashes in src/data/store/admin-users.json.
+ * Plaintext passwords are NEVER saved.
+ */
+export function ensureAdminAccounts(): AdminUserRecord[] {
+  if (!fs.existsSync(STORE_DIR)) {
+    fs.mkdirSync(STORE_DIR, { recursive: true });
+  }
+
+  let users: AdminUserRecord[] = [];
+  if (fs.existsSync(USERS_FILE)) {
+    try {
+      const raw = fs.readFileSync(USERS_FILE, 'utf-8');
+      users = JSON.parse(raw);
+      if (!Array.isArray(users)) users = [];
+    } catch (err) {
+      console.error('[Auth] Error reading admin-users.json, re-initializing:', err);
+      users = [];
+    }
+  }
+
+  let modified = false;
+
+  // Account 1: Shirin
+  let shirinUser = users.find(
+    (u) => u.username && u.username.toLowerCase() === 'shirin'
+  );
+  if (!shirinUser) {
+    const salt = bcrypt.genSaltSync(10);
+    const hash = bcrypt.hashSync('Shirin@tso', salt);
+    shirinUser = {
+      id: 'admin-shirin',
+      username: 'Shirin',
+      displayName: 'Shirin Shila',
+      role: 'admin',
+      passwordHash: hash,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+    users.push(shirinUser);
+    modified = true;
+  }
+
+  // Account 2: Rumel
+  let rumelUser = users.find(
+    (u) => u.username && u.username.toLowerCase() === 'rumel'
+  );
+  if (!rumelUser) {
+    const salt = bcrypt.genSaltSync(10);
+    const hash = bcrypt.hashSync('Rumel@tso', salt);
+    rumelUser = {
+      id: 'admin-rumel',
+      username: 'Rumel',
+      displayName: 'Rumel Ahmed',
+      role: 'admin',
+      passwordHash: hash,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+    users.push(rumelUser);
+    modified = true;
+  }
+
+  // Ensure ONLY these two accounts exist (remove legacy or unauthorized accounts)
+  const allowed = ['shirin', 'rumel'];
+  const filteredUsers = users.filter((u) => allowed.includes(u.username.toLowerCase()));
+  if (filteredUsers.length !== users.length) {
+    users = filteredUsers;
+    modified = true;
+  }
+
+  if (modified || !fs.existsSync(USERS_FILE)) {
+    fs.writeFileSync(USERS_FILE, JSON.stringify(users, null, 2), 'utf-8');
+  }
+
+  return users;
+}
+
+/**
+ * Verifies credentials against the two authorized accounts with rate-limiting.
+ */
+export function verifyAdminCredentials(
+  identifier?: string,
+  password?: string,
+  clientIp: string = 'global'
+): { success: boolean; user?: SessionUser; error?: string } {
+  if (!identifier || !password) {
+    return { success: false, error: 'Username and password are required' };
+  }
+
+  const rateKey = `${clientIp}_${identifier.trim().toLowerCase()}`;
+  const now = Date.now();
+  const attempt = loginAttempts.get(rateKey);
+
+  if (attempt && attempt.lockedUntil > now) {
+    const remainingMin = Math.ceil((attempt.lockedUntil - now) / 60000);
+    return {
+      success: false,
+      error: `Account temporarily locked due to repeated failed attempts. Please retry in ${remainingMin} minute(s).`,
+    };
+  }
+
+  const users = ensureAdminAccounts();
+  const targetUser = users.find(
+    (u) => u.username.toLowerCase() === identifier.trim().toLowerCase()
+  );
+
+  if (!targetUser) {
+    recordFailedAttempt(rateKey, now);
+    return { success: false, error: 'Invalid username or password' };
+  }
+
+  const passwordValid = bcrypt.compareSync(password, targetUser.passwordHash);
+
+  if (!passwordValid) {
+    recordFailedAttempt(rateKey, now);
+    return { success: false, error: 'Invalid username or password' };
+  }
+
+  // Successful login -> clear failed attempts
+  loginAttempts.delete(rateKey);
+
+  return {
+    success: true,
+    user: {
+      id: targetUser.id,
+      username: targetUser.username,
+      displayName: targetUser.displayName,
+      role: targetUser.role,
+    },
+  };
+}
+
+function recordFailedAttempt(key: string, now: number) {
+  const current = loginAttempts.get(key) || { count: 0, lockedUntil: 0 };
+  const newCount = current.count + 1;
+  if (newCount >= MAX_ATTEMPTS) {
+    loginAttempts.set(key, { count: newCount, lockedUntil: now + LOCKOUT_DURATION_MS });
+  } else {
+    loginAttempts.set(key, { count: newCount, lockedUntil: 0 });
+  }
+}
+
+/**
+ * Creates an HMAC-SHA256 signed session token
+ */
+export function createSessionToken(user: SessionUser): string {
   const payload = JSON.stringify({
-    role: 'admin',
-    email: ADMIN_EMAIL,
+    sub: user.id,
+    username: user.username,
+    displayName: user.displayName,
+    role: user.role,
     iat: Date.now(),
     exp: Date.now() + 7 * 24 * 60 * 60 * 1000, // 7 days
   });
@@ -31,11 +201,14 @@ export function createSessionToken(): string {
   return `${encodedPayload}.${signature}`;
 }
 
-export function verifySessionToken(token?: string | null): boolean {
-  if (!token) return false;
+/**
+ * Verifies HMAC-SHA256 signed session token and checks expiration.
+ */
+export function verifySessionToken(token?: string | null): SessionUser | null {
+  if (!token) return null;
 
   const parts = token.split('.');
-  if (parts.length !== 2) return false;
+  if (parts.length !== 2) return null;
 
   const [encodedPayload, signature] = parts;
   const expectedSignature = crypto
@@ -43,15 +216,29 @@ export function verifySessionToken(token?: string | null): boolean {
     .update(encodedPayload)
     .digest('base64url');
 
-  if (signature !== expectedSignature) return false;
+  // Timing safe equal check
+  const sigBuf = Buffer.from(signature);
+  const expBuf = Buffer.from(expectedSignature);
+  if (sigBuf.length !== expBuf.length || !crypto.timingSafeEqual(sigBuf, expBuf)) {
+    return null;
+  }
 
   try {
     const payload = JSON.parse(Buffer.from(encodedPayload, 'base64url').toString('utf-8'));
     if (!payload.exp || Date.now() > payload.exp) {
-      return false;
+      return null;
     }
-    return payload.role === 'admin';
+    if (payload.role !== 'admin') {
+      return null;
+    }
+
+    return {
+      id: payload.sub,
+      username: payload.username,
+      displayName: payload.displayName || payload.username,
+      role: 'admin',
+    };
   } catch {
-    return false;
+    return null;
   }
 }

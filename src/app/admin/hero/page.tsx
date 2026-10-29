@@ -1,8 +1,9 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from 'react';
-import { LayoutTemplate, Upload, Save, RefreshCw, Check, ArrowUpRight } from 'lucide-react';
+import { LayoutTemplate, Upload, Save, RefreshCw, Check, ArrowUpRight, FolderKanban } from 'lucide-react';
 import { HeroProfile } from '@/data/hero';
+import { MediaPickerModal } from '@/components/admin/media-picker-modal';
 
 export default function AdminHeroPage() {
   const [hero, setHero] = useState<HeroProfile | null>(null);
@@ -10,6 +11,7 @@ export default function AdminHeroPage() {
   const [saving, setSaving] = useState(false);
   const [savedSuccess, setSavedSuccess] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
+  const [pickerOpen, setPickerOpen] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const loadHero = async () => {
@@ -207,16 +209,37 @@ export default function AdminHeroPage() {
                   style={{ display: 'none' }}
                 />
 
-                <button
-                  type="button"
-                  onClick={() => fileInputRef.current?.click()}
-                  disabled={isUploading}
-                  className="adm-btn adm-btn-secondary"
-                  style={{ margin: '0 auto', display: 'inline-flex' }}
-                >
-                  <Upload size={14} />
-                  <span>{isUploading ? 'Uploading Portrait...' : 'Upload New Portrait Photo'}</span>
-                </button>
+                <div style={{ display: 'flex', gap: '8px', justifyContent: 'center', flexWrap: 'wrap' }}>
+                  <button
+                    type="button"
+                    onClick={() => setPickerOpen(true)}
+                    className="adm-btn adm-btn-primary"
+                    style={{ display: 'inline-flex' }}
+                  >
+                    <FolderKanban size={14} />
+                    <span>Browse Media Library</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={isUploading}
+                    className="adm-btn adm-btn-secondary"
+                    style={{ display: 'inline-flex' }}
+                  >
+                    <Upload size={14} />
+                    <span>{isUploading ? 'Uploading...' : 'Direct Upload'}</span>
+                  </button>
+                </div>
+
+                <MediaPickerModal
+                  isOpen={pickerOpen}
+                  onClose={() => setPickerOpen(false)}
+                  onSelect={(url) => setHero((prev) => (prev ? { ...prev, image: url } : null))}
+                  title="Select Hero Portrait Photo"
+                  currentValue={hero.image}
+                  targetFolder="hero"
+                />
               </div>
 
               <div className="adm-form-group">

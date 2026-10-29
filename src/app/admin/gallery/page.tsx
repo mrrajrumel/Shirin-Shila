@@ -10,8 +10,10 @@ import {
   RefreshCw,
   X,
   Award,
+  FolderKanban,
 } from 'lucide-react';
 import { GalleryImage } from '@/data/gallery';
+import { MediaPickerModal } from '@/components/admin/media-picker-modal';
 
 export default function AdminGalleryPage() {
   const [images, setImages] = useState<GalleryImage[]>([]);
@@ -21,6 +23,7 @@ export default function AdminGalleryPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
   const [isUploading, setIsUploading] = useState(false);
+  const [pickerOpen, setPickerOpen] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [formData, setFormData] = useState<Partial<GalleryImage>>({
@@ -302,16 +305,34 @@ export default function AdminGalleryPage() {
                         onChange={handleFileUpload}
                         style={{ display: 'none' }}
                       />
-                      <button
-                        type="button"
-                        onClick={() => fileInputRef.current?.click()}
-                        disabled={isUploading}
-                        className="adm-btn adm-btn-secondary adm-btn-sm"
-                        style={{ alignSelf: 'flex-start' }}
-                      >
-                        <Upload size={13} />
-                        <span>{isUploading ? 'Uploading Image...' : 'Upload Image from Computer'}</span>
-                      </button>
+                      <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                        <button
+                          type="button"
+                          onClick={() => setPickerOpen(true)}
+                          className="adm-btn adm-btn-primary adm-btn-sm"
+                        >
+                          <FolderKanban size={13} />
+                          <span>Choose from Library</span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => fileInputRef.current?.click()}
+                          disabled={isUploading}
+                          className="adm-btn adm-btn-secondary adm-btn-sm"
+                        >
+                          <Upload size={13} />
+                          <span>{isUploading ? 'Uploading...' : 'Direct Upload'}</span>
+                        </button>
+                      </div>
+
+                      <MediaPickerModal
+                        isOpen={pickerOpen}
+                        onClose={() => setPickerOpen(false)}
+                        onSelect={(url) => setFormData((prev) => ({ ...prev, src: url }))}
+                        title="Select Gallery / Award Photo"
+                        currentValue={formData.src}
+                        targetFolder="gallery"
+                      />
 
                       <input
                         type="text"

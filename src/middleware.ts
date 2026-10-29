@@ -23,13 +23,23 @@ export function middleware(request: NextRequest) {
     let isAuthenticated = false;
     if (sessionCookie) {
       try {
-        const [encodedPayload] = sessionCookie.split('.');
-        if (encodedPayload) {
-          const decoded = decodeBase64Url(encodedPayload);
-          if (decoded) {
-            const payload = JSON.parse(decoded);
-            if (payload && payload.exp && Date.now() < payload.exp && payload.role === 'admin') {
-              isAuthenticated = true;
+        const parts = sessionCookie.split('.');
+        if (parts.length === 2) {
+          const [encodedPayload, signature] = parts;
+          if (encodedPayload && signature) {
+            const decoded = decodeBase64Url(encodedPayload);
+            if (decoded) {
+              const payload = JSON.parse(decoded);
+              if (
+                payload &&
+                payload.exp &&
+                Date.now() < payload.exp &&
+                payload.role === 'admin' &&
+                (payload.username?.toLowerCase() === 'shirin' ||
+                  payload.username?.toLowerCase() === 'rumel')
+              ) {
+                isAuthenticated = true;
+              }
             }
           }
         }

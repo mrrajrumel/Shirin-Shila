@@ -1,15 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
-import path from 'path';
-import fs from 'fs';
 import { SESSION_COOKIE_NAME, verifySessionToken } from '@/lib/auth';
+import { uploadMediaAsset } from '@/lib/media-service';
 
 export const dynamic = 'force-dynamic';
 
 export async function POST(request: NextRequest) {
-  // Guard with session
+  // Session verification
   const token = request.cookies.get(SESSION_COOKIE_NAME)?.value;
-  if (!verifySessionToken(token)) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  const user = verifySessionToken(token);
+  if (!user) {
+    return NextResponse.json({ error: 'Unauthorized access' }, { status: 401 });
   }
 
   try {
@@ -21,55 +21,37 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'No file provided' }, { status: 400 });
     }
 
-    // Validate mime type
-    const validTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/svg+xml'];
-    if (!validTypes.includes(file.type)) {
-      return NextResponse.json(
-        { error: 'Invalid file type. Only JPEG, PNG, WebP, and GIF images are allowed.' },
-        { status: 400 }
-      );
-    }
-
-    // Limit size: 12MB
-    const maxSize = 12 * 1024 * 1024;
+    // Limit size: 15MB
+    const maxSize = 15 * 1024 * 1024;
     if (file.size > maxSize) {
       return NextResponse.json(
-        { error: 'File too large. Maximum image size is 12MB.' },
+        { error: 'File too large. Maximum size is 15MB.' },
         { status: 400 }
       );
     }
-
-    const sanitizedFolder = folder.replace(/[^a-zA-Z0-9_-]/g, '') || 'general';
-    const uploadDir = path.join(process.cwd(), 'public', 'uploads', sanitizedFolder);
-
-    if (!fs.existsSync(uploadDir)) {
-      fs.mkdirSync(uploadDir, { recursive: true });
-    }
-
-    // Generate safe file name
-    const originalName = file.name || 'image.jpg';
-    const ext = path.extname(originalName) || '.jpg';
-    const rawName = path.basename(originalName, ext).toLowerCase().replace(/[^a-z0-9]/g, '-').slice(0, 30);
-    const filename = `${rawName || 'upload'}-${Date.now()}${ext.toLowerCase()}`;
-    const targetPath = path.join(uploadDir, filename);
 
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
-    await fs.promises.writeFile(targetPath, buffer);
 
-    const publicUrl = `/uploads/${sanitizedFolder}/${filename}`;
+    const result = await uploadMediaAsset({
+      buffer,
+      originalFilename: file.name || 'image.jpg',
+      folder,
+    });
 
     return NextResponse.json({
       success: true,
-      url: publicUrl,
-      filename,
-      size: file.size,
-      type: file.type,
+      url: result.asset.url,
+      asset: result.asset,
+      isDuplicate: result.isDuplicate,
+      message: result.isDuplicate
+        ? 'Identical image found in library; reused existing asset.'
+        : 'File uploaded and indexed successfully.',
     });
   } catch (err: any) {
-    console.error('[Upload API] Error saving file:', err);
+    console.error('[Upload API] Error processing file:', err);
     return NextResponse.json(
-      { error: err.message || 'File upload failed' },
+      { error: err.message || 'Failed to upload asset' },
       { status: 500 }
     );
   }

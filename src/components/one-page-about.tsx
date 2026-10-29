@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Award, CheckCircle2, Film, GraduationCap } from "lucide-react";
+import { Award, Film, GraduationCap } from "lucide-react";
 import { biography as defaultBio, profileFacts as defaultFacts, aboutMeta as defaultMeta } from "@/data/about";
 
 export interface AboutSectionProps {
@@ -123,17 +123,13 @@ export function OnePageAbout({ id = "about" }: AboutSectionProps) {
           transition={{ duration: 0.7, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
         >
           <div className="about-dossier-card">
-            {/* Cinematic Portrait Frame with Overlays */}
+            {/* Cinematic Portrait Frame */}
             <div className="about-dossier-portrait-wrap">
               <img
                 src={aboutMeta.portraitSrc}
                 alt={aboutMeta.portraitAlt}
                 className="about-dossier-portrait-img"
               />
-              <div className="about-dossier-badge-top">
-                <Film size={12} className="check-icon" style={{ color: "var(--pink)" }} />
-                <span>Film &amp; Television</span>
-              </div>
               <div className="about-dossier-badge-bottom">
                 <span className="badge-name">Shirin Shila</span>
                 <span className="badge-sub">Feature Films • Television • Fashion</span>

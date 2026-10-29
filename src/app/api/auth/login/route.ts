@@ -6,17 +6,30 @@ export const dynamic = 'force-dynamic';
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { email, password } = body;
+    const identifier = body.username || body.email;
+    const password = body.password;
 
-    if (!verifyAdminCredentials(email, password)) {
+    const forwarded = request.headers.get('x-forwarded-for');
+    const clientIp = forwarded ? forwarded.split(',')[0].trim() : '127.0.0.1';
+
+    const result = verifyAdminCredentials(identifier, password, clientIp);
+
+    if (!result.success || !result.user) {
       return NextResponse.json(
-        { error: 'Invalid admin email or password' },
+        { error: result.error || 'Invalid credentials' },
         { status: 401 }
       );
     }
 
-    const token = createSessionToken();
-    const response = NextResponse.json({ success: true, email });
+    const token = createSessionToken(result.user);
+    const response = NextResponse.json({
+      success: true,
+      user: {
+        username: result.user.username,
+        displayName: result.user.displayName,
+        role: result.user.role,
+      },
+    });
 
     // Set secure HTTP-only cookie
     response.cookies.set({

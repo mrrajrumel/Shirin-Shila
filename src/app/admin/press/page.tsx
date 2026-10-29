@@ -14,8 +14,10 @@ import {
   X,
   Video,
   FileImage,
+  FolderKanban,
 } from 'lucide-react';
 import { PressItem, PressKind } from '@/data/press';
+import { MediaPickerModal } from '@/components/admin/media-picker-modal';
 
 export default function AdminPressPage() {
   const [items, setItems] = useState<PressItem[]>([]);
@@ -31,6 +33,7 @@ export default function AdminPressPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<PressItem | null>(null);
   const [isUploading, setIsUploading] = useState(false);
+  const [pickerOpen, setPickerOpen] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [formData, setFormData] = useState<Partial<PressItem>>({
@@ -494,16 +497,34 @@ export default function AdminPressPage() {
                         onChange={handleFileUpload}
                         style={{ display: 'none' }}
                       />
-                      <button
-                        type="button"
-                        onClick={() => fileInputRef.current?.click()}
-                        disabled={isUploading}
-                        className="adm-btn adm-btn-secondary adm-btn-sm"
-                        style={{ alignSelf: 'flex-start' }}
-                      >
-                        <Upload size={13} />
-                        <span>{isUploading ? 'Uploading...' : 'Upload Image from Computer'}</span>
-                      </button>
+                      <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                        <button
+                          type="button"
+                          onClick={() => setPickerOpen(true)}
+                          className="adm-btn adm-btn-primary adm-btn-sm"
+                        >
+                          <FolderKanban size={13} />
+                          <span>Choose from Library</span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => fileInputRef.current?.click()}
+                          disabled={isUploading}
+                          className="adm-btn adm-btn-secondary adm-btn-sm"
+                        >
+                          <Upload size={13} />
+                          <span>{isUploading ? 'Uploading...' : 'Direct Upload'}</span>
+                        </button>
+                      </div>
+
+                      <MediaPickerModal
+                        isOpen={pickerOpen}
+                        onClose={() => setPickerOpen(false)}
+                        onSelect={(url) => setFormData((prev) => ({ ...prev, image: url }))}
+                        title="Select Press Clipping / Cover Photo"
+                        currentValue={formData.image}
+                        targetFolder="press"
+                      />
 
                       <input
                         type="text"

@@ -12,10 +12,11 @@ import {
   Search,
   Check,
   Award,
-  Sparkles,
   ArrowUpRight,
+  FolderKanban,
 } from 'lucide-react';
 import { JourneyItem, Month, monthOrder } from '@/data/timeline';
+import { MediaPickerModal } from '@/components/admin/media-picker-modal';
 
 const monthsList: Month[] = [
   'January',
@@ -41,6 +42,7 @@ export default function AdminTimelinePage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<JourneyItem | null>(null);
   const [isUploading, setIsUploading] = useState(false);
+  const [pickerOpen, setPickerOpen] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [formData, setFormData] = useState<{
@@ -465,16 +467,35 @@ export default function AdminTimelinePage() {
                         accept="image/*"
                         style={{ display: 'none' }}
                       />
-                      <button
-                        type="button"
-                        onClick={() => fileInputRef.current?.click()}
-                        disabled={isUploading}
-                        className="adm-btn adm-btn-secondary adm-btn-sm"
-                        style={{ alignSelf: 'flex-start' }}
-                      >
-                        <Upload size={13} />
-                        <span>{isUploading ? 'Uploading...' : 'Upload Photo'}</span>
-                      </button>
+                      <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                        <button
+                          type="button"
+                          onClick={() => setPickerOpen(true)}
+                          className="adm-btn adm-btn-primary adm-btn-sm"
+                        >
+                          <FolderKanban size={13} />
+                          <span>Choose from Library</span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => fileInputRef.current?.click()}
+                          disabled={isUploading}
+                          className="adm-btn adm-btn-secondary adm-btn-sm"
+                        >
+                          <Upload size={13} />
+                          <span>{isUploading ? 'Uploading...' : 'Direct Upload'}</span>
+                        </button>
+                      </div>
+
+                      <MediaPickerModal
+                        isOpen={pickerOpen}
+                        onClose={() => setPickerOpen(false)}
+                        onSelect={(url) => setFormData((prev) => ({ ...prev, image: url }))}
+                        title="Select Award / Trophy Photo"
+                        currentValue={formData.image}
+                        targetFolder="timeline"
+                      />
+
                       <input
                         type="text"
                         className="adm-input"

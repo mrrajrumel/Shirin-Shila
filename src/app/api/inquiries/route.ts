@@ -7,7 +7,7 @@ export const dynamic = 'force-dynamic';
 
 function checkAuth(request: NextRequest): boolean {
   const token = request.cookies.get(SESSION_COOKIE_NAME)?.value;
-  return verifySessionToken(token);
+  return Boolean(verifySessionToken(token));
 }
 
 // GET all inquiries (Protected)

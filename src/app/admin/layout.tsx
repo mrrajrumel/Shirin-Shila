@@ -19,7 +19,8 @@ import {
   Share2,
   Menu,
   X,
-  Sparkles,
+  Globe,
+  FolderKanban,
 } from "lucide-react";
 import "./admin.css";
 
@@ -29,12 +30,22 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const [newInquiriesCount, setNewInquiriesCount] = useState(0);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [currentUser, setCurrentUser] = useState<{ username: string; displayName: string } | null>(null);
 
   // If on login page, render plain without sidebar shell
   const isLoginPage = pathname === "/admin/login";
 
   useEffect(() => {
     if (isLoginPage) return;
+
+    fetch("/api/auth/me")
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (data?.authenticated && data?.user) {
+          setCurrentUser(data.user);
+        }
+      })
+      .catch(() => {});
 
     // Fetch incoming inquiries count
     fetch("/api/inquiries")
@@ -78,6 +89,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       ],
     },
     {
+      group: "MEDIA & ASSETS",
+      items: [
+        { href: "/admin/media", label: "Media Library", icon: FolderKanban },
+      ],
+    },
+    {
       group: "EDITORIAL & CONTENT",
       items: [
         { href: "/admin/hero", label: "Hero Banner", icon: LayoutTemplate },
@@ -100,6 +117,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           icon: Inbox,
           badge: newInquiriesCount > 0 ? newInquiriesCount : undefined,
         },
+      ],
+    },
+    {
+      group: "SEO & SYSTEM SETTINGS",
+      items: [
+        { href: "/admin/seo", label: "SEO & Meta Settings", icon: Globe },
       ],
     },
   ];
@@ -239,15 +262,24 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           <div className="adm-header-actions">
             <div className="adm-user-chip">
               <div className="adm-user-avatar">
-                <span>SS</span>
+                <span>
+                  {currentUser?.displayName
+                    ? currentUser.displayName
+                        .split(" ")
+                        .map((n) => n[0])
+                        .join("")
+                        .slice(0, 2)
+                        .toUpperCase()
+                    : "SS"}
+                </span>
                 <span className="adm-user-online-dot" />
               </div>
               <div className="hidden md:block text-left leading-tight">
                 <span className="block text-xs font-semibold text-slate-800">
-                  Shirin Shila
+                  {currentUser?.displayName || "Administrator"}
                 </span>
                 <span className="block text-[11px] text-slate-500 font-mono">
-                  Administrator
+                  @{currentUser?.username || "admin"}
                 </span>
               </div>
             </div>

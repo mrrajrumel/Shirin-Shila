@@ -1,84 +1,80 @@
 import type { Metadata } from 'next';
 import './globals.css';
+import { readStore } from '@/lib/server-storage';
+import { SiteSeoData, defaultSeoData } from '@/data/seo';
+import { CustomHeadInjector } from '@/lib/custom-head';
 
-export const metadata: Metadata = {
-  metadataBase: new URL('https://shirinshila.com'),
-  title: {
-    default: 'Shirin Shila — Official Dhallywood Film Actress & Casting Portfolio',
-    template: '%s | Shirin Shila',
-  },
-  description:
-    'Official portfolio of Bangladeshi silver-screen film actress, television reality show judge, and model Shirin Shila (Shirin Akter). Explore filmography, video showreels, career milestones, awards, press coverage, and talent management booking representation.',
-  keywords: [
-    'Shirin Shila',
-    'Shirin Akter',
-    'Dhallywood Actress',
-    'Bangladeshi Film Actress',
-    'Dhallywood Cinema',
-    'Bangladeshi Cinema Star',
-    'Begum Jaan Actress',
-    'Hitman Shakib Khan Shirin Shila',
-    'Birangona 71 Shirin Shila',
-    'Shesh Baji Movie',
-    'Bangladeshi Celebrity Judge',
-    'Reality Show Bicharok',
-    'Shirin Shila Casting Showreel',
-    'Dhallywood Model',
-  ],
-  authors: [{ name: 'Shirin Shila', url: 'https://shirinshila.com' }],
-  creator: 'Rumel Ahmed',
-  publisher: 'Tune Soul Ocean',
-  icons: {
-    icon: [
-      { url: '/icon.svg', type: 'image/svg+xml' },
-      { url: '/favicon.ico', sizes: '32x32' },
-    ],
-    shortcut: '/favicon.ico',
-    apple: '/apple-touch-icon.png',
-  },
-  openGraph: {
-    title: 'Shirin Shila — Official Dhallywood Film Actress & Casting Portfolio',
-    description:
-      'Explore official filmography, awards, press archive, and casting showreels of Bangladeshi film star Shirin Shila.',
-    url: 'https://shirinshila.com',
-    siteName: 'Shirin Shila Official Portfolio',
-    locale: 'en_US',
-    type: 'website',
-    images: [
-      {
-        url: '/images/hero.jpg',
-        width: 1200,
-        height: 630,
-        alt: 'Shirin Shila — Dhallywood Film Actress',
-      },
-    ],
-  },
-  twitter: {
-    card: 'summary_large_image',
-    title: 'Shirin Shila — Official Dhallywood Film Actress Portfolio',
-    description:
-      'Official cinema portfolio of Bangladeshi film star Shirin Shila. Filmography, awards, press coverage, and casting showreels.',
-    images: ['/images/hero.jpg'],
-    creator: '@shirin_shila',
-  },
-  robots: {
-    index: true,
-    follow: true,
-    googleBot: {
+export async function generateMetadata(): Promise<Metadata> {
+  const seo = (await readStore<SiteSeoData>('seo')) || defaultSeoData;
+
+  const title = seo.siteTitle || defaultSeoData.siteTitle;
+  const description = seo.description || defaultSeoData.description;
+  const keywords = (seo.keywords || defaultSeoData.keywords).split(',').map((k) => k.trim());
+  const ogImage = seo.ogImage || '/images/hero.jpg';
+
+  return {
+    metadataBase: new URL(seo.siteUrl || 'https://shirinshila.com'),
+    title: {
+      default: title,
+      template: `%s | ${seo.tagline || 'Shirin Shila'}`,
+    },
+    description,
+    keywords,
+    authors: [{ name: seo.author || 'Shirin Shila', url: seo.siteUrl || 'https://shirinshila.com' }],
+    creator: 'Rumel Ahmed',
+    publisher: 'Tune Soul Ocean',
+    icons: {
+      icon: [
+        { url: seo.faviconUrl || '/icon.svg', type: 'image/svg+xml' },
+        { url: '/favicon.ico', sizes: '32x32' },
+      ],
+      shortcut: seo.faviconUrl || '/favicon.ico',
+      apple: seo.appleTouchIconUrl || '/apple-icon.png',
+    },
+    openGraph: {
+      title: seo.ogTitle || title,
+      description: seo.ogDescription || description,
+      url: seo.siteUrl || 'https://shirinshila.com',
+      siteName: 'Shirin Shila Official Portfolio',
+      locale: 'en_US',
+      type: 'website',
+      images: [
+        {
+          url: ogImage,
+          width: 1200,
+          height: 630,
+          alt: `${seo.author || 'Shirin Shila'} — Official Cinema Portfolio`,
+        },
+      ],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: seo.ogTitle || title,
+      description: seo.ogDescription || description,
+      images: [ogImage],
+      creator: seo.twitterHandle || '@shirin_shila',
+    },
+    robots: {
       index: true,
       follow: true,
-      'max-video-preview': -1,
-      'max-image-preview': 'large',
-      'max-snippet': -1,
+      googleBot: {
+        index: true,
+        follow: true,
+        'max-video-preview': -1,
+        'max-image-preview': 'large',
+        'max-snippet': -1,
+      },
     },
-  },
-};
+  };
+}
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const seo = (await readStore<SiteSeoData>('seo')) || defaultSeoData;
+
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
@@ -88,6 +84,9 @@ export default function RootLayout({
           href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap"
           rel="stylesheet"
         />
+
+        {/* Custom Header Code Injection (Google Search Console Verification, Analytics, Meta Tags) */}
+        {seo.customHeadHtml && <CustomHeadInjector html={seo.customHeadHtml} />}
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{

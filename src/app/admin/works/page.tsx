@@ -16,8 +16,10 @@ import {
   Play,
   Tv,
   ExternalLink,
+  FolderKanban,
 } from 'lucide-react';
 import { ProjectItem, filmographyCategories } from '@/data/filmography';
+import { MediaPickerModal } from '@/components/admin/media-picker-modal';
 
 export default function AdminWorksPage() {
   const [works, setWorks] = useState<ProjectItem[]>([]);
@@ -29,6 +31,7 @@ export default function AdminWorksPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<ProjectItem | null>(null);
   const [isUploading, setIsUploading] = useState(false);
+  const [pickerOpen, setPickerOpen] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Auto-fetch state for Works
@@ -556,12 +559,20 @@ export default function AdminWorksPage() {
                         />
                         <button
                           type="button"
+                          onClick={() => setPickerOpen(true)}
+                          className="adm-btn adm-btn-primary adm-btn-sm"
+                        >
+                          <FolderKanban size={13} />
+                          <span>Choose from Library</span>
+                        </button>
+                        <button
+                          type="button"
                           onClick={() => fileInputRef.current?.click()}
                           disabled={isUploading}
                           className="adm-btn adm-btn-secondary adm-btn-sm"
                         >
                           <Upload size={13} />
-                          <span>{isUploading ? 'Uploading...' : 'Upload Image File'}</span>
+                          <span>{isUploading ? 'Uploading...' : 'Direct Upload'}</span>
                         </button>
 
                         {formData.videoUrl && (
@@ -576,6 +587,15 @@ export default function AdminWorksPage() {
                           </button>
                         )}
                       </div>
+
+                      <MediaPickerModal
+                        isOpen={pickerOpen}
+                        onClose={() => setPickerOpen(false)}
+                        onSelect={(url) => setFormData((prev) => ({ ...prev, image: url }))}
+                        title="Select Work Poster / Visual"
+                        currentValue={formData.image}
+                        targetFolder="works"
+                      />
                       
                       <input
                         type="text"

@@ -11,12 +11,6 @@ import ContactSection from "@/components/contact-section";
 import MediaTickerSection from "@/components/media-ticker-section";
 import Footer from "@/components/footer";
 
-export const metadata = {
-  title: "Shirin Shila — Official Dhallywood Actress Portfolio & Casting Showreel",
-  description:
-    "Official cinematic portfolio of Bangladeshi film actress Shirin Shila (Shirin Akter). Explore film showreels, acting career milestones, awards, press coverage, and booking representation.",
-};
-
 export default function Home() {
   return (
     <main className="one-page-portfolio-main">
