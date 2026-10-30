@@ -38,9 +38,17 @@ export default function AdminOverviewPage() {
   const [inquiries, setInquiries] = useState<InquiryItem[]>([]);
   const [mediaPartners, setMediaPartners] = useState<MediaPartner[]>([]);
   const [awardsCount, setAwardsCount] = useState<number>(0);
+  const [dbStatus, setDbStatus] = useState<{ connected: boolean; tablesCount?: number } | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    fetch("/api/db-status", { cache: "no-store" })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((res) => {
+        if (res && res.status) setDbStatus(res.status);
+      })
+      .catch(() => {});
+
     Promise.all([
       fetch("/api/works", { cache: "no-store" }).then((r) => r.json()).catch(() => ({ items: [] })),
       fetch("/api/showreels", { cache: "no-store" }).then((r) => r.json()).catch(() => ({ items: [] })),
@@ -74,10 +82,15 @@ export default function AdminOverviewPage() {
       <div className="adm-card" style={{ marginBottom: "24px", background: "linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)" }}>
         <div style={{ padding: "24px 28px", display: "flex", flexWrap: "wrap", alignItems: "center", justifyContent: "space-between", gap: "16px" }}>
           <div>
-            <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "6px" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "6px", flexWrap: "wrap" }}>
               <span className="adm-badge adm-badge-blue" style={{ fontSize: "11px", fontWeight: 700 }}>
                 TUNE SOUL OCEAN
               </span>
+              {dbStatus?.connected && (
+                <span className="adm-badge" style={{ fontSize: "11px", fontWeight: 700, background: "#ecfdf5", color: "#059669", border: "1px solid #a7f3d0" }}>
+                  ● Hostinger MySQL Connected ({dbStatus.tablesCount || 5} tables)
+                </span>
+              )}
               <a
                 href="https://trytso.com/"
                 target="_blank"

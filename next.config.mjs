@@ -2,6 +2,9 @@
 const nextConfig = {
   images: { unoptimized: true },
   transpilePackages: ['framer-motion', 'lucide-react'],
+  experimental: {
+    serverComponentsExternalPackages: ['mysql2', 'bcryptjs', 'sharp'],
+  },
   async headers() {
     return [
       {

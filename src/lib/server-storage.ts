@@ -1,6 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import { getPersistentStoreDir, getPersistentBackupsDir } from './persistent-paths';
+import { getDbContent, saveDbContent, isDatabaseConfigured } from './db';
 
 // Import default seed data from codebase
 import { filmography as defaultFilmography, ProjectItem } from '../data/filmography';
@@ -101,19 +102,36 @@ function getDefaultData(key: StoreKey): any {
  * 3. Fallback: getDefaultData(key) from code
  */
 export async function readStore<T>(key: StoreKey): Promise<T> {
+  // 1. Primary: If database is configured, read directly from Hostinger MySQL
+  if (isDatabaseConfigured()) {
+    try {
+      const dbData = await getDbContent<T>(key);
+      if (dbData !== null && dbData !== undefined) {
+        return dbData;
+      }
+    } catch (dbErr) {
+      console.warn(`[ServerStore] MySQL read failed for ${key}, falling back to persistent file store:`, (dbErr as Error).message);
+    }
+  }
+
   const filePath = getStoreFilePath(key);
 
-  // 1. If file already exists in persistent directory, read and return it
+  // 2. Secondary: If file already exists in persistent directory, read and return it
   if (fs.existsSync(filePath)) {
     try {
       const raw = await fs.promises.readFile(filePath, 'utf-8');
-      return JSON.parse(raw) as T;
+      const parsed = JSON.parse(raw) as T;
+      // If DB is configured but empty for this key, seed it now
+      if (isDatabaseConfigured()) {
+        saveDbContent(key, parsed, 'initial_file_sync').catch(() => {});
+      }
+      return parsed;
     } catch (err) {
       console.error(`[ServerStore] Error reading persistent ${key}.json:`, err);
     }
   }
 
-  // 2. First-time initialization: check if repository has a seed file
+  // 3. First-time initialization: check if repository has a seed file
   const repoSeedPath = path.join(process.cwd(), 'src', 'data', 'store', `${key}.json`);
   let initialData: T;
 
@@ -140,9 +158,14 @@ export async function readStore<T>(key: StoreKey): Promise<T> {
 }
 
 /**
- * Write data to persistent JSON store with atomic file renaming and rolling safety backups.
+ * Write data to persistent JSON store and MySQL database with atomic file renaming and rolling safety backups.
  */
 export async function writeStore<T>(key: StoreKey, data: T, createBackup = true): Promise<void> {
+  if (data === undefined || data === null) {
+    console.warn(`[ServerStore] Attempted to write null/undefined data for ${key}, skipping`);
+    return;
+  }
+
   const filePath = getStoreFilePath(key);
   const dir = path.dirname(filePath);
   if (!fs.existsSync(dir)) {
@@ -168,7 +191,19 @@ export async function writeStore<T>(key: StoreKey, data: T, createBackup = true)
     }
   }
 
-  // 2. Rolling backup (keeps last 5 revisions for disaster recovery)
+  // 2. Write to MySQL database if configured
+  if (isDatabaseConfigured()) {
+    try {
+      const dbSuccess = await saveDbContent(key, data);
+      if (!dbSuccess) {
+        console.error(`[ServerStore] Warning: MySQL save returned false for ${key}`);
+      }
+    } catch (dbErr) {
+      console.error(`[ServerStore] MySQL save failed for ${key}:`, (dbErr as Error).message);
+    }
+  }
+
+  // 3. Rolling backup (keeps last 5 revisions for disaster recovery)
   if (createBackup) {
     try {
       const backupsDir = path.join(getPersistentBackupsDir(), key);
