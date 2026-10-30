@@ -28,12 +28,15 @@ export async function generateMetadata(): Promise<Metadata> {
     publisher: 'Tune Soul Ocean',
     icons: {
       icon: [
+        { url: '/favicon.ico', sizes: 'any' },
         { url: seo.faviconUrl || '/icon.svg', type: 'image/svg+xml' },
-        { url: '/favicon.ico', sizes: '32x32' },
       ],
-      shortcut: seo.faviconUrl || '/favicon.ico',
-      apple: seo.appleTouchIconUrl || '/apple-icon.png',
+      shortcut: '/favicon.ico',
+      apple: [
+        { url: seo.appleTouchIconUrl || '/apple-icon.png', sizes: '180x180', type: 'image/png' },
+      ],
     },
+    manifest: '/site.webmanifest',
     openGraph: {
       title: seo.ogTitle || title,
       description: seo.ogDescription || description,

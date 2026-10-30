@@ -95,14 +95,16 @@ export function MediaPickerModal({
   });
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+    const fileList = e.target.files;
+    if (!fileList || fileList.length === 0) return;
 
     setUploading(true);
     setFeedback(null);
 
     const formData = new FormData();
-    formData.append("file", file);
+    for (let i = 0; i < fileList.length; i++) {
+      formData.append("files", fileList[i]);
+    }
     formData.append("folder", targetFolder);
 
     try {
@@ -118,13 +120,15 @@ export function MediaPickerModal({
 
       setFeedback({
         type: data.isDuplicate ? "info" : "success",
-        message: data.message || "File uploaded successfully",
+        message: data.message || "File(s) uploaded successfully",
       });
 
       // Refresh list
       await fetchAssets();
       if (data.asset) {
         setSelectedAsset(data.asset);
+      } else if (data.files && data.files.length > 0) {
+        setSelectedAsset(data.files[0].asset);
       }
     } catch (err: any) {
       setFeedback({
@@ -164,10 +168,12 @@ export function MediaPickerModal({
         padding: "16px",
       }}
       onClick={(e) => {
+        e.stopPropagation();
         if (e.target === e.currentTarget) onClose();
       }}
     >
       <div
+        onClick={(e) => e.stopPropagation()}
         style={{
           width: "100%",
           maxWidth: "960px",
@@ -330,6 +336,7 @@ export function MediaPickerModal({
               )}
               <input
                 type="file"
+                multiple
                 accept="image/jpeg,image/png,image/webp,image/gif,image/svg+xml"
                 style={{ display: "none" }}
                 disabled={uploading}
@@ -421,6 +428,11 @@ export function MediaPickerModal({
                   <div
                     key={asset.id}
                     onClick={() => setSelectedAsset(asset)}
+                    onDoubleClick={() => {
+                      onSelect(asset.url, asset);
+                      onClose();
+                    }}
+                    title="Click to select, double-click to use immediately"
                     style={{
                       border: isSelected ? "2px solid #3c50e0" : "1px solid #e2e8f0",
                       borderRadius: "8px",

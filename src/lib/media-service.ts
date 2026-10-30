@@ -2,6 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import crypto from 'crypto';
 import { getPersistentStoreDir, getPersistentUploadsDir } from './persistent-paths';
+import { getDbContent, saveDbContent, isDatabaseConfigured } from './db';
 
 export interface MediaAsset {
   id: string;
@@ -143,6 +144,19 @@ export function validateFileSignature(
  */
 export async function getMediaManifest(): Promise<MediaAsset[]> {
   ensureDirectories();
+
+  // 1. Primary: Hostinger MySQL check if configured
+  if (isDatabaseConfigured()) {
+    try {
+      const dbManifest = await getDbContent<MediaAsset[]>('media-manifest');
+      if (Array.isArray(dbManifest) && dbManifest.length > 0) {
+        return dbManifest;
+      }
+    } catch (e) {
+      console.warn('[MediaService] DB manifest fetch failed, falling back to disk:', (e as Error).message);
+    }
+  }
+
   const manifestPath = getManifestPath();
 
   if (fs.existsSync(manifestPath)) {
@@ -150,6 +164,9 @@ export async function getMediaManifest(): Promise<MediaAsset[]> {
       const raw = await fs.promises.readFile(manifestPath, 'utf-8');
       const data = JSON.parse(raw);
       if (Array.isArray(data) && data.length > 0) {
+        if (isDatabaseConfigured()) {
+          saveDbContent('media-manifest', data, 'initial_file_sync').catch(() => {});
+        }
         return data;
       }
     } catch (err) {
@@ -175,7 +192,7 @@ export async function getMediaManifest(): Promise<MediaAsset[]> {
 }
 
 /**
- * Saves media manifest atomically to disk.
+ * Saves media manifest atomically to disk and Hostinger MySQL database.
  */
 export async function saveMediaManifest(manifest: MediaAsset[]): Promise<void> {
   ensureDirectories();
@@ -189,6 +206,15 @@ export async function saveMediaManifest(manifest: MediaAsset[]): Promise<void> {
   } catch (err) {
     console.error('[MediaService] Temp rename failed, direct write fallback:', err);
     await fs.promises.writeFile(manifestPath, serialized, 'utf-8');
+  }
+
+  // Persist to Hostinger MySQL
+  if (isDatabaseConfigured()) {
+    try {
+      await saveDbContent('media-manifest', manifest, 'media_manifest_update');
+    } catch (dbErr) {
+      console.error('[MediaService] MySQL save manifest error:', (dbErr as Error).message);
+    }
   }
 }
 
