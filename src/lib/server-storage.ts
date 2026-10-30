@@ -128,8 +128,14 @@ export async function readStore<T>(key: StoreKey): Promise<T> {
     initialData = getDefaultData(key) as T;
   }
 
-  // Write once to persistent storage without creating rolling backup for the initial seed
-  await writeStore(key, initialData, false);
+  // Only write initial seed to persistent storage during runtime, not during static next build
+  const isBuildPhase =
+    process.env.npm_lifecycle_event === 'build' ||
+    process.env.NEXT_PHASE === 'phase-production-build';
+
+  if (!isBuildPhase) {
+    await writeStore(key, initialData, false).catch(() => {});
+  }
   return initialData;
 }
 
@@ -138,6 +144,13 @@ export async function readStore<T>(key: StoreKey): Promise<T> {
  */
 export async function writeStore<T>(key: StoreKey, data: T, createBackup = true): Promise<void> {
   const filePath = getStoreFilePath(key);
+  const dir = path.dirname(filePath);
+  if (!fs.existsSync(dir)) {
+    try {
+      fs.mkdirSync(dir, { recursive: true });
+    } catch (_) {}
+  }
+
   const tempPath = `${filePath}.tmp.${Date.now()}`;
   const serialized = JSON.stringify(data, null, 2);
 
