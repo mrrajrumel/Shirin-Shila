@@ -48,6 +48,26 @@ app.prepare().then(() => {
       const parsedUrl = parse(req.url, true);
       const { pathname } = parsedUrl;
 
+      // Explicit robots.txt handler with Content-Signal & Sitemap directives
+      if (pathname === '/robots.txt') {
+        const robotsContent = `# Robots.txt for Shirin Shila Portfolio
+User-agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /api/
+
+Content-Signal: search=yes, ai-train=no
+Sitemap: https://cornflowerblue-wildcat-675604.hostingersite.com/sitemap.xml
+Sitemap: https://shirinshila.com/sitemap.xml
+`;
+        res.writeHead(200, {
+          'Content-Type': 'text/plain; charset=utf-8',
+          'Cache-Control': 'public, max-age=86400',
+        });
+        res.end(robotsContent);
+        return;
+      }
+
       // Fast streaming static uploads handler
       if (pathname && pathname.startsWith('/uploads/')) {
         const rel = decodeURIComponent(pathname.replace(/^\/uploads\//, ''));
