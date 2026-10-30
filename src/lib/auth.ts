@@ -200,6 +200,76 @@ function recordFailedAttempt(key: string, now: number) {
 }
 
 /**
+ * Updates a user's display name. Returns updated user or an error string.
+ */
+export function updateDisplayName(
+  userId: string,
+  newDisplayName: string
+): { success: boolean; error?: string; user?: AdminUserRecord } {
+  const trimmed = newDisplayName.trim();
+  if (!trimmed || trimmed.length < 2 || trimmed.length > 64) {
+    return { success: false, error: 'Display name must be 2–64 characters.' };
+  }
+
+  const users = ensureAdminAccounts();
+
+  const idx = users.findIndex((u) => u.id === userId);
+  if (idx < 0) return { success: false, error: 'User not found.' };
+
+  users[idx] = {
+    ...users[idx],
+    displayName: trimmed,
+    updatedAt: new Date().toISOString(),
+  };
+
+  const usersFile = getUsersFile();
+  fs.writeFileSync(usersFile, JSON.stringify(users, null, 2), 'utf-8');
+  return { success: true, user: users[idx] };
+}
+
+/**
+ * Changes a user's password after verifying the current password.
+ * Enforces minimum complexity: 8+ chars, at least one letter and one digit.
+ */
+export function changePassword(
+  userId: string,
+  currentPassword: string,
+  newPassword: string
+): { success: boolean; error?: string } {
+  if (!currentPassword || !newPassword) {
+    return { success: false, error: 'Current and new passwords are required.' };
+  }
+  if (newPassword.length < 8) {
+    return { success: false, error: 'New password must be at least 8 characters.' };
+  }
+  if (!/[a-zA-Z]/.test(newPassword) || !/[0-9]/.test(newPassword)) {
+    return { success: false, error: 'New password must contain at least one letter and one number.' };
+  }
+
+  const users = ensureAdminAccounts();
+  const idx = users.findIndex((u) => u.id === userId);
+  if (idx < 0) return { success: false, error: 'User not found.' };
+
+  const user = users[idx];
+  const currentValid = bcrypt.compareSync(currentPassword, user.passwordHash);
+  if (!currentValid) {
+    return { success: false, error: 'Current password is incorrect.' };
+  }
+
+  const salt = bcrypt.genSaltSync(10);
+  const newHash = bcrypt.hashSync(newPassword, salt);
+  users[idx] = {
+    ...user,
+    passwordHash: newHash,
+    updatedAt: new Date().toISOString(),
+  };
+
+  const usersFile = getUsersFile();
+  fs.writeFileSync(usersFile, JSON.stringify(users, null, 2), 'utf-8');
+  return { success: true };
+}
+
+/**
  * Creates an HMAC-SHA256 signed session token
  */
 export function createSessionToken(user: SessionUser): string {

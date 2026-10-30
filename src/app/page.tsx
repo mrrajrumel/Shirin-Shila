@@ -25,13 +25,23 @@ export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
 export default async function Home() {
+  // Track whether timeline was loaded from persistent storage or failed
+  let timelineLoadedFromStore = false;
+  const timeline = await readStore<TimelineStoreData>("timeline")
+    .then((data) => { timelineLoadedFromStore = true; return data; })
+    .catch(() => ({
+      top: defaultTopJourneyData,
+      bottom: defaultBottomJourneyData,
+      milestones: careerTimeline,
+      deletedIds: [] as string[],
+    }));
+
   const [
     hero,
     about,
     showreels,
     works,
     gallery,
-    timeline,
     press,
     contact,
     mediaPartners,
@@ -41,15 +51,20 @@ export default async function Home() {
     readStore<ShowreelItem[]>("showreels").catch(() => showreelVideos),
     readStore<ProjectItem[]>("filmography").catch(() => filmography),
     readStore<GalleryImage[]>("gallery").catch(() => galleryImages),
-    readStore<TimelineStoreData>("timeline").catch(() => ({
-      top: defaultTopJourneyData,
-      bottom: defaultBottomJourneyData,
-      milestones: careerTimeline,
-    })),
     readStore<PressItem[]>("press").catch(() => pressItems),
     readStore<ContactInfo>("contactInfo").catch(() => initialContactInfo),
     readStore<MediaPartner[]>("mediaPartners").catch(() => defaultMediaPartners),
   ]);
+
+  // Only fall back to hardcoded seed data when the store itself failed to load.
+  // If the store loaded successfully but user deleted all items, respect that (show empty).
+  const deletedIds = new Set(Array.isArray(timeline.deletedIds) ? timeline.deletedIds : []);
+  const timelineTopData = timelineLoadedFromStore
+    ? (timeline.top || []).filter((it) => !deletedIds.has(it.id))
+    : defaultTopJourneyData.filter((it) => !deletedIds.has(it.id));
+  const timelineBottomData = timelineLoadedFromStore
+    ? (timeline.bottom || []).filter((it) => !deletedIds.has(it.id))
+    : defaultBottomJourneyData.filter((it) => !deletedIds.has(it.id));
 
   return (
     <main className="one-page-portfolio-main">
@@ -71,11 +86,11 @@ export default async function Home() {
       {/* 6. Visual Parallax Gallery */}
       <GallerySection id="gallery" initialImages={gallery && gallery.length > 0 ? gallery : galleryImages} />
 
-      {/* 7. Awards & Honors Milestone Timeline */}
+      {/* 7. Awards & Honors Milestone Timeline — always reflects admin deletions */}
       <TimelineSection
         id="timeline"
-        topData={timeline?.top && timeline.top.length > 0 ? timeline.top : defaultTopJourneyData}
-        bottomData={timeline?.bottom && timeline.bottom.length > 0 ? timeline.bottom : defaultBottomJourneyData}
+        topData={timelineTopData}
+        bottomData={timelineBottomData}
       />
 
       {/* 8. Media coverage, newspaper clippings, and interviews */}

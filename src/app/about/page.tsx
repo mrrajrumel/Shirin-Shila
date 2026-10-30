@@ -26,30 +26,50 @@ export default async function AboutPage() {
   const activeAbout = about || defaultAbout;
   const pageConfig = pages?.about || defaultPagesRegistry.about;
 
-  const rawTimelineItems: JourneyItem[] = [
-    ...(Array.isArray(timelineData?.top) ? timelineData.top : topJourneyData),
-    ...(Array.isArray(timelineData?.bottom) ? timelineData.bottom : bottomJourneyData),
-  ];
+  // deletedIds from store — items the admin permanently removed
+  const deletedIds = new Set<string>(
+    Array.isArray(timelineData?.deletedIds) ? timelineData.deletedIds : []
+  );
 
-  // Derive dynamic accolades automatically from timeline/awards
-  const dynamicTimelineAccolades = rawTimelineItems
-    .map((item) => {
-      const year = item.year ? `(${item.year})` : '';
-      const title = (item.title || '').trim();
-      let content = (item.content || '').trim();
+  // Only use top/bottom journey items (not milestones which are career-stage entries, not individual awards)
+  // Filter out any ids the admin deleted before building the accolades list
+  const allTimelineItems: Array<{ id?: string; year?: string; title?: string; content?: string; description?: string }> = [
+    ...(Array.isArray(timelineData?.items)  ? timelineData.items  : []),
+    ...(Array.isArray(timelineData?.top)    ? timelineData.top    : []),
+    ...(Array.isArray(timelineData?.bottom) ? timelineData.bottom : []),
+  ].filter((it) => !it.id || !deletedIds.has(it.id));
 
-      if (title && content) {
-        const titleRegex = new RegExp(`^${title.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s*(—|-|:)?\\s*`, 'i');
-        content = content.replace(titleRegex, '');
-        return `${title} ${year} — ${content}`.replace(/\s+/g, ' ').trim();
-      } else if (title) {
-        return `${title} ${year}`.trim();
-      } else if (content) {
-        return `${content} ${year}`.trim();
-      }
-      return '';
-    })
-    .filter(Boolean);
+  // Fallback to static seed only when the store itself could not be loaded
+  if (allTimelineItems.length === 0 && !timelineData) {
+    allTimelineItems.push(...topJourneyData, ...bottomJourneyData);
+  }
+
+  // De-duplicate by title or content
+  const seenAccolades = new Set<string>();
+  const dynamicTimelineAccolades: string[] = [];
+
+  for (const item of allTimelineItems) {
+    const yearStr = item.year ? `(${item.year})` : '';
+    const title = (item.title || '').trim();
+    let text = (item.content || item.description || '').trim();
+
+    if (!title && !text) continue;
+
+    // Normalization key for de-duplication
+    const normKey = (title || text).toLowerCase().slice(0, 16);
+    if (seenAccolades.has(normKey)) continue;
+    seenAccolades.add(normKey);
+
+    if (title && text) {
+      const titleRegex = new RegExp(`^${title.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s*(—|-|:)?\\s*`, 'i');
+      text = text.replace(titleRegex, '');
+      dynamicTimelineAccolades.push(`${title} ${yearStr} — ${text}`.replace(/\s+/g, ' ').trim());
+    } else if (title) {
+      dynamicTimelineAccolades.push(`${title} ${yearStr}`.trim());
+    } else {
+      dynamicTimelineAccolades.push(`${text} ${yearStr}`.trim());
+    }
+  }
 
   const accoladesList =
     pageConfig.meta?.useCustomAccolades === true && Array.isArray(pageConfig.meta?.accolades) && pageConfig.meta.accolades.length > 0
@@ -63,8 +83,8 @@ export default async function AboutPage() {
               'National Star Excellence Honor (2025) — Television & Cinema Contribution Crest',
             ]);
 
-  const babisasItem = rawTimelineItems.find((it) => /babisas/i.test(it.title || '') || /babisas/i.test(it.content || ''));
-  const diffItem = rawTimelineItems.find((it) => /diff/i.test(it.title || '') || /dhaka international/i.test(it.content || ''));
+  const babisasItem = allTimelineItems.find((it) => /babisas/i.test(it.title || '') || /babisas/i.test(it.content || '') || /babisas/i.test(it.description || ''));
+  const diffItem = allTimelineItems.find((it) => /diff/i.test(it.title || '') || /dhaka international/i.test(it.content || '') || /dhaka international/i.test(it.description || ''));
 
   const displayedSubheading =
     pageConfig.subheading ||

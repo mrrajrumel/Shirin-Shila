@@ -66,10 +66,27 @@ export default function CareerJourneyTimeline({
       .then((res) => (res.ok ? res.json() : null))
       .then((data) => {
         if (data && data.data) {
+          // The API now includes deletedIds so we can filter client-side too
+          const deletedSet = new Set<string>(
+            Array.isArray(data.data.deletedIds) ? data.data.deletedIds : []
+          );
           const combined = [
             ...(Array.isArray(data.data.top) ? data.data.top : []),
             ...(Array.isArray(data.data.bottom) ? data.data.bottom : []),
-          ];
+          ].filter((it) => it && it.id && !deletedSet.has(it.id));
+
+          // If the API responded with `loaded: true`, treat an empty list as intentional
+          if (data.loaded === true) {
+            combined.sort((a, b) => {
+              const yA = parseInt(a.year, 10) || 0;
+              const yB = parseInt(b.year, 10) || 0;
+              if (yA !== yB) return yA - yB;
+              return (monthOrder[a.month as Month] || 0) - (monthOrder[b.month as Month] || 0);
+            });
+            setLiveItems(combined);
+            return;
+          }
+
           if (combined.length > 0) {
             combined.sort((a, b) => {
               const yA = parseInt(a.year, 10) || 0;
@@ -81,7 +98,7 @@ export default function CareerJourneyTimeline({
             return;
           }
         }
-        // Fallback default
+        // Only fall back to prop data when the API itself failed to respond
         const fallback = [...topData, ...bottomData].sort((a, b) => {
           const yA = parseInt(a.year, 10) || 0;
           const yB = parseInt(b.year, 10) || 0;

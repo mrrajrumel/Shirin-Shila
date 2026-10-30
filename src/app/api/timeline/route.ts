@@ -59,11 +59,12 @@ export async function GET() {
       ...(Array.isArray(store.bottom) ? store.bottom : []),
     ];
 
-    // De-duplicate by id if any duplicates exist
+    // De-duplicate by id if any duplicates exist and ignore deletedIds
+    const deletedSet = new Set(Array.isArray(store.deletedIds) ? store.deletedIds : []);
     const seen = new Set<string>();
     const uniqueItems: JourneyItem[] = [];
     for (const it of rawItems) {
-      if (it && it.id && !seen.has(it.id)) {
+      if (it && it.id && !deletedSet.has(it.id) && !seen.has(it.id)) {
         seen.add(it.id);
         uniqueItems.push(it);
       }
@@ -75,11 +76,14 @@ export async function GET() {
     return NextResponse.json(
       {
         success: true,
+        // loaded=true tells consumers the store was initialised; top/bottom reflect real persisted state
+        loaded: true,
         data: {
           items: sortedItems,
           top,
           bottom,
-          milestones: store.milestones || [],
+          milestones: (store.milestones || []).filter((m: any) => !m.id || !deletedSet.has(m.id)),
+          deletedIds: Array.from(deletedSet),
         },
       },
       {
@@ -141,9 +145,15 @@ export async function POST(request: NextRequest) {
 
     store.top = top;
     store.bottom = bottom;
+    if (Array.isArray(store.deletedIds)) {
+      store.deletedIds = store.deletedIds.filter((dId) => dId !== itemId);
+    }
 
     await writeStore('timeline', store);
     revalidatePath('/');
+    revalidatePath('/about');
+    revalidatePath('/admin/timeline');
+    revalidatePath('/admin/pages');
 
     return NextResponse.json({
       success: true,
@@ -153,6 +163,7 @@ export async function POST(request: NextRequest) {
         top,
         bottom,
         milestones: store.milestones,
+        deletedIds: store.deletedIds || [],
       },
     });
   } catch (err: any) {
@@ -215,6 +226,9 @@ export async function PUT(request: NextRequest) {
 
     await writeStore('timeline', store);
     revalidatePath('/');
+    revalidatePath('/about');
+    revalidatePath('/admin/timeline');
+    revalidatePath('/admin/pages');
 
     return NextResponse.json({
       success: true,
@@ -223,6 +237,7 @@ export async function PUT(request: NextRequest) {
         top,
         bottom,
         milestones: store.milestones,
+        deletedIds: store.deletedIds || [],
       },
     });
   } catch (err: any) {
@@ -248,6 +263,9 @@ export async function DELETE(request: NextRequest) {
       ...(Array.isArray(store.top) ? store.top : []),
       ...(Array.isArray(store.bottom) ? store.bottom : []),
     ];
+
+    const targetItem = rawItems.find((it) => it && it.id === id);
+
     const seen = new Set<string>();
     const remaining: JourneyItem[] = [];
     for (const it of rawItems) {
@@ -263,8 +281,30 @@ export async function DELETE(request: NextRequest) {
     store.top = top;
     store.bottom = bottom;
 
+    // Track permanently in deletedIds so fallback seed data never resurrects it
+    const deletedIds = new Set(Array.isArray(store.deletedIds) ? store.deletedIds : []);
+    deletedIds.add(id);
+    store.deletedIds = Array.from(deletedIds);
+
+    // Also clean from legacy store.items if present
+    if (Array.isArray(store.items)) {
+      store.items = store.items.filter((it: any) => it.id !== id);
+    }
+
+    // Clean corresponding entry from store.milestones so it never leaks back into /about
+    if (Array.isArray(store.milestones)) {
+      store.milestones = store.milestones.filter((m: any) => {
+        if (m.id === id) return false;
+        if (targetItem?.title && m.title && m.title.trim().toLowerCase() === targetItem.title.trim().toLowerCase()) return false;
+        return true;
+      });
+    }
+
     await writeStore('timeline', store);
     revalidatePath('/');
+    revalidatePath('/about');
+    revalidatePath('/admin/timeline');
+    revalidatePath('/admin/pages');
 
     return NextResponse.json({
       success: true,
@@ -274,6 +314,7 @@ export async function DELETE(request: NextRequest) {
         top,
         bottom,
         milestones: store.milestones,
+        deletedIds: store.deletedIds,
       },
     });
   } catch (err: any) {

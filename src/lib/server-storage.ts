@@ -31,6 +31,8 @@ export interface TimelineStoreData {
   top: JourneyItem[];
   bottom: JourneyItem[];
   milestones: TimelineMilestone[];
+  items?: JourneyItem[];
+  deletedIds?: string[];
 }
 
 export type StoreKey =
@@ -130,6 +132,23 @@ export async function readStore<T>(key: StoreKey): Promise<T> {
           }
           return pages as unknown as T;
         }
+        if (key === 'timeline') {
+          const t = dbData as unknown as TimelineStoreData;
+          if (t && typeof t === 'object') {
+            const deleted = new Set(Array.isArray(t.deletedIds) ? t.deletedIds : []);
+            const cleanTop = (Array.isArray(t.top) ? t.top : []).filter((it) => it && it.id && !deleted.has(it.id));
+            const cleanBottom = (Array.isArray(t.bottom) ? t.bottom : []).filter((it) => it && it.id && !deleted.has(it.id));
+            const cleanItems = (Array.isArray(t.items) ? t.items : []).filter((it) => it && it.id && !deleted.has(it.id));
+            return {
+              ...t,
+              top: cleanTop,
+              bottom: cleanBottom,
+              items: cleanItems,
+              milestones: Array.isArray(t.milestones) ? t.milestones : [],
+              deletedIds: Array.from(deleted),
+            } as unknown as T;
+          }
+        }
         return dbData;
       }
     } catch (dbErr) {
@@ -164,6 +183,23 @@ export async function readStore<T>(key: StoreKey): Promise<T> {
           }
         }
         return pages as unknown as T;
+      }
+      if (key === 'timeline') {
+        const t = parsed as unknown as TimelineStoreData;
+        if (t && typeof t === 'object') {
+          const deleted = new Set(Array.isArray(t.deletedIds) ? t.deletedIds : []);
+          const cleanTop = (Array.isArray(t.top) ? t.top : []).filter((it) => it && it.id && !deleted.has(it.id));
+          const cleanBottom = (Array.isArray(t.bottom) ? t.bottom : []).filter((it) => it && it.id && !deleted.has(it.id));
+          const cleanItems = (Array.isArray(t.items) ? t.items : []).filter((it) => it && it.id && !deleted.has(it.id));
+          return {
+            ...t,
+            top: cleanTop,
+            bottom: cleanBottom,
+            items: cleanItems,
+            milestones: Array.isArray(t.milestones) ? t.milestones : [],
+            deletedIds: Array.from(deleted),
+          } as unknown as T;
+        }
       }
       // If DB is configured but empty for this key, seed it now
       if (isDatabaseConfigured()) {

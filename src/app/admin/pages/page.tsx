@@ -205,21 +205,33 @@ export default function AdminPagesManagement() {
       const res = await fetch('/api/timeline', { cache: 'no-store' });
       const json = await res.json();
       const items = [
+        ...(Array.isArray(json?.data?.items) ? json.data.items : []),
         ...(Array.isArray(json?.data?.top) ? json.data.top : []),
         ...(Array.isArray(json?.data?.bottom) ? json.data.bottom : []),
+        ...(Array.isArray(json?.data?.milestones) ? json.data.milestones : []),
       ];
       if (items.length > 0) {
-        const formatted = items.map((it: any) => {
+        const seen = new Set<string>();
+        const formatted: string[] = [];
+        for (const it of items) {
           const year = it.year ? `(${it.year})` : '';
           const title = (it.title || '').trim();
-          let content = (it.content || '').trim();
-          if (title && content) {
+          let text = (it.content || it.description || '').trim();
+          if (!title && !text) continue;
+          const normKey = (title || text).toLowerCase().slice(0, 16);
+          if (seen.has(normKey)) continue;
+          seen.add(normKey);
+
+          if (title && text) {
             const titleRegex = new RegExp(`^${title.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s*(—|-|:)?\\s*`, 'i');
-            content = content.replace(titleRegex, '');
-            return `${title} ${year} — ${content}`.replace(/\s+/g, ' ').trim();
+            text = text.replace(titleRegex, '');
+            formatted.push(`${title} ${year} — ${text}`.replace(/\s+/g, ' ').trim());
+          } else if (title) {
+            formatted.push(`${title} ${year}`.trim());
+          } else {
+            formatted.push(`${text} ${year}`.trim());
           }
-          return `${title || content} ${year}`.trim();
-        }).filter(Boolean);
+        }
         handleMetaChange('accolades', formatted);
       }
     } catch (err: any) {

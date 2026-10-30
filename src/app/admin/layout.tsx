@@ -23,6 +23,7 @@ import {
   FolderKanban,
   ShieldCheck,
   FileText,
+  UserCircle,
 } from "lucide-react";
 import "./admin.css";
 
@@ -130,8 +131,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     {
       group: "SEO & SYSTEM SETTINGS",
       items: [
-        { href: "/admin/seo", label: "SEO & AI Visibility", icon: Globe },
+        { href: "/admin/seo", label: "SEO & Meta Data", icon: Globe },
         { href: "/admin/backup", label: "Data & Persistence", icon: ShieldCheck },
+        { href: "/admin/profile", label: "Profile & Security", icon: UserCircle },
       ],
     },
   ];
