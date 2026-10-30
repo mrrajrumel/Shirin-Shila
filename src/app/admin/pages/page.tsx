@@ -200,6 +200,33 @@ export default function AdminPagesManagement() {
     }
   };
 
+  const handleSyncFromTimeline = async () => {
+    try {
+      const res = await fetch('/api/timeline', { cache: 'no-store' });
+      const json = await res.json();
+      const items = [
+        ...(Array.isArray(json?.data?.top) ? json.data.top : []),
+        ...(Array.isArray(json?.data?.bottom) ? json.data.bottom : []),
+      ];
+      if (items.length > 0) {
+        const formatted = items.map((it: any) => {
+          const year = it.year ? `(${it.year})` : '';
+          const title = (it.title || '').trim();
+          let content = (it.content || '').trim();
+          if (title && content) {
+            const titleRegex = new RegExp(`^${title.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s*(—|-|:)?\\s*`, 'i');
+            content = content.replace(titleRegex, '');
+            return `${title} ${year} — ${content}`.replace(/\s+/g, ' ').trim();
+          }
+          return `${title || content} ${year}`.trim();
+        }).filter(Boolean);
+        handleMetaChange('accolades', formatted);
+      }
+    } catch (err: any) {
+      alert(`Sync error: ${err.message}`);
+    }
+  };
+
   const handlePortraitUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -369,14 +396,27 @@ export default function AdminPagesManagement() {
                   </div>
 
                   <div className="adm-form-group">
-                    <label className="adm-label">Subheading / Kicker</label>
+                    <label className="adm-label">
+                      {activeTab === 'about'
+                        ? 'Page Subheading / Tagline Banner'
+                        : 'Subheading / Kicker'}
+                    </label>
                     <input
                       type="text"
                       className="adm-input"
                       value={activePage.subheading || ''}
                       onChange={(e) => handleFieldChange('subheading', e.target.value)}
-                      placeholder="Page subtitle or status kicker..."
+                      placeholder={
+                        activeTab === 'about'
+                          ? 'Silver-Screen Dhallywood Actress, Television Reality Judge & Cultural Fashion Icon'
+                          : 'Page subtitle or status kicker...'
+                      }
                     />
+                    {activeTab === 'about' && (
+                      <span style={{ fontSize: '11px', color: 'var(--adm-text-muted)', marginTop: '4px', display: 'block' }}>
+                        Controls the prominent tagline: "Silver-Screen Dhallywood Actress, Television Reality Judge & Cultural Fashion Icon" on /about.
+                      </span>
+                    )}
                   </div>
 
                   {/* Main Content Area */}
@@ -513,18 +553,34 @@ export default function AdminPagesManagement() {
                         </div>
                       </div>
 
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '6px' }}>
-                        <span style={{ fontSize: '13px', fontWeight: 600, color: 'var(--tail-primary)' }}>
-                          Notable Accolades &amp; Honors
-                        </span>
-                        <button
-                          type="button"
-                          onClick={handleAddAccolade}
-                          className="adm-btn adm-btn-secondary adm-btn-sm"
-                        >
-                          <Plus size={12} />
-                          <span>Add Accolade</span>
-                        </button>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '6px', flexWrap: 'wrap', gap: '8px' }}>
+                        <div>
+                          <span style={{ fontSize: '13px', fontWeight: 600, color: 'var(--tail-primary)', display: 'block' }}>
+                            Notable Accolades &amp; Honors
+                          </span>
+                          <span style={{ fontSize: '11px', color: 'var(--adm-text-muted)' }}>
+                            Automatically synchronizes with your awards from Admin &gt; Awards &amp; Milestones (Timeline).
+                          </span>
+                        </div>
+                        <div style={{ display: 'flex', gap: '8px' }}>
+                          <button
+                            type="button"
+                            onClick={handleSyncFromTimeline}
+                            className="adm-btn adm-btn-secondary adm-btn-sm"
+                            title="Load latest awards from Timeline"
+                          >
+                            <RefreshCw size={12} />
+                            <span>Sync from Awards</span>
+                          </button>
+                          <button
+                            type="button"
+                            onClick={handleAddAccolade}
+                            className="adm-btn adm-btn-secondary adm-btn-sm"
+                          >
+                            <Plus size={12} />
+                            <span>Add Custom</span>
+                          </button>
+                        </div>
                       </div>
 
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>

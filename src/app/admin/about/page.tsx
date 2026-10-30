@@ -255,6 +255,26 @@ export default function AdminAboutPage() {
                 />
               </div>
 
+              <div className="adm-form-group">
+                <label className="adm-label">Page Subheading / Tagline Banner</label>
+                <input
+                  type="text"
+                  className="adm-input"
+                  value={about.subheading || about.meta?.subheading || ''}
+                  onChange={(e) =>
+                    setAbout({
+                      ...about,
+                      subheading: e.target.value,
+                      meta: { ...about.meta, subheading: e.target.value },
+                    })
+                  }
+                  placeholder="e.g. Silver-Screen Dhallywood Actress, Television Reality Judge & Cultural Fashion Icon"
+                />
+                <span style={{ fontSize: '11px', color: 'var(--adm-text-muted)', marginTop: '4px', display: 'block' }}>
+                  Displays directly beneath the main title on the public /about page.
+                </span>
+              </div>
+
               <div style={{ marginTop: '20px' }}>
                 <div
                   style={{

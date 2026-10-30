@@ -4,6 +4,7 @@ import { ArrowLeft, Award, Film, Star, CheckCircle } from 'lucide-react';
 import { readStore } from '@/lib/server-storage';
 import { aboutData as defaultAbout } from '@/data/about';
 import { PagesRegistry, defaultPagesRegistry } from '@/data/pages';
+import { JourneyItem, topJourneyData, bottomJourneyData } from '@/data/timeline';
 
 export const dynamic = 'force-dynamic';
 
@@ -16,23 +17,60 @@ export const metadata = {
 };
 
 export default async function AboutPage() {
-  const [about, pages] = await Promise.all([
+  const [about, pages, timelineData] = await Promise.all([
     readStore<any>('about').catch(() => defaultAbout),
     readStore<PagesRegistry>('pages').catch(() => defaultPagesRegistry),
+    readStore<any>('timeline').catch(() => null),
   ]);
 
   const activeAbout = about || defaultAbout;
   const pageConfig = pages?.about || defaultPagesRegistry.about;
 
+  const rawTimelineItems: JourneyItem[] = [
+    ...(Array.isArray(timelineData?.top) ? timelineData.top : topJourneyData),
+    ...(Array.isArray(timelineData?.bottom) ? timelineData.bottom : bottomJourneyData),
+  ];
+
+  // Derive dynamic accolades automatically from timeline/awards
+  const dynamicTimelineAccolades = rawTimelineItems
+    .map((item) => {
+      const year = item.year ? `(${item.year})` : '';
+      const title = (item.title || '').trim();
+      let content = (item.content || '').trim();
+
+      if (title && content) {
+        const titleRegex = new RegExp(`^${title.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s*(—|-|:)?\\s*`, 'i');
+        content = content.replace(titleRegex, '');
+        return `${title} ${year} — ${content}`.replace(/\s+/g, ' ').trim();
+      } else if (title) {
+        return `${title} ${year}`.trim();
+      } else if (content) {
+        return `${content} ${year}`.trim();
+      }
+      return '';
+    })
+    .filter(Boolean);
+
   const accoladesList =
-    Array.isArray(pageConfig.meta?.accolades) && pageConfig.meta.accolades.length > 0
+    pageConfig.meta?.useCustomAccolades === true && Array.isArray(pageConfig.meta?.accolades) && pageConfig.meta.accolades.length > 0
       ? pageConfig.meta.accolades
-      : [
-          'Babisas Best Actress Award (2019) — Awarded for leading role in "Begum Jaan"',
-          'Meril-Prothom Alo Awards Nominee (2014) — Best Debut Performance for "Hitman"',
-          'DIFF Best Actress Trophy (2024) — International Film Festival recognition',
-          'National Star Excellence Honor (2025) — Television & Cinema Contribution Crest',
-        ];
+      : (dynamicTimelineAccolades.length > 0
+          ? dynamicTimelineAccolades
+          : [
+              'Babisas Best Actress Award (2019) — Awarded for leading role in "Begum Jaan"',
+              'Meril-Prothom Alo Awards Nominee (2014) — Best Debut Performance for "Hitman"',
+              'DIFF Best Actress Trophy (2024) — International Film Festival recognition',
+              'National Star Excellence Honor (2025) — Television & Cinema Contribution Crest',
+            ]);
+
+  const babisasItem = rawTimelineItems.find((it) => /babisas/i.test(it.title || '') || /babisas/i.test(it.content || ''));
+  const diffItem = rawTimelineItems.find((it) => /diff/i.test(it.title || '') || /dhaka international/i.test(it.content || ''));
+
+  const displayedSubheading =
+    pageConfig.subheading ||
+    activeAbout?.subheading ||
+    activeAbout?.meta?.subheading ||
+    'Silver-Screen Dhallywood Actress, Television Reality Judge & Cultural Fashion Icon';
 
   return (
     <main style={{ minHeight: '100vh', backgroundColor: '#09090b', color: '#f8fafc', padding: '60px 20px' }}>
@@ -62,7 +100,7 @@ export default async function AboutPage() {
             {pageConfig.title || 'About Us'}
           </h1>
           <p style={{ fontSize: '18px', color: '#a1a1aa', lineHeight: 1.6 }}>
-            {pageConfig.subheading || activeAbout.subheading || 'Silver-Screen Dhallywood Actress, Television Reality Judge & Cultural Fashion Icon'}
+            {displayedSubheading}
           </p>
         </header>
 
@@ -93,13 +131,13 @@ export default async function AboutPage() {
               </div>
               <div style={{ background: '#18181b', padding: '12px 18px', borderRadius: '8px', border: '1px solid #27272a' }}>
                 <span style={{ fontSize: '20px', fontWeight: 800, color: '#ec4899', display: 'block' }}>
-                  {pageConfig.meta?.babisasYear || '2019'}
+                  {pageConfig.meta?.babisasYear || babisasItem?.year || '2019'}
                 </span>
                 <span style={{ fontSize: '12px', color: '#a1a1aa' }}>Babisas Best Actress</span>
               </div>
               <div style={{ background: '#18181b', padding: '12px 18px', borderRadius: '8px', border: '1px solid #27272a' }}>
                 <span style={{ fontSize: '20px', fontWeight: 800, color: '#ec4899', display: 'block' }}>
-                  {pageConfig.meta?.diffYear || '2024'}
+                  {pageConfig.meta?.diffYear || diffItem?.year || '2024'}
                 </span>
                 <span style={{ fontSize: '12px', color: '#a1a1aa' }}>DIFF Best Actress Trophy</span>
               </div>

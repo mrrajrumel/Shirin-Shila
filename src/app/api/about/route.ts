@@ -32,9 +32,11 @@ export async function POST(request: NextRequest) {
 
     const updated = {
       ...current,
+      subheading: body.subheading !== undefined ? body.subheading : (body.meta?.subheading || current.subheading || 'Silver-Screen Dhallywood Actress, Television Reality Judge & Cultural Fashion Icon'),
       meta: {
         ...current.meta,
         ...(body.meta || {}),
+        subheading: body.subheading !== undefined ? body.subheading : (body.meta?.subheading || current.meta?.subheading || 'Silver-Screen Dhallywood Actress, Television Reality Judge & Cultural Fashion Icon'),
       },
       biography: {
         ...current.biography,
@@ -62,6 +64,7 @@ export async function POST(request: NextRequest) {
 
     await writeStore('about', updated);
     revalidatePath('/');
+    revalidatePath('/about');
 
     return NextResponse.json({ success: true, about: updated });
   } catch (err: any) {
