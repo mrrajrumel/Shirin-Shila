@@ -46,6 +46,14 @@ export async function POST(request: NextRequest) {
       profileFacts: Array.isArray(body.profileFacts)
         ? body.profileFacts
         : current.profileFacts,
+      prestigeMilestones: Array.isArray(body.prestigeMilestones)
+        ? body.prestigeMilestones.map((item: any, i: number) => ({
+            id: item.id || `milestone-${i + 1}`,
+            title: item.title?.trim() || '',
+            subtitle: item.subtitle?.trim() || '',
+            icon: item.icon?.trim() || 'award',
+          }))
+        : (current.prestigeMilestones || []),
       compCardData: {
         ...current.compCardData,
         ...(body.compCardData || {}),

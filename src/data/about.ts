@@ -6,6 +6,19 @@ export interface ProfileFact {
   isHighlight?: boolean;
 }
 
+export interface PrestigeMilestone {
+  id: string;
+  title: string;
+  subtitle: string;
+  icon?: 'film' | 'award' | 'education' | string;
+}
+
+export const defaultPrestigeMilestones: PrestigeMilestone[] = [
+  { id: 'cinema-years', icon: 'film', title: '10+ Years', subtitle: 'Dhallywood Cinema' },
+  { id: 'babisas-award', icon: 'award', title: 'Babisas Award', subtitle: 'Best Actress' },
+  { id: 'msc-physics', icon: 'education', title: 'M.Sc. Physics', subtitle: 'Jahangirnagar Univ' },
+];
+
 export const profileFacts: ProfileFact[] = [
   { label: 'Screen Name', value: 'Shirin Shila (Shirin Akter)' },
   { label: 'Origin', value: 'Dhaka, Bangladesh' },
@@ -38,6 +51,7 @@ export const aboutData = {
   meta: aboutMeta,
   biography,
   profileFacts,
+  prestigeMilestones: defaultPrestigeMilestones,
   timeline,
 };
 

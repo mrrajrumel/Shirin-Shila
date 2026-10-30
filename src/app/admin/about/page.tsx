@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { User, Upload, Save, RefreshCw, Check, Plus, Trash2, Award, Star, FolderKanban } from 'lucide-react';
 import { MediaPickerModal } from '@/components/admin/media-picker-modal';
+import { defaultPrestigeMilestones } from '@/data/about';
 
 export default function AdminAboutPage() {
   const [about, setAbout] = useState<any>(null);
@@ -19,6 +20,9 @@ export default function AdminAboutPage() {
       const res = await fetch('/api/about', { cache: 'no-store' });
       const data = await res.json();
       if (data.about) {
+        if (!Array.isArray(data.about.prestigeMilestones) || data.about.prestigeMilestones.length === 0) {
+          data.about.prestigeMilestones = defaultPrestigeMilestones;
+        }
         // Filter out obsolete email/representation facts
         if (Array.isArray(data.about.profileFacts)) {
           data.about.profileFacts = data.about.profileFacts.filter(
@@ -153,6 +157,15 @@ export default function AdminAboutPage() {
     }));
   };
 
+  const handleMilestoneChange = (index: number, field: string, val: string) => {
+    const list = [...(about.prestigeMilestones || defaultPrestigeMilestones)];
+    list[index] = { ...list[index], [field]: val };
+    setAbout((prev: any) => ({
+      ...prev,
+      prestigeMilestones: list,
+    }));
+  };
+
   if (loading || !about) {
     return (
       <div style={{ padding: '40px', color: 'var(--adm-text-muted)' }}>
@@ -264,34 +277,60 @@ export default function AdminAboutPage() {
                   </button>
                 </div>
 
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
                   {about.biography.paragraphs.map((p: string, idx: number) => (
-                    <div key={idx} style={{ position: 'relative' }}>
+                    <div
+                      key={idx}
+                      style={{
+                        padding: '14px',
+                        background: '#f8fafc',
+                        borderRadius: '8px',
+                        border: '1px solid var(--adm-border)',
+                      }}
+                    >
+                      <div
+                        style={{
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'center',
+                          marginBottom: '8px',
+                        }}
+                      >
+                        <span style={{ fontSize: '12px', fontWeight: 700, color: 'var(--tail-text-dark)' }}>
+                          Story Paragraph {idx + 1}
+                        </span>
+                        {about.biography.paragraphs.length > 1 && (
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveParagraph(idx)}
+                            style={{
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '4px',
+                              background: '#fee2e2',
+                              border: 'none',
+                              color: '#dc2626',
+                              borderRadius: '4px',
+                              padding: '3px 8px',
+                              fontSize: '11px',
+                              fontWeight: 600,
+                              cursor: 'pointer',
+                            }}
+                            title="Remove paragraph"
+                          >
+                            <Trash2 size={12} />
+                            <span>Remove</span>
+                          </button>
+                        )}
+                      </div>
                       <textarea
                         className="adm-textarea"
-                        rows={3}
+                        rows={4}
                         value={p}
                         onChange={(e) => handleParagraphChange(idx, e.target.value)}
-                        placeholder={`Paragraph ${idx + 1}...`}
+                        placeholder={`Enter narrative for paragraph ${idx + 1}...`}
+                        style={{ width: '100%', resize: 'vertical', minHeight: '95px', lineHeight: 1.6 }}
                       />
-                      <button
-                        type="button"
-                        onClick={() => handleRemoveParagraph(idx)}
-                        style={{
-                          position: 'absolute',
-                          top: '8px',
-                          right: '8px',
-                          background: 'rgba(239, 68, 68, 0.2)',
-                          border: 'none',
-                          color: '#ef4444',
-                          borderRadius: '4px',
-                          padding: '4px 6px',
-                          cursor: 'pointer',
-                        }}
-                        title="Remove paragraph"
-                      >
-                        <Trash2 size={12} />
-                      </button>
                     </div>
                   ))}
                 </div>
@@ -496,6 +535,79 @@ export default function AdminAboutPage() {
                   ))}
                 </div>
               </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Prestige Milestone Highlights (3 Cards on Homepage) */}
+          <div className="adm-card" style={{ marginTop: '24px' }}>
+            <div className="adm-card-header">
+              <div>
+                <span className="adm-card-title">Prestige Milestone Cards (Homepage Accolade Bar)</span>
+                <p style={{ margin: '4px 0 0', fontSize: '12px', color: 'var(--tail-text-body)' }}>
+                  Manage the 3 prestige accolade badges (10+ Years Dhallywood Cinema, Babisas Best Actress Award, M.Sc. Physics Jahangirnagar Univ).
+                </p>
+              </div>
+            </div>
+            <div className="adm-card-body">
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '16px' }}>
+                {(about.prestigeMilestones || defaultPrestigeMilestones).map((m: any, idx: number) => (
+                  <div
+                    key={m.id || idx}
+                    style={{
+                      padding: '16px',
+                      borderRadius: '8px',
+                      border: '1px solid var(--adm-border)',
+                      background: '#f8fafc',
+                    }}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
+                      <span className="adm-badge adm-badge-blue" style={{ fontSize: '11px' }}>
+                        Badge Card {idx + 1}
+                      </span>
+                      <span style={{ fontSize: '13px', fontWeight: 700, color: 'var(--tail-text-dark)' }}>
+                        {m.title || `Milestone ${idx + 1}`}
+                      </span>
+                    </div>
+
+                    <div className="adm-form-group" style={{ marginBottom: '12px' }}>
+                      <label className="adm-label">Primary Headline Title</label>
+                      <input
+                        type="text"
+                        className="adm-input"
+                        value={m.title}
+                        onChange={(e) => handleMilestoneChange(idx, 'title', e.target.value)}
+                        placeholder="e.g. 10+ Years"
+                        required
+                      />
+                    </div>
+
+                    <div className="adm-form-group" style={{ marginBottom: '12px' }}>
+                      <label className="adm-label">Sub-Headline / Affiliation</label>
+                      <input
+                        type="text"
+                        className="adm-input"
+                        value={m.subtitle}
+                        onChange={(e) => handleMilestoneChange(idx, 'subtitle', e.target.value)}
+                        placeholder="e.g. Dhallywood Cinema"
+                        required
+                      />
+                    </div>
+
+                    <div className="adm-form-group" style={{ margin: 0 }}>
+                      <label className="adm-label">Icon Category</label>
+                      <select
+                        className="adm-input"
+                        value={m.icon || 'award'}
+                        onChange={(e) => handleMilestoneChange(idx, 'icon', e.target.value)}
+                      >
+                        <option value="film">Film &amp; Cinema (Film Reel Icon)</option>
+                        <option value="award">Accolade &amp; Honor (Trophy Award Icon)</option>
+                        <option value="education">Academic Degree (Graduation Cap Icon)</option>
+                      </select>
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
           </div>

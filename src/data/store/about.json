@@ -23,5 +23,10 @@
     { "label": "Languages", "value": "Bengali, English, Hindi" },
     { "label": "Height", "value": "5 ft 4 in (163 cm)" },
     { "label": "Disciplines", "value": "Acting, Classical Dance, TV Judge" }
+  ],
+  "prestigeMilestones": [
+    { "id": "cinema-years", "icon": "film", "title": "10+ Years", "subtitle": "Dhallywood Cinema" },
+    { "id": "babisas-award", "icon": "award", "title": "Babisas Award", "subtitle": "Best Actress" },
+    { "id": "msc-physics", "icon": "education", "title": "M.Sc. Physics", "subtitle": "Jahangirnagar Univ" }
   ]
 }

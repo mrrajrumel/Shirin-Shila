@@ -3,7 +3,13 @@
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Award, Film, GraduationCap } from "lucide-react";
-import { biography as defaultBio, profileFacts as defaultFacts, aboutMeta as defaultMeta } from "@/data/about";
+import {
+  biography as defaultBio,
+  profileFacts as defaultFacts,
+  aboutMeta as defaultMeta,
+  defaultPrestigeMilestones,
+  PrestigeMilestone,
+} from "@/data/about";
 
 export interface AboutSectionProps {
   id?: string;
@@ -11,12 +17,18 @@ export interface AboutSectionProps {
     meta?: typeof defaultMeta;
     biography?: typeof defaultBio;
     profileFacts?: typeof defaultFacts;
+    prestigeMilestones?: PrestigeMilestone[];
   };
 }
 
 export function OnePageAbout({ id = "about", initialData }: AboutSectionProps) {
   const [aboutMeta, setAboutMeta] = useState(initialData?.meta || defaultMeta);
   const [biography, setBiography] = useState(initialData?.biography || defaultBio);
+  const [prestigeMilestones, setPrestigeMilestones] = useState<PrestigeMilestone[]>(
+    initialData?.prestigeMilestones && initialData.prestigeMilestones.length > 0
+      ? initialData.prestigeMilestones
+      : defaultPrestigeMilestones
+  );
   const [profileFacts, setProfileFacts] = useState(() => {
     const raw = initialData?.profileFacts || defaultFacts;
     return raw.filter((f: any) => !/representation|email/i.test(f.label || ""));
@@ -29,6 +41,9 @@ export function OnePageAbout({ id = "about", initialData }: AboutSectionProps) {
         if (data && data.about) {
           if (data.about.meta) setAboutMeta(data.about.meta);
           if (data.about.biography) setBiography(data.about.biography);
+          if (Array.isArray(data.about.prestigeMilestones) && data.about.prestigeMilestones.length > 0) {
+            setPrestigeMilestones(data.about.prestigeMilestones);
+          }
           if (Array.isArray(data.about.profileFacts)) {
             const cleanFacts = data.about.profileFacts.filter(
               (f: any) => !/representation|email/i.test(f.label || "")
@@ -97,27 +112,25 @@ export function OnePageAbout({ id = "about", initialData }: AboutSectionProps) {
 
           {/* Prestige Milestone Highlights Bar */}
           <div className="about-prestige-bar">
-            <div className="about-prestige-card">
-              <Film size={18} className="prestige-icon" />
-              <div className="prestige-info">
-                <span className="prestige-title">10+ Years</span>
-                <span className="prestige-sub">Dhallywood Cinema</span>
-              </div>
-            </div>
-            <div className="about-prestige-card">
-              <Award size={18} className="prestige-icon pink" />
-              <div className="prestige-info">
-                <span className="prestige-title">Babisas Award</span>
-                <span className="prestige-sub">Best Actress</span>
-              </div>
-            </div>
-            <div className="about-prestige-card">
-              <GraduationCap size={18} className="prestige-icon" />
-              <div className="prestige-info">
-                <span className="prestige-title">M.Sc. Physics</span>
-                <span className="prestige-sub">Jahangirnagar Univ</span>
-              </div>
-            </div>
+            {prestigeMilestones.map((item, idx) => {
+              const isAward = item.icon === 'award';
+              const isFilm = item.icon === 'film';
+              return (
+                <div className="about-prestige-card" key={item.id || idx}>
+                  {isFilm ? (
+                    <Film size={18} className="prestige-icon" />
+                  ) : isAward ? (
+                    <Award size={18} className="prestige-icon pink" />
+                  ) : (
+                    <GraduationCap size={18} className="prestige-icon" />
+                  )}
+                  <div className="prestige-info">
+                    <span className="prestige-title">{item.title}</span>
+                    <span className="prestige-sub">{item.subtitle}</span>
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </motion.div>
 
