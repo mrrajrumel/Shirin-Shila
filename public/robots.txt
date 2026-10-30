@@ -1,0 +1,12 @@
+# Robots.txt for Shirin Shila Portfolio
+User-agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /api/
+
+# Content-Signal Directive (AI & Agent Content Usage Policy)
+Content-Signal: search=yes, ai-train=no
+
+# Sitemap Directives
+Sitemap: https://cornflowerblue-wildcat-675604.hostingersite.com/sitemap.xml
+Sitemap: https://shirinshila.com/sitemap.xml

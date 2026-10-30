@@ -1,0 +1,83 @@
+{
+  "$schema": "https://modelcontextprotocol.io/schemas/server-card/v1.json",
+  "name": "shirin-shila-portfolio-mcp",
+  "version": "1.0.0",
+  "description": "Model Context Protocol (MCP) server for querying Dhallywood film actress Shirin Shila's official portfolio, filmography catalog, career showreels, press archive, and submitting verified booking inquiries.",
+  "endpoint": "https://cornflowerblue-wildcat-675604.hostingersite.com/api/mcp",
+  "homepage": "https://cornflowerblue-wildcat-675604.hostingersite.com",
+  "capabilities": {
+    "tools": {
+      "listChanged": false
+    },
+    "resources": {
+      "subscribe": false,
+      "listChanged": false
+    },
+    "prompts": {
+      "listChanged": false
+    }
+  },
+  "tools": [
+    {
+      "name": "get_filmography",
+      "description": "Retrieve the complete verified filmography of Shirin Shila including movie titles, co-stars, directors, release years, and roles",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": ["all", "released", "upcoming"],
+            "description": "Filter movies by release status"
+          },
+          "query": {
+            "type": "string",
+            "description": "Search query for movie title or co-star"
+          }
+        }
+      }
+    },
+    {
+      "name": "get_bio_and_awards",
+      "description": "Retrieve biographical highlights, Babisas Best Actress honors, DIFF trophies, and career timeline for Shirin Shila",
+      "inputSchema": {
+        "type": "object",
+        "properties": {}
+      }
+    },
+    {
+      "name": "submit_inquiry",
+      "description": "Submit a casting, media appearance, or acting booking inquiry directly to Shirin Shila talent management desk",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Full name of producer or casting director"
+          },
+          "email": {
+            "type": "string",
+            "description": "Verified business email"
+          },
+          "phone": {
+            "type": "string",
+            "description": "Contact telephone or WhatsApp"
+          },
+          "service": {
+            "type": "string",
+            "description": "Engagement category (e.g. Feature Film Lead Role, Commercial Endorsement, Reality Show Judge)"
+          },
+          "message": {
+            "type": "string",
+            "description": "Project brief, shooting timeline, and character description"
+          }
+        },
+        "required": ["name", "email", "message"]
+      }
+    }
+  ],
+  "contact": {
+    "name": "Shirin Shila Official Management Desk",
+    "email": "booking@shirinshila.com",
+    "url": "https://cornflowerblue-wildcat-675604.hostingersite.com/contact"
+  }
+}

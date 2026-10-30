@@ -52,3 +52,4 @@ Schema migrations execute **automatically and idempotently** on server boot via 
 | `Access denied for user` | Incorrect password or username | Verify `DATABASE_USER` and `DATABASE_PASSWORD` in Node.js environment variables. |
 | Remote tool cannot connect | Missing remote IP rule | Add client IP or `%` under **Databases** $\rightarrow$ **Remote MySQL** in hPanel. |
 | Application serving default content | Database credentials not detected | Check if `DATABASE_PASSWORD` is configured in environment variables. |
+

@@ -44,8 +44,27 @@ async function verifyHmacSignature(encodedPayload: string, signature: string): P
 }
 
 export async function middleware(request: NextRequest) {
-  const { pathname } = request.nextUrl;
+  const { pathname, searchParams } = request.nextUrl;
 
+  // 1. Agent Negotiation: Serve Markdown when requested via Accept header or query param
+  const acceptHeader = request.headers.get('accept') || '';
+  const wantsMarkdown =
+    acceptHeader.includes('text/markdown') ||
+    acceptHeader.includes('text/x-markdown') ||
+    searchParams.get('format') === 'markdown';
+
+  if ((pathname === '/' || pathname === '') && wantsMarkdown) {
+    const markdownUrl = new URL('/api/markdown', request.url);
+    const response = NextResponse.rewrite(markdownUrl);
+    response.headers.set(
+      'Link',
+      '</llms.txt>; rel="describedby", </llms-full.txt>; rel="describedby", </api/markdown>; rel="alternate"; type="text/markdown", </.well-known/mcp/server-card.json>; rel="service-desc"'
+    );
+    response.headers.set('Vary', 'Accept');
+    return response;
+  }
+
+  // 2. Admin Authentication Checks
   if (pathname.startsWith('/admin')) {
     const sessionCookie = request.cookies.get('shirin_shila_admin_session')?.value;
     const isLoginPage = pathname === '/admin/login';
@@ -99,9 +118,16 @@ export async function middleware(request: NextRequest) {
     }
   }
 
-  return NextResponse.next();
+  // 3. Default response with RFC 8288 Link header for agent discovery
+  const response = NextResponse.next();
+  response.headers.set(
+    'Link',
+    '</llms.txt>; rel="describedby", </llms-full.txt>; rel="describedby", </api/markdown>; rel="alternate"; type="text/markdown", </.well-known/mcp/server-card.json>; rel="service-desc"'
+  );
+  response.headers.set('Vary', 'Accept');
+  return response;
 }
 
 export const config = {
-  matcher: ['/admin/:path*'],
+  matcher: ['/((?!_next/static|_next/image|favicon.ico|icon.svg|apple-icon.png|images|documents|uploads).*)'],
 };

@@ -46,3 +46,4 @@ The application provides two complementary backup tiers:
   `/home/u473489494/shirin_shila_persistent_data/uploads/`
 - This directory is not affected by Git deployment checkouts.
 - In the event of catastrophic server disk re-imaging, media assets can be restored by re-uploading the backup media directory.
+

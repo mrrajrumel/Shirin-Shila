@@ -30,3 +30,4 @@
 1. **Instant On-Demand SSR**: Public visitors hitting `GET /` trigger the server component to query Hostinger MySQL in real-time, completely bypassing static build artifacts.
 2. **Cross-Tab Storage Signals**: Every mutation saves to MySQL, dispatches an intra-window event (`shirin_shila_*_updated`), and writes a timestamp to `localStorage` (`shirin_shila_sync_*`). This causes all open tabs across the browser to immediately revalidate without requiring a page refresh.
 3. **No-Store HTTP Directives**: All dynamic API routes output `Cache-Control: no-store, no-cache, must-revalidate`.
+

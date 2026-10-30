@@ -154,3 +154,4 @@ CREATE TABLE IF NOT EXISTS admin_users (
 - **Internal Hostinger Network**: The deployed Node.js application connects to `127.0.0.1:3306` over local IPC/loopback.
 - **External Administration**: Authorized external management connects to `srv1647.hstgr.io:3306` using Hostinger remote connection access rules.
 - **Graceful Fallback**: If the database server is ever temporarily unreachable, `server-storage.ts` falls back transparently to the verified local persistent file store, guaranteeing zero downtime.
+

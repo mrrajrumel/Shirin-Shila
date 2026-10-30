@@ -30,18 +30,20 @@ const nextConfig = {
             key: 'Permissions-Policy',
             value: 'camera=(), microphone=(), geolocation=()',
           },
+          {
+            key: 'Link',
+            value: '</llms.txt>; rel="describedby", </llms-full.txt>; rel="describedby", </api/markdown>; rel="alternate"; type="text/markdown", </.well-known/mcp/server-card.json>; rel="service-desc"',
+          },
         ],
       },
     ];
   },
   async redirects() {
     return [
-      { source: '/about', destination: '/#about', permanent: true },
       { source: '/filmography', destination: '/#filmography', permanent: true },
       { source: '/works', destination: '/#filmography', permanent: true },
       { source: '/projects', destination: '/#filmography', permanent: true },
       { source: '/press', destination: '/#press', permanent: true },
-      { source: '/contact', destination: '/#contact', permanent: true },
     ];
   },
 };

@@ -396,7 +396,16 @@ export function OnePageContact({ id = "contact", initialInfo }: ContactSectionPr
                 </div>
               </div>
             ) : (
-              <form onSubmit={handleSubmit} className="booking-form-fields">
+              <form
+                onSubmit={handleSubmit}
+                className="booking-form-fields"
+                data-toolname="submit_booking_inquiry"
+                data-tooldescription="Send a casting or talent booking inquiry directly to Shirin Shila official management desk"
+                {...({
+                  toolname: "submit_booking_inquiry",
+                  tooldescription: "Send a casting or talent booking inquiry directly to Shirin Shila official management desk"
+                } as any)}
+              >
                 <div className="form-field-group">
                   <label className="field-lbl">Your Name / Production House *</label>
                   <input
@@ -406,6 +415,7 @@ export function OnePageContact({ id = "contact", initialInfo }: ContactSectionPr
                     onChange={(e) => setForm({ ...form, name: e.target.value })}
                     placeholder="e.g. Bangladesh Film Development Corp / Brand Agency"
                     className="field-input"
+                    {...({ toolparam: "name" } as any)}
                   />
                 </div>
 
@@ -419,6 +429,7 @@ export function OnePageContact({ id = "contact", initialInfo }: ContactSectionPr
                       onChange={(e) => setForm({ ...form, email: e.target.value })}
                       placeholder="producer@studio.com"
                       className="field-input"
+                      {...({ toolparam: "email" } as any)}
                     />
                   </div>
                   <div className="form-field-group">
@@ -429,6 +440,7 @@ export function OnePageContact({ id = "contact", initialInfo }: ContactSectionPr
                       onChange={(e) => setForm({ ...form, phone: e.target.value })}
                       placeholder="+880 1..."
                       className="field-input"
+                      {...({ toolparam: "phone" } as any)}
                     />
                   </div>
                 </div>
@@ -439,6 +451,7 @@ export function OnePageContact({ id = "contact", initialInfo }: ContactSectionPr
                     value={form.inquiryType}
                     onChange={(e) => setForm({ ...form, inquiryType: e.target.value })}
                     className="field-select"
+                    {...({ toolparam: "service" } as any)}
                   >
                     {inquiryTypes.map((type) => (
                       <option key={type.value} value={type.value}>
@@ -457,6 +470,7 @@ export function OnePageContact({ id = "contact", initialInfo }: ContactSectionPr
                     onChange={(e) => setForm({ ...form, message: e.target.value })}
                     placeholder="Please include project background, director credentials, anticipated timeline, and character or campaign scope..."
                     className="field-textarea"
+                    {...({ toolparam: "message" } as any)}
                   />
                 </div>
 

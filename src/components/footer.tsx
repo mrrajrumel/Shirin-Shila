@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import Link from "next/link";
 import { motion } from "framer-motion";
 import { ArrowUp } from "lucide-react";
 import { footerData } from "@/data/footer";
@@ -56,6 +57,42 @@ export function Footer() {
             {link.label}
           </a>
         ))}
+      </div>
+
+      {/* Standalone Legal, Representation & Agent Verification Row */}
+      <div
+        className="footer-legal-row"
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          flexWrap: "wrap",
+          gap: "18px",
+          padding: "14px 0",
+          borderTop: "1px solid var(--border-subtle, rgba(255,255,255,0.08))",
+          borderBottom: "1px solid var(--border-subtle, rgba(255,255,255,0.08))",
+          margin: "16px 0",
+          fontSize: "12.5px",
+        }}
+      >
+        <Link href="/about" style={{ color: "#a1a1aa", textDecoration: "none" }}>
+          About Artist
+        </Link>
+        <span style={{ color: "#3f3f46" }}>•</span>
+        <Link href="/contact" style={{ color: "#a1a1aa", textDecoration: "none" }}>
+          Contact &amp; Booking Desk
+        </Link>
+        <span style={{ color: "#3f3f46" }}>•</span>
+        <Link href="/terms" style={{ color: "#a1a1aa", textDecoration: "none" }}>
+          Terms of Representation
+        </Link>
+        <span style={{ color: "#3f3f46" }}>•</span>
+        <Link href="/privacy" style={{ color: "#a1a1aa", textDecoration: "none" }}>
+          Privacy Policy
+        </Link>
+        <span style={{ color: "#3f3f46" }}>•</span>
+        <a href="/llms.txt" target="_blank" rel="noreferrer" style={{ color: "#ec4899", textDecoration: "none", fontWeight: 600 }}>
+          llms.txt
+        </a>
       </div>
 
       <div className="footer-bottom-row">

@@ -1,0 +1,33 @@
+# Shirin Shila — Official Cinema Portfolio & Casting Desk
+
+> Official portfolio of Bangladeshi silver-screen film actress, television reality show judge, and model Shirin Shila (Shirin Akter).
+
+## Overview
+Shirin Shila is an acclaimed Dhallywood film actress based in Dhaka, Bangladesh. She debuted in 2014 in the blockbuster feature "Hitman" alongside superstar Shakib Khan, earned the Babisas Best Actress Award in 2019 for "Begum Jaan", starred in historical liberation war cinema "Birangona 71", and continues to headline high-profile films such as "Shesh Baji" (2024), "Ghor Vanga Songsar", and "Jimmi". Beyond cinema, she serves as a celebrity judge on nationwide television reality competitions and acts as a cultural brand ambassador.
+
+## Key Pages & Endpoints
+- [Home](https://cornflowerblue-wildcat-675604.hostingersite.com/): Official cinematic portfolio featuring 3D parallax gallery, filmography poster carousel, active career milestones, and live TV broadcaster marquee.
+- [About](https://cornflowerblue-wildcat-675604.hostingersite.com/about): Complete biography, acting credentials, industry accolades, and career statistics.
+- [Contact & Booking Desk](https://cornflowerblue-wildcat-675604.hostingersite.com/contact): Direct point of contact for directors, producers, advertising agencies, and corporate event organizers.
+- [Terms of Representation](https://cornflowerblue-wildcat-675604.hostingersite.com/terms): Official representation policy, talent booking guidelines, media usage rights, and AI likeness policy.
+- [Privacy Policy](https://cornflowerblue-wildcat-675604.hostingersite.com/privacy): Data protection, script confidentiality, and inquiry handling terms.
+- [Full LLM Context](https://cornflowerblue-wildcat-675604.hostingersite.com/llms-full.txt): Deep comprehensive text catalog of all movies, co-stars, directors, showreels, awards, and press archive.
+- [MCP Server Card](https://cornflowerblue-wildcat-675604.hostingersite.com/.well-known/mcp/server-card.json): Model Context Protocol (SEP-1649) discovery card for in-agent tool calling.
+
+## Core Filmography
+- **Hitman (2014)**: Silver-screen debut opposite Shakib Khan; action-romance directed by Wazed Ali Sumon; nominated for Meril-Prothom Alo Awards.
+- **Begum Jaan (2019)**: Title lead role; dramatic performance directed by Mohammad Aslam; Winner of Babisas Best Actress Award.
+- **Birangona 71 (2022)**: Historical 1971 Liberation War patriotic drama directed by M. Sakhawat Hossain.
+- **Shesh Baji (2024)**: Psychological suspense thriller directed by Mehedi Hasan.
+- **Ghor Vanga Songsar (2023)**: Family socio-drama directed by Montazur Rahman Akbar.
+- **Jimmi (2023)**: Action-thriller directed by Monowar Hossain Dipjol.
+
+## Representation & Inquiries
+- **Talent Management Email**: booking@shirinshila.com
+- **Phone / WhatsApp**: +880 1711-000000
+- **Location**: Dhaka, Bangladesh (Available for global shooting schedules)
+- **Turnaround**: 24-48 hours for verified industry inquiries
+
+## Machine & AI Usage Policies
+- **Content-Signal**: search=yes, ai-train=no
+- **Synthetic Likeness / Deepfake Training**: Strictly prohibited without explicit contractual license.

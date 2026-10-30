@@ -115,3 +115,4 @@ To provide complete resilience against server restarts or network partitions, th
 The Admin Dashboard now features a live health indicator connected to `/api/db-status`:
 - **Connected State:** Displays a green badge `"Hostinger MySQL Connected"` with host name (`127.0.0.1`), database name (`u473489494_shirin`), and pool readiness.
 - **Failover State:** If database is unreachable, clearly displays fallback to persistent storage without throwing unhandled exceptions to the administrator.
+

@@ -3,6 +3,7 @@ import './globals.css';
 import { readStore } from '@/lib/server-storage';
 import { SiteSeoData, defaultSeoData } from '@/data/seo';
 import { CustomHeadInjector } from '@/lib/custom-head';
+import { WebMcpProvider } from '@/components/webmcp-provider';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -10,22 +11,30 @@ export const revalidate = 0;
 export async function generateMetadata(): Promise<Metadata> {
   const seo = (await readStore<SiteSeoData>('seo')) || defaultSeoData;
 
+  const siteUrl = seo.siteUrl || 'https://cornflowerblue-wildcat-675604.hostingersite.com';
   const title = seo.siteTitle || defaultSeoData.siteTitle;
   const description = seo.description || defaultSeoData.description;
   const keywords = (seo.keywords || defaultSeoData.keywords).split(',').map((k) => k.trim());
   const ogImage = seo.ogImage || '/images/hero.jpg';
 
   return {
-    metadataBase: new URL(seo.siteUrl || 'https://shirinshila.com'),
+    metadataBase: new URL(siteUrl),
+    alternates: {
+      canonical: '/',
+      languages: {
+        'en-US': '/',
+        'bn-BD': '/',
+      },
+    },
     title: {
       default: title,
       template: `%s | ${seo.tagline || 'Shirin Shila'}`,
     },
     description,
     keywords,
-    authors: [{ name: seo.author || 'Shirin Shila', url: seo.siteUrl || 'https://shirinshila.com' }],
+    authors: [{ name: seo.author || 'Shirin Shila', url: siteUrl }],
     creator: 'Rumel Ahmed',
-    publisher: 'Tune Soul Ocean',
+    publisher: 'Shirin Shila Official Management',
     icons: {
       icon: [
         { url: '/favicon.ico', sizes: 'any' },
@@ -40,7 +49,7 @@ export async function generateMetadata(): Promise<Metadata> {
     openGraph: {
       title: seo.ogTitle || title,
       description: seo.ogDescription || description,
-      url: seo.siteUrl || 'https://shirinshila.com',
+      url: siteUrl,
       siteName: 'Shirin Shila Official Portfolio',
       locale: 'en_US',
       type: 'website',
@@ -80,10 +89,163 @@ export default async function RootLayout({
   children: React.ReactNode;
 }) {
   const seo = (await readStore<SiteSeoData>('seo')) || defaultSeoData;
+  const siteUrl = seo.siteUrl || 'https://cornflowerblue-wildcat-675604.hostingersite.com';
+
+  const structuredDataGraph = {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": ["Organization", "PerformingGroup"],
+        "@id": `${siteUrl}/#organization`,
+        "name": "Shirin Shila Official Management Desk",
+        "legalName": "Shirin Shila Talent & Media Representation",
+        "url": siteUrl,
+        "logo": `${siteUrl}/icon.svg`,
+        "email": "booking@shirinshila.com",
+        "telephone": "+8801711000000",
+        "description": "Official talent representation and booking management for Dhallywood film actress and model Shirin Shila.",
+        "address": {
+          "@type": "PostalAddress",
+          "addressLocality": "Dhaka",
+          "addressRegion": "Dhaka Division",
+          "addressCountry": "BD"
+        },
+        "founder": { "@id": `${siteUrl}/#person` },
+        "member": [{ "@id": `${siteUrl}/#person` }],
+        "sameAs": [
+          "https://www.facebook.com/shirinshilaofficial",
+          "https://www.instagram.com/shirin_shila",
+          "https://www.youtube.com/@shirinshilaofficial"
+        ]
+      },
+      {
+        "@type": "Person",
+        "@id": `${siteUrl}/#person`,
+        "name": "Shirin Shila",
+        "alternateName": ["Shirin Akter", "শিরিন শিলা"],
+        "birthDate": "1996-08-26",
+        "birthPlace": {
+          "@type": "Place",
+          "name": "Dhaka, Bangladesh"
+        },
+        "gender": "Female",
+        "jobTitle": "Film Actress, Television Star & Reality Show Judge",
+        "nationality": {
+          "@type": "Country",
+          "name": "Bangladesh"
+        },
+        "worksFor": { "@id": `${siteUrl}/#organization` },
+        "affiliation": { "@id": `${siteUrl}/#organization` },
+        "url": siteUrl,
+        "image": `${siteUrl}/images/hero.jpg`,
+        "award": [
+          "Babisas Best Actress Award (2019) for Begum Jaan",
+          "Meril-Prothom Alo Awards Nominee (2014) for Hitman",
+          "DIFF Best Actress Trophy Presentation (2024)",
+          "National Star Excellence Crest (2025)"
+        ],
+        "performerIn": [
+          {
+            "@type": "Movie",
+            "name": "Hitman",
+            "datePublished": "2014",
+            "director": { "@type": "Person", "name": "Wazed Ali Sumon" },
+            "actor": [{ "@type": "Person", "name": "Shakib Khan" }, { "@type": "Person", "name": "Shirin Shila" }]
+          },
+          {
+            "@type": "Movie",
+            "name": "Begum Jaan",
+            "datePublished": "2019",
+            "director": { "@type": "Person", "name": "Mohammad Aslam" },
+            "award": "Babisas Best Actress Award (2019)"
+          },
+          {
+            "@type": "Movie",
+            "name": "Birangona 71",
+            "datePublished": "2022",
+            "director": { "@type": "Person", "name": "M. Sakhawat Hossain" }
+          },
+          {
+            "@type": "Movie",
+            "name": "Shesh Baji",
+            "datePublished": "2024",
+            "director": { "@type": "Person", "name": "Mehedi Hasan" }
+          }
+        ],
+        "sameAs": [
+          "https://www.facebook.com/shirin.shila.5",
+          "https://www.facebook.com/shirinshilaofficial",
+          "https://www.instagram.com/shirin_shila",
+          "https://www.youtube.com/@shirinshilaofficial",
+          "https://www.tiktok.com/@shirinshilaofficial",
+          "https://www.imdb.com/name/nm6897284/",
+          "https://bn.wikipedia.org/wiki/%E0%A6%B6%E0%A6%BF%E0%A6%B0%E0%A6%BF%E0%A6%A8_%E0%A6%B6%E0%A6%BF%E0%A6%B2%E0%A6%BE",
+          "https://share.google/t32VCGGg4i72ZQ1nq"
+        ]
+      },
+      {
+        "@type": "WebSite",
+        "@id": `${siteUrl}/#website`,
+        "url": siteUrl,
+        "name": "Shirin Shila Official Cinema Portfolio",
+        "description": "Official casting and film portfolio of Bangladeshi silver-screen actress Shirin Shila.",
+        "publisher": { "@id": `${siteUrl}/#organization` },
+        "inLanguage": ["en", "bn"]
+      },
+      {
+        "@type": "Service",
+        "@id": `${siteUrl}/#services`,
+        "serviceType": "Acting, Film Castings & Commercial Engagements",
+        "provider": { "@id": `${siteUrl}/#organization` },
+        "areaServed": "Worldwide",
+        "hasOfferCatalog": {
+          "@type": "OfferCatalog",
+          "name": "Professional Engagements",
+          "itemListElement": [
+            { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Feature Film Lead Roles" } },
+            { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Television Reality Show Judge" } },
+            { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Brand Ambassador & Commercials" } },
+            { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Cultural Gala & Stage Appearances" } }
+          ]
+        }
+      },
+      {
+        "@type": "FAQPage",
+        "@id": `${siteUrl}/#faq`,
+        "mainEntity": [
+          {
+            "@type": "Question",
+            "name": "Who represents actress Shirin Shila for professional bookings?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Shirin Shila is officially represented through her official talent management desk. Inquiries for films, brand endorsements, reality shows, and media appearances can be submitted directly via the booking portal on this website."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "What was Shirin Shila's breakthrough movie?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Shirin Shila debuted in 2014 in the blockbuster Dhallywood action film 'Hitman' alongside Shakib Khan, followed by her critically acclaimed lead role in 'Begum Jaan' (2019) for which she won the Babisas Best Actress Award."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "How can filmmakers and casting directors request showreels and schedule casting sessions?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Full 4K casting showreels, high-resolution comp cards, and scheduling requests are available via the contact portal or by emailing booking@shirinshila.com."
+            }
+          }
+        ]
+      }
+    ]
+  };
 
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
+        <link rel="canonical" href={siteUrl} />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link
@@ -91,52 +253,21 @@ export default async function RootLayout({
           rel="stylesheet"
         />
 
-        {/* Custom Header Code Injection (Google Search Console Verification, Analytics, Meta Tags) */}
+        {/* Custom Header Code Injection */}
         {seo.customHeadHtml && <CustomHeadInjector html={seo.customHeadHtml} />}
+
+        {/* Comprehensive Multi-Schema JSON-LD Graph */}
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
-            __html: JSON.stringify({
-              "@context": "https://schema.org",
-              "@type": "Person",
-              "name": "Shirin Shila",
-              "alternateName": ["Shirin Akter", "শিরিন শিলা"],
-              "birthDate": "1996-08-26",
-              "birthPlace": {
-                "@type": "Place",
-                "name": "Dhaka, Bangladesh"
-              },
-              "jobTitle": "Film Actress, Television Star & Reality Show Judge",
-              "nationality": "Bangladeshi",
-              "url": "https://shirinshila.com",
-              "image": "https://shirinshila.com/images/hero.jpg",
-              "award": [
-                "Babisas Best Actress Award (2019) for Begum Jaan",
-                "Meril-Prothom Alo Awards Nominee (2014) for Hitman",
-                "DIFF Best Actress Trophy Presentation (2024)",
-                "National Star Excellence Crest (2025)"
-              ],
-              "performerIn": [
-                { "@type": "Movie", "name": "Hitman", "datePublished": "2014" },
-                { "@type": "Movie", "name": "Begum Jaan", "datePublished": "2019" },
-                { "@type": "Movie", "name": "Birangona 71", "datePublished": "2022" },
-                { "@type": "Movie", "name": "Shesh Baji", "datePublished": "2024" }
-              ],
-              "sameAs": [
-                "https://www.facebook.com/shirin.shila.5",
-                "https://www.facebook.com/shirinshilaofficial",
-                "https://www.instagram.com/shirin_shila",
-                "https://www.youtube.com/@shirinshilaofficial",
-                "https://www.tiktok.com/@shirinshilaofficial",
-                "https://www.imdb.com/name/nm6897284/",
-                "https://bn.wikipedia.org/wiki/%E0%A6%B6%E0%A6%BF%E0%A6%B0%E0%A6%BF%E0%A6%A8_%E0%A6%B6%E0%A6%BF%E0%A6%B2%E0%A6%BE",
-                "https://share.google/t32VCGGg4i72ZQ1nq"
-              ]
-            })
+            __html: JSON.stringify(structuredDataGraph),
           }}
         />
       </head>
-      <body suppressHydrationWarning>{children}</body>
+      <body suppressHydrationWarning>
+        <WebMcpProvider />
+        {children}
+      </body>
     </html>
   );
 }
