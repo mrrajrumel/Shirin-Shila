@@ -1,10 +1,26 @@
+export interface FooterLinkItem {
+  id: string;
+  label: string;
+  href: string;
+  isVisible: boolean;
+  order: number;
+}
+
+export const defaultFooterLinks: FooterLinkItem[] = [
+  { id: 'about', label: 'About Actor', href: '/about', isVisible: true, order: 1 },
+  { id: 'contact', label: 'Contact and Book', href: '/contact', isVisible: true, order: 2 },
+  { id: 'privacy', label: 'Privacy Policy', href: '/privacy', isVisible: true, order: 3 },
+  { id: 'terms', label: 'Terms of Representation', href: '/terms', isVisible: true, order: 4 },
+  { id: 'llms', label: 'llms.txt', href: '/llms.txt', isVisible: true, order: 5 },
+];
+
 export interface SiteSeoData {
   siteTitle: string;
   tagline: string;
   description: string;
   keywords: string;
   author: string;
-  siteUrl: string;
+  siteUrl: string; // Canonical URL override or fallback
   ogTitle: string;
   ogDescription: string;
   ogImage: string;
@@ -12,6 +28,10 @@ export interface SiteSeoData {
   faviconUrl: string;
   appleTouchIconUrl: string;
   customHeadHtml: string;
+  // AI Visibility & Agent Directives
+  contentSignal: string; // Content-Signal policy (e.g. "search=yes, ai-train=no")
+  llmsSummary: string; // Custom summary notes for /llms.txt
+  footerLinks: FooterLinkItem[]; // Admin-managed approved footer links
 }
 
 export const defaultSeoData: SiteSeoData = {
@@ -22,7 +42,7 @@ export const defaultSeoData: SiteSeoData = {
   keywords:
     "Shirin Shila, Shirin Akter, Dhallywood Actress, Bangladeshi Film Actress, Dhallywood Cinema, Begum Jaan Actress, Hitman Shakib Khan, Birangona 71, Shesh Baji Movie, Bangladeshi Celebrity Judge, Dhallywood Model",
   author: "Shirin Shila",
-  siteUrl: "https://shirinshila.com",
+  siteUrl: "", // Empty by default; dynamically resolved from server configuration (SITE_URL) or temporary staging fallback
   ogTitle: "Shirin Shila | Official Dhallywood Film Actress & Casting Portfolio",
   ogDescription:
     "Explore official filmography, awards, press archive, and casting showreels of Bangladeshi film star Shirin Shila.",
@@ -31,7 +51,9 @@ export const defaultSeoData: SiteSeoData = {
   faviconUrl: "/icon.svg",
   appleTouchIconUrl: "/apple-icon.png",
   customHeadHtml: "",
+  contentSignal: "search=yes, ai-train=no",
+  llmsSummary: "",
+  footerLinks: defaultFooterLinks,
 };
 
 export default defaultSeoData;
-

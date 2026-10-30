@@ -1,33 +1,21 @@
-# Shirin Shila — Official Cinema Portfolio & Casting Desk
+# Shirin Shila — Dhallywood Film Actress & Casting Portfolio
 
-> Official portfolio of Bangladeshi silver-screen film actress, television reality show judge, and model Shirin Shila (Shirin Akter).
+> Official, verified portfolio of Bangladeshi silver-screen cinema actress, model, and television reality show judge Shirin Shila (Shirin Akter).
 
-## Overview
-Shirin Shila is an acclaimed Dhallywood film actress based in Dhaka, Bangladesh. She debuted in 2014 in the blockbuster feature "Hitman" alongside superstar Shakib Khan, earned the Babisas Best Actress Award in 2019 for "Begum Jaan", starred in historical liberation war cinema "Birangona 71", and continues to headline high-profile films such as "Shesh Baji" (2024), "Ghor Vanga Songsar", and "Jimmi". Beyond cinema, she serves as a celebrity judge on nationwide television reality competitions and acts as a cultural brand ambassador.
+## Core Pages
+- [Home](/): Official portfolio homepage featuring silver-screen showreels, career highlights, and news archive.
+- [About Actor](/about): Comprehensive biography, acting background, feature filmography, and major industry awards.
+- [Contact and Book](/contact): Direct talent management desk for casting directors, filmmakers, brand endorsement agencies, and press requests.
+- [Terms of Representation](/terms): Professional representation terms, casting guidelines, intellectual property, and AI voice/likeness usage protection.
+- [Privacy Policy](/privacy): Data protection, script confidentiality, and inquiry handling standards.
+- [Full LLM Content Profile](/llms-full.txt): Detailed factual biography, full filmography credits, and accolades index.
+- [MCP Server Card](/.well-known/mcp/server-card.json): Machine-readable Model Context Protocol (MCP) server manifest declaring portfolio query tools.
 
-## Key Pages & Endpoints
-- [Home](https://cornflowerblue-wildcat-675604.hostingersite.com/): Official cinematic portfolio featuring 3D parallax gallery, filmography poster carousel, active career milestones, and live TV broadcaster marquee.
-- [About](https://cornflowerblue-wildcat-675604.hostingersite.com/about): Complete biography, acting credentials, industry accolades, and career statistics.
-- [Contact & Booking Desk](https://cornflowerblue-wildcat-675604.hostingersite.com/contact): Direct point of contact for directors, producers, advertising agencies, and corporate event organizers.
-- [Terms of Representation](https://cornflowerblue-wildcat-675604.hostingersite.com/terms): Official representation policy, talent booking guidelines, media usage rights, and AI likeness policy.
-- [Privacy Policy](https://cornflowerblue-wildcat-675604.hostingersite.com/privacy): Data protection, script confidentiality, and inquiry handling terms.
-- [Full LLM Context](https://cornflowerblue-wildcat-675604.hostingersite.com/llms-full.txt): Deep comprehensive text catalog of all movies, co-stars, directors, showreels, awards, and press archive.
-- [MCP Server Card](https://cornflowerblue-wildcat-675604.hostingersite.com/.well-known/mcp/server-card.json): Model Context Protocol (SEP-1649) discovery card for in-agent tool calling.
+## Content Usage & AI Policy
+- **Content-Signal Directive**: search=yes, ai-train=no
+- **Search & Discovery**: Authorized for search indexing, conversational discovery, factual summaries, and knowledge queries.
+- **Likeness Protection**: Synthetic voice cloning, biometric generative facial likeness models, and uncredited generative replicas are strictly prohibited without an explicit licensed talent agreement.
 
-## Core Filmography
-- **Hitman (2014)**: Silver-screen debut opposite Shakib Khan; action-romance directed by Wazed Ali Sumon; nominated for Meril-Prothom Alo Awards.
-- **Begum Jaan (2019)**: Title lead role; dramatic performance directed by Mohammad Aslam; Winner of Babisas Best Actress Award.
-- **Birangona 71 (2022)**: Historical 1971 Liberation War patriotic drama directed by M. Sakhawat Hossain.
-- **Shesh Baji (2024)**: Psychological suspense thriller directed by Mehedi Hasan.
-- **Ghor Vanga Songsar (2023)**: Family socio-drama directed by Montazur Rahman Akbar.
-- **Jimmi (2023)**: Action-thriller directed by Monowar Hossain Dipjol.
-
-## Representation & Inquiries
-- **Talent Management Email**: booking@shirinshila.com
-- **Phone / WhatsApp**: +880 1711-000000
-- **Location**: Dhaka, Bangladesh (Available for global shooting schedules)
-- **Turnaround**: 24-48 hours for verified industry inquiries
-
-## Machine & AI Usage Policies
-- **Content-Signal**: search=yes, ai-train=no
-- **Synthetic Likeness / Deepfake Training**: Strictly prohibited without explicit contractual license.
+## Talent Desk Contact
+- **Email**: booking@shirinshila.com
+- **Representation Base**: Dhaka, Bangladesh (Available for Worldwide Productions)

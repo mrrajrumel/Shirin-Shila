@@ -11,8 +11,15 @@ export interface FooterData {
   backToTopText: string;
   adminPortalTitle: string;
   links: FooterLink[];
-  legalLinks: FooterLink[];
 }
+
+export const defaultFooterLinks: FooterLink[] = [
+  { label: "About Actor", href: "/about" },
+  { label: "Contact and Book", href: "/contact" },
+  { label: "Privacy Policy", href: "/privacy" },
+  { label: "Terms of Representation", href: "/terms" },
+  { label: "llms.txt", href: "/llms.txt" },
+];
 
 export const footerData: FooterData = {
   brandName: "SHIRIN SHILA",
@@ -21,23 +28,7 @@ export const footerData: FooterData = {
   copyright: "© 2026 Shirin Shila. All rights reserved.",
   backToTopText: "Back to top",
   adminPortalTitle: "Management Portal",
-  links: [
-    { label: "Home", href: "#home" },
-    { label: "Showreel", href: "#showreel" },
-    { label: "About", href: "/about" },
-    { label: "Filmography", href: "#filmography" },
-    { label: "Gallery", href: "#gallery" },
-    { label: "Timeline", href: "#timeline" },
-    { label: "Press", href: "#press" },
-    { label: "Contact", href: "/contact" },
-  ],
-  legalLinks: [
-    { label: "About Artist", href: "/about" },
-    { label: "Booking Desk", href: "/contact" },
-    { label: "Terms of Representation", href: "/terms" },
-    { label: "Privacy Policy", href: "/privacy" },
-    { label: "llms.txt", href: "/llms.txt" },
-  ],
+  links: defaultFooterLinks,
 };
 
 export default footerData;

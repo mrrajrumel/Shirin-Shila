@@ -1,12 +1,35 @@
 "use client";
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { ArrowUp } from "lucide-react";
-import { footerData } from "@/data/footer";
+import { footerData, defaultFooterLinks, FooterLink } from "@/data/footer";
 
 export function Footer() {
+  const [links, setLinks] = useState<FooterLink[]>(defaultFooterLinks);
+
+  useEffect(() => {
+    // Load dynamic footer links if updated via Admin Panel (SEO & AI Visibility)
+    fetch("/api/seo", { cache: "no-store" })
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (data?.seo?.footerLinks && Array.isArray(data.seo.footerLinks) && data.seo.footerLinks.length > 0) {
+          const activeLinks = data.seo.footerLinks
+            .filter((item: any) => item.isVisible !== false)
+            .sort((a: any, b: any) => (a.order || 0) - (b.order || 0))
+            .map((item: any) => ({
+              label: item.label,
+              href: item.href,
+            }));
+          if (activeLinks.length > 0) {
+            setLinks(activeLinks);
+          }
+        }
+      })
+      .catch(() => {});
+  }, []);
+
   const handleScrollToTop = (e: React.MouseEvent<HTMLAnchorElement>) => {
     e.preventDefault();
     if (typeof window !== "undefined") {
@@ -39,61 +62,33 @@ export function Footer() {
         </span>
       </div>
 
-      <div className="footer-links">
-        {footerData.links.map((link) => (
-          <a
-            key={link.href}
-            href={link.href}
-            onClick={(e) => {
-              if (link.href.startsWith("#")) {
-                e.preventDefault();
-                const target = document.querySelector(link.href);
-                if (target) {
-                  target.scrollIntoView({ behavior: "smooth" });
-                }
-              }
-            }}
-          >
-            {link.label}
-          </a>
-        ))}
-      </div>
+      {/* Primary Approved Navigation & Legal Links */}
+      <nav aria-label="Footer Navigation" className="footer-links">
+        {links.map((link) => {
+          const isTxt = link.href.endsWith(".txt");
+          const isExternal = link.href.startsWith("http");
 
-      {/* Standalone Legal, Representation & Agent Verification Row */}
-      <div
-        className="footer-legal-row"
-        style={{
-          display: "flex",
-          justifyContent: "center",
-          flexWrap: "wrap",
-          gap: "18px",
-          padding: "14px 0",
-          borderTop: "1px solid var(--border-subtle, rgba(255,255,255,0.08))",
-          borderBottom: "1px solid var(--border-subtle, rgba(255,255,255,0.08))",
-          margin: "16px 0",
-          fontSize: "12.5px",
-        }}
-      >
-        <Link href="/about" style={{ color: "#a1a1aa", textDecoration: "none" }}>
-          About Artist
-        </Link>
-        <span style={{ color: "#3f3f46" }}>•</span>
-        <Link href="/contact" style={{ color: "#a1a1aa", textDecoration: "none" }}>
-          Contact &amp; Booking Desk
-        </Link>
-        <span style={{ color: "#3f3f46" }}>•</span>
-        <Link href="/terms" style={{ color: "#a1a1aa", textDecoration: "none" }}>
-          Terms of Representation
-        </Link>
-        <span style={{ color: "#3f3f46" }}>•</span>
-        <Link href="/privacy" style={{ color: "#a1a1aa", textDecoration: "none" }}>
-          Privacy Policy
-        </Link>
-        <span style={{ color: "#3f3f46" }}>•</span>
-        <a href="/llms.txt" target="_blank" rel="noreferrer" style={{ color: "#ec4899", textDecoration: "none", fontWeight: 600 }}>
-          llms.txt
-        </a>
-      </div>
+          if (isTxt || isExternal) {
+            return (
+              <a
+                key={link.href}
+                href={link.href}
+                target={isTxt ? "_blank" : undefined}
+                rel={isTxt ? "noopener noreferrer" : undefined}
+                style={isTxt ? { color: "#ec4899", fontWeight: 600 } : undefined}
+              >
+                {link.label}
+              </a>
+            );
+          }
+
+          return (
+            <Link key={link.href} href={link.href}>
+              {link.label}
+            </Link>
+          );
+        })}
+      </nav>
 
       <div className="footer-bottom-row">
         <div className="footer-credits-col">

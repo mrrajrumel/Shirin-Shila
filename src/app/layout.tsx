@@ -4,14 +4,17 @@ import { readStore } from '@/lib/server-storage';
 import { SiteSeoData, defaultSeoData } from '@/data/seo';
 import { CustomHeadInjector } from '@/lib/custom-head';
 import { WebMcpProvider } from '@/components/webmcp-provider';
+import { resolveCanonicalSiteUrl } from '@/lib/site-config';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
 export async function generateMetadata(): Promise<Metadata> {
-  const seo = (await readStore<SiteSeoData>('seo')) || defaultSeoData;
+  const [seo, siteUrl] = await Promise.all([
+    readStore<SiteSeoData>('seo').then((d) => d || defaultSeoData),
+    resolveCanonicalSiteUrl(),
+  ]);
 
-  const siteUrl = seo.siteUrl || 'https://cornflowerblue-wildcat-675604.hostingersite.com';
   const title = seo.siteTitle || defaultSeoData.siteTitle;
   const description = seo.description || defaultSeoData.description;
   const keywords = (seo.keywords || defaultSeoData.keywords).split(',').map((k) => k.trim());
@@ -34,7 +37,7 @@ export async function generateMetadata(): Promise<Metadata> {
     keywords,
     authors: [{ name: seo.author || 'Shirin Shila', url: siteUrl }],
     creator: 'Rumel Ahmed',
-    publisher: 'Shirin Shila Official Management',
+    publisher: 'Shirin Shila Official Management Desk',
     icons: {
       icon: [
         { url: '/favicon.ico', sizes: 'any' },
@@ -50,12 +53,12 @@ export async function generateMetadata(): Promise<Metadata> {
       title: seo.ogTitle || title,
       description: seo.ogDescription || description,
       url: siteUrl,
-      siteName: 'Shirin Shila Official Portfolio',
+      siteName: 'Shirin Shila Official Cinema Portfolio',
       locale: 'en_US',
       type: 'website',
       images: [
         {
-          url: ogImage,
+          url: ogImage.startsWith('http') ? ogImage : `${siteUrl}${ogImage.startsWith('/') ? '' : '/'}${ogImage}`,
           width: 1200,
           height: 630,
           alt: `${seo.author || 'Shirin Shila'} — Official Cinema Portfolio`,
@@ -66,7 +69,7 @@ export async function generateMetadata(): Promise<Metadata> {
       card: 'summary_large_image',
       title: seo.ogTitle || title,
       description: seo.ogDescription || description,
-      images: [ogImage],
+      images: [ogImage.startsWith('http') ? ogImage : `${siteUrl}${ogImage.startsWith('/') ? '' : '/'}${ogImage}`],
       creator: seo.twitterHandle || '@shirin_shila',
     },
     robots: {
@@ -88,35 +91,33 @@ export default async function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const seo = (await readStore<SiteSeoData>('seo')) || defaultSeoData;
-  const siteUrl = seo.siteUrl || 'https://cornflowerblue-wildcat-675604.hostingersite.com';
+  const [seo, contact, siteUrl] = await Promise.all([
+    readStore<SiteSeoData>('seo').then((d) => d || defaultSeoData),
+    readStore<any>('contactInfo').then((d) => d || {}),
+    resolveCanonicalSiteUrl(),
+  ]);
 
+  const managementEmail = contact.email || 'booking@shirinshila.com';
+  const managementPhone = contact.phone || '';
+
+  // Truthful, accurate Schema.org JSON-LD describing Shirin Shila's official actor portfolio
   const structuredDataGraph = {
     "@context": "https://schema.org",
     "@graph": [
       {
-        "@type": ["Organization", "PerformingGroup"],
-        "@id": `${siteUrl}/#organization`,
-        "name": "Shirin Shila Official Management Desk",
-        "legalName": "Shirin Shila Talent & Media Representation",
+        "@type": "WebSite",
+        "@id": `${siteUrl}/#website`,
         "url": siteUrl,
-        "logo": `${siteUrl}/icon.svg`,
-        "email": "booking@shirinshila.com",
-        "telephone": "+8801711000000",
-        "description": "Official talent representation and booking management for Dhallywood film actress and model Shirin Shila.",
-        "address": {
-          "@type": "PostalAddress",
-          "addressLocality": "Dhaka",
-          "addressRegion": "Dhaka Division",
-          "addressCountry": "BD"
-        },
-        "founder": { "@id": `${siteUrl}/#person` },
-        "member": [{ "@id": `${siteUrl}/#person` }],
-        "sameAs": [
-          "https://www.facebook.com/shirinshilaofficial",
-          "https://www.instagram.com/shirin_shila",
-          "https://www.youtube.com/@shirinshilaofficial"
-        ]
+        "name": "Shirin Shila Official Cinema Portfolio",
+        "description": "Official casting and film portfolio of Bangladeshi silver-screen actress Shirin Shila.",
+        "inLanguage": ["en", "bn"]
+      },
+      {
+        "@type": "ProfilePage",
+        "@id": `${siteUrl}/#profile`,
+        "url": siteUrl,
+        "name": "Shirin Shila Official Portfolio & Casting Profile",
+        "mainEntity": { "@id": `${siteUrl}/#person` }
       },
       {
         "@type": "Person",
@@ -129,13 +130,11 @@ export default async function RootLayout({
           "name": "Dhaka, Bangladesh"
         },
         "gender": "Female",
-        "jobTitle": "Film Actress, Television Star & Reality Show Judge",
+        "jobTitle": "Dhallywood Film Actress, Television Star & Cultural Fashion Model",
         "nationality": {
           "@type": "Country",
           "name": "Bangladesh"
         },
-        "worksFor": { "@id": `${siteUrl}/#organization` },
-        "affiliation": { "@id": `${siteUrl}/#organization` },
         "url": siteUrl,
         "image": `${siteUrl}/images/hero.jpg`,
         "award": [
@@ -184,30 +183,13 @@ export default async function RootLayout({
         ]
       },
       {
-        "@type": "WebSite",
-        "@id": `${siteUrl}/#website`,
-        "url": siteUrl,
-        "name": "Shirin Shila Official Cinema Portfolio",
-        "description": "Official casting and film portfolio of Bangladeshi silver-screen actress Shirin Shila.",
-        "publisher": { "@id": `${siteUrl}/#organization` },
-        "inLanguage": ["en", "bn"]
-      },
-      {
-        "@type": "Service",
-        "@id": `${siteUrl}/#services`,
-        "serviceType": "Acting, Film Castings & Commercial Engagements",
-        "provider": { "@id": `${siteUrl}/#organization` },
-        "areaServed": "Worldwide",
-        "hasOfferCatalog": {
-          "@type": "OfferCatalog",
-          "name": "Professional Engagements",
-          "itemListElement": [
-            { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Feature Film Lead Roles" } },
-            { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Television Reality Show Judge" } },
-            { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Brand Ambassador & Commercials" } },
-            { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Cultural Gala & Stage Appearances" } }
-          ]
-        }
+        "@type": "ContactPoint",
+        "@id": `${siteUrl}/#booking-desk`,
+        "contactType": "Talent Booking & Management Desk",
+        "email": managementEmail,
+        ...(managementPhone ? { "telephone": managementPhone } : {}),
+        "url": `${siteUrl}/contact`,
+        "availableLanguage": ["English", "Bengali"]
       },
       {
         "@type": "FAQPage",
@@ -218,7 +200,7 @@ export default async function RootLayout({
             "name": "Who represents actress Shirin Shila for professional bookings?",
             "acceptedAnswer": {
               "@type": "Answer",
-              "text": "Shirin Shila is officially represented through her official talent management desk. Inquiries for films, brand endorsements, reality shows, and media appearances can be submitted directly via the booking portal on this website."
+              "text": `Shirin Shila is officially represented through her talent booking desk. Professional casting, endorsement, and appearance inquiries can be submitted directly via the booking portal on this website or by emailing ${managementEmail}.`
             }
           },
           {
@@ -234,7 +216,7 @@ export default async function RootLayout({
             "name": "How can filmmakers and casting directors request showreels and schedule casting sessions?",
             "acceptedAnswer": {
               "@type": "Answer",
-              "text": "Full 4K casting showreels, high-resolution comp cards, and scheduling requests are available via the contact portal or by emailing booking@shirinshila.com."
+              "text": `Full 4K casting showreels, high-resolution comp cards, and scheduling requests are available via the contact portal or by emailing ${managementEmail}.`
             }
           }
         ]
@@ -256,7 +238,7 @@ export default async function RootLayout({
         {/* Custom Header Code Injection */}
         {seo.customHeadHtml && <CustomHeadInjector html={seo.customHeadHtml} />}
 
-        {/* Comprehensive Multi-Schema JSON-LD Graph */}
+        {/* Truthful Multi-Schema JSON-LD Graph */}
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{

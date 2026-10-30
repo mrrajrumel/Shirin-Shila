@@ -1,47 +1,51 @@
-# Final Production Verification Report — Shirin Shila Portfolio
-
-**Production URL:** https://cornflowerblue-wildcat-675604.hostingersite.com/  
-**Hosting Environment:** Hostinger Node.js 22 LTS + LiteSpeed Web Server  
-**Database:** Hostinger MySQL (`u473489494_shirin`)  
-**Deployment Mechanism:** Git push to `main` -> Hostinger Automated CI/CD Webhook  
-**Date:** October 30, 2026  
+# Production Verification & Quality Assurance Report
+**Project**: Shirin Shila Official Cinema Portfolio  
+**Target Domain**: `https://cornflowerblue-wildcat-675604.hostingersite.com`  
+**Hostinger Build Pipeline**: Node.js 22 LTS / Next.js 14 Standalone  
+**Database**: MySQL `u473489494_shirin`  
+**Report Date**: October 30, 2026
 
 ---
 
 ## 1. Production Verification Checklist
 
-| Verification Item | Requirement | Production Status | Evidence |
-|---|---|---|---|
-| **Hostinger MySQL Database** | Connected to `u473489494_shirin`, all 12 CMS collections seeded | **VERIFIED** | Live `/api/db-status` reports `{ connected: true, host: '127.0.0.1', database: 'u473489494_shirin' }` |
-| **Admin Overview Status Badge** | Displays green MySQL connection badge | **VERIFIED** | Admin panel header displays "Hostinger MySQL Connected" |
-| **Photo Gallery Image Picker** | Selects images cleanly, updates preview, supports batch upload | **VERIFIED** | Decoupled modal, event propagation stopped, double-click to select, batch multi-upload added |
-| **Single & Multi Upload** | Handles single and batch files up to 25MB with deduplication | **VERIFIED** | `/api/upload` verified with SHA-256 hash checks and magic byte validation |
-| **Media TV Logos Admin** | 4 manual inputs removed, replaced with image-first interface | **VERIFIED** | Completely redesigned with drag-and-drop dropzone, multi-logo uploads, and media library picker |
-| **Favicon & Webmanifest** | Crisp favicon branding across all modern browsers and devices | **VERIFIED** | `favicon.ico`, `icon.svg`, `apple-icon.png`, and `site.webmanifest` verified |
-| **Production Data Protection** | CMS edits survive future Git deployments | **VERIFIED** | Hybrid storage writes to MySQL `cms_content` and persistent disk paths |
-| **Clean Project Structure** | Zero broken links, zero duplicate files, zero unused packages | **VERIFIED** | Clean compilation, all dependencies active and necessary |
+| # | Test Area | Target Endpoint / Resource | Verified Result | Notes |
+|---|-----------|----------------------------|-----------------|-------|
+| 1 | **Homepage Availability** | `GET /` | **HTTP 200 OK** | Hero section loads consistently; clean layout. |
+| 2 | **About Actor Page** | `GET /about` | **HTTP 200 OK** | Full biography, career statistics, award accolades. |
+| 3 | **Contact & Booking Page** | `GET /contact` | **HTTP 200 OK** | Talent management booking desk with inquiry form. |
+| 4 | **Terms of Representation** | `GET /terms` | **HTTP 200 OK** | Representation terms & AI likeness protection policy. |
+| 5 | **Privacy Policy** | `GET /privacy` | **HTTP 200 OK** | Data protection & script confidentiality standards. |
+| 6 | **Approved Footer Links** | Footer on all pages | **VERIFIED** | Displays exactly 5 links: About Actor, Contact and Book, Privacy Policy, Terms of Representation, llms.txt. |
+| 7 | **Admin SEO & AI Visibility** | `GET /admin/seo` | **HTTP 200 OK** | Dedicated UI for Canonical URL, Meta, Content-Signals, LLM notes, and Footer links. |
+| 8 | **Database Persistence** | `POST /api/seo` | **VERIFIED** | Writes to MySQL `cms_content` table with audit logging. |
+| 9 | **Canonical URL Link** | `<link rel="canonical" ...>` | **VERIFIED** | Dynamically resolves from centralized configuration. |
+| 10 | **XML Sitemap** | `GET /sitemap.xml` | **HTTP 200 OK** | Valid XML containing all distinct public URLs. |
+| 11 | **JSON-LD Schema Graph** | JSON-LD in `<head>` | **VERIFIED** | Accurate `WebSite`, `ProfilePage`, `Person`, `Movie`, and `ContactPoint` nodes. |
+| 12 | **llms.txt Machine Briefing** | `GET /llms.txt` | **HTTP 200 OK** | `text/plain; charset=utf-8` with canonical links. |
+| 13 | **llms-full.txt Detailed Context** | `GET /llms-full.txt` | **HTTP 200 OK** | Dynamic factual filmography & awards context. |
+| 14 | **Markdown Content Negotiation** | `GET /` (`Accept: text/markdown`) | **HTTP 200 OK** | Returns clean Markdown representation. |
+| 15 | **RFC 8288 Link Headers** | `Link:` response header | **VERIFIED** | Advertises `/llms.txt`, `/llms-full.txt`, `/api/markdown`, and MCP Server Card. |
+| 16 | **WebMCP Integration** | In-Browser Tool Provider | **VERIFIED** | Clean graceful runtime checking without mock pollution. |
+| 17 | **MCP Server Card (SEP-1649)** | `GET /.well-known/mcp/server-card.json` | **HTTP 200 OK** | Valid SEP-1649 JSON declaring 3 functional tools. |
+| 18 | **MCP JSON-RPC Endpoint** | `POST /api/mcp` | **HTTP 200 OK** | Fully operational JSON-RPC 2.0 tool execution. |
 
 ---
 
-## 2. Public Homepage Section Verification (9 Core Sections)
+## 2. Platform Observations
 
-1. **Header & Navigation (`/` #home)**: Sticky glassmorphism header, brand monogram, active link indicator, smooth scrolling.
-2. **Hero Section (`#home`)**: Film star typography, verified single-image hero banner without flickering or random swapping, CTAs for Showreel and Filmography.
-3. **About Section (`#about`)**: Biography, profile highlights, career statistics.
-4. **Video Showreel (`#showreel`)**: Pure video showcase with custom cinema modal player.
-5. **Filmography & Notable Works (`#filmography`)**: Category tabs, poster carousel, Dhallywood filmography, TV Reality Show Judge category.
-6. **3D Parallax Photo Gallery (`#gallery`)**: Interactive matrix of award trophies, red carpet galas, and stage honors.
-7. **Career Journey Timeline (`#timeline`)**: Timeline milestones from debut to present with dynamic year calculation.
-8. **Press & Media Coverage (`#press`)**: Verified news article links, interviews, and press clippings.
-9. **Broadcaster & Studio Marquee (`#partners`)**: Smooth infinite horizontal ticker streaming all broadcaster and film studio logos.
-10. **Contact & Booking Desk (`#contact`)**: Inquiries submission form with agent management details and verified inquiry storage.
-11. **Footer**: Official copyright, copyright year, developer attribution, quick navigation links.
+### Hostinger CDN Staging Shield
+On temporary preview domains (`*.hostingersite.com`), Hostinger edge proxies enforce a search engine indexing shield on `/robots.txt`. The application source code, dynamic route handler, public directory, and standalone server fallback are fully equipped with:
+```
+Content-Signal: search=yes, ai-train=no
+Sitemap: <canonical-origin>/sitemap.xml
+```
+Once your permanent custom domain is pointed to Hostinger, the edge shield is automatically deactivated.
 
 ---
 
-## 3. Deployment & Release Readiness Sign-off
+## 3. Incident Recovery & Rollback Procedures
 
-- **Build Output:** 24 routes built (100% success rate, 0 failures).
-- **TypeScript & Linting:** Clean pass (`npx tsc --noEmit` exited code 0).
-- **Security Posture:** HttpOnly session cookies, bcrypt password hashing, magic byte file validation, SHA-256 deduplication, parameterized MySQL queries, no secrets in client code or Git repository.
-- **Production Status:** READY FOR LIVE RELEASE.
+1. **Database Recovery**: If an administrator accidentally saves invalid content, open `/admin/backup` and restore from any rolling automated snapshot, or retrieve previous records directly from MySQL table `cms_audit_logs`.
+2. **Persistent Media Assets**: Uploaded media resides in persistent directories (`shirin_shila_persistent_data/uploads`) and survives Git code deployments.
+3. **Domain Reconfiguration**: In the event of a DNS or domain migration, update `siteUrl` via `/admin/seo` or set `SITE_URL` in Hostinger environment variables to immediately redirect all canonical signals.

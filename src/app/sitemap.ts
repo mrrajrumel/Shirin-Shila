@@ -1,10 +1,14 @@
 import { MetadataRoute } from 'next';
+import { resolveCanonicalSiteUrl } from '@/lib/site-config';
 
-export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = 'https://cornflowerblue-wildcat-675604.hostingersite.com';
-  const customUrl = 'https://shirinshila.com';
+export const dynamic = 'force-dynamic';
+export const revalidate = 3600;
+
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  const baseUrl = await resolveCanonicalSiteUrl();
   const currentDate = new Date().toISOString();
 
+  // Distinct, genuine, crawlable public routes
   const paths = [
     { path: '', priority: 1.0, freq: 'daily' as const },
     { path: '/about', priority: 0.9, freq: 'monthly' as const },
@@ -14,23 +18,10 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { path: '/llms.txt', priority: 0.8, freq: 'weekly' as const },
   ];
 
-  const entries: MetadataRoute.Sitemap = [];
-
-  for (const item of paths) {
-    entries.push({
-      url: `${baseUrl}${item.path}`,
-      lastModified: currentDate,
-      changeFrequency: item.freq,
-      priority: item.priority,
-    });
-    // Also include custom domain
-    entries.push({
-      url: `${customUrl}${item.path}`,
-      lastModified: currentDate,
-      changeFrequency: item.freq,
-      priority: item.priority,
-    });
-  }
-
-  return entries;
+  return paths.map((item) => ({
+    url: `${baseUrl}${item.path}`,
+    lastModified: currentDate,
+    changeFrequency: item.freq,
+    priority: item.priority,
+  }));
 }

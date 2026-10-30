@@ -2,43 +2,35 @@
   "$schema": "https://modelcontextprotocol.io/schemas/server-card/v1.json",
   "name": "shirin-shila-portfolio-mcp",
   "version": "1.0.0",
-  "description": "Model Context Protocol (MCP) server for querying Dhallywood film actress Shirin Shila's official portfolio, filmography catalog, career showreels, press archive, and submitting verified booking inquiries.",
-  "endpoint": "https://cornflowerblue-wildcat-675604.hostingersite.com/api/mcp",
-  "homepage": "https://cornflowerblue-wildcat-675604.hostingersite.com",
+  "description": "Official Model Context Protocol (MCP) server for querying Bangladeshi film actress Shirin Shila official portfolio, verified filmography, awards, and booking representations.",
+  "endpoint": "/api/mcp",
+  "homepage": "/",
+  "transport": {
+    "type": "http-post",
+    "url": "/api/mcp"
+  },
   "capabilities": {
     "tools": {
-      "listChanged": false
-    },
-    "resources": {
-      "subscribe": false,
-      "listChanged": false
-    },
-    "prompts": {
       "listChanged": false
     }
   },
   "tools": [
     {
       "name": "get_filmography",
-      "description": "Retrieve the complete verified filmography of Shirin Shila including movie titles, co-stars, directors, release years, and roles",
+      "description": "Retrieve verified filmography and silver-screen projects of actress Shirin Shila",
       "inputSchema": {
         "type": "object",
         "properties": {
-          "status": {
-            "type": "string",
-            "enum": ["all", "released", "upcoming"],
-            "description": "Filter movies by release status"
-          },
           "query": {
             "type": "string",
-            "description": "Search query for movie title or co-star"
+            "description": "Optional filter by movie title, director, or co-star"
           }
         }
       }
     },
     {
       "name": "get_bio_and_awards",
-      "description": "Retrieve biographical highlights, Babisas Best Actress honors, DIFF trophies, and career timeline for Shirin Shila",
+      "description": "Retrieve verified biography, artistic honors, and career accolades of Shirin Shila",
       "inputSchema": {
         "type": "object",
         "properties": {}
@@ -46,38 +38,41 @@
     },
     {
       "name": "submit_inquiry",
-      "description": "Submit a casting, media appearance, or acting booking inquiry directly to Shirin Shila talent management desk",
+      "description": "Submit an official casting, media appearance, or acting booking inquiry to the talent desk",
       "inputSchema": {
         "type": "object",
         "properties": {
           "name": {
             "type": "string",
-            "description": "Full name of producer or casting director"
+            "description": "Full name of producer, director, or casting agent"
           },
           "email": {
             "type": "string",
-            "description": "Verified business email"
+            "description": "Contact email address"
           },
           "phone": {
             "type": "string",
-            "description": "Contact telephone or WhatsApp"
+            "description": "Contact telephone or WhatsApp number"
           },
           "service": {
             "type": "string",
-            "description": "Engagement category (e.g. Feature Film Lead Role, Commercial Endorsement, Reality Show Judge)"
+            "description": "Type of engagement (Feature Film, Commercial, Reality Show Judge)"
           },
           "message": {
             "type": "string",
-            "description": "Project brief, shooting timeline, and character description"
+            "description": "Project overview and scheduling details"
           }
         },
-        "required": ["name", "email", "message"]
+        "required": [
+          "name",
+          "email",
+          "message"
+        ]
       }
     }
   ],
   "contact": {
-    "name": "Shirin Shila Official Management Desk",
     "email": "booking@shirinshila.com",
-    "url": "https://cornflowerblue-wildcat-675604.hostingersite.com/contact"
+    "url": "/contact"
   }
 }

@@ -6,11 +6,13 @@ import { filmography as defaultFilmography } from '@/data/filmography';
 import { pressItems as defaultPress } from '@/data/press';
 import { initialContactInfo } from '@/data/contact';
 import { defaultMediaPartners } from '@/data/media-partners';
+import { resolveCanonicalSiteUrl } from '@/lib/site-config';
 
 export const dynamic = 'force-dynamic';
 
 export async function GET(request: NextRequest) {
-  const [hero, about, filmography, press, contact, mediaPartners] = await Promise.all([
+  const [baseUrl, hero, about, filmography, press, contact, mediaPartners] = await Promise.all([
+    resolveCanonicalSiteUrl(),
     readStore<any>('hero').catch(() => defaultHero),
     readStore<any>('about').catch(() => defaultAbout),
     readStore<any[]>('filmography').catch(() => defaultFilmography),
@@ -19,18 +21,14 @@ export async function GET(request: NextRequest) {
     readStore<any[]>('mediaPartners').catch(() => defaultMediaPartners),
   ]);
 
-  const host = request.headers.get('host') || 'cornflowerblue-wildcat-675604.hostingersite.com';
-  const proto = request.headers.get('x-forwarded-proto') || 'https';
-  const baseUrl = `${proto}://${host}`;
-
   const md = `# ${hero?.name || 'Shirin Shila'} — Official Cinema Portfolio & Casting Desk
 
 > ${hero?.tagline || 'Dhallywood Cinema, Television Star & Cultural Fashion Model'}
 
 ## Quick Links
 - **Homepage**: ${baseUrl}/
-- **About Biography**: ${baseUrl}/about
-- **Contact & Booking**: ${baseUrl}/contact
+- **About Actor**: ${baseUrl}/about
+- **Contact and Book**: ${baseUrl}/contact
 - **Terms of Representation**: ${baseUrl}/terms
 - **Privacy Policy**: ${baseUrl}/privacy
 - **LLM Summary**: ${baseUrl}/llms.txt

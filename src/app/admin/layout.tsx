@@ -123,7 +123,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     {
       group: "SEO & SYSTEM SETTINGS",
       items: [
-        { href: "/admin/seo", label: "SEO & Meta Settings", icon: Globe },
+        { href: "/admin/seo", label: "SEO & AI Visibility", icon: Globe },
         { href: "/admin/backup", label: "Data & Persistence", icon: ShieldCheck },
       ],
     },

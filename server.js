@@ -50,6 +50,7 @@ app.prepare().then(() => {
 
       // Explicit robots.txt handler with Content-Signal & Sitemap directives
       if (pathname === '/robots.txt') {
+        const canonicalUrl = (process.env.SITE_URL || process.env.APP_URL || 'https://cornflowerblue-wildcat-675604.hostingersite.com').replace(/\/+$/, '');
         const robotsContent = `# Robots.txt for Shirin Shila Portfolio
 User-agent: *
 Allow: /
@@ -57,8 +58,7 @@ Disallow: /admin/
 Disallow: /api/
 
 Content-Signal: search=yes, ai-train=no
-Sitemap: https://cornflowerblue-wildcat-675604.hostingersite.com/sitemap.xml
-Sitemap: https://shirinshila.com/sitemap.xml
+Sitemap: ${canonicalUrl}/sitemap.xml
 `;
         res.writeHead(200, {
           'Content-Type': 'text/plain; charset=utf-8',
