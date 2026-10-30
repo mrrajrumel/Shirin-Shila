@@ -6,61 +6,112 @@
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind-3.4-38bdf8?style=for-the-badge&logo=tailwindcss)](https://tailwindcss.com/)
 [![Framer Motion](https://img.shields.io/badge/Framer_Motion-11.15-ff3f79?style=for-the-badge&logo=framer)](https://www.framer.com/motion/)
 
-An authentic, ultra-premium Next.js 14 cinematic portfolio, media archive, and zero-database Editorial CMS celebrating renowned Bangladeshi silver-screen film actress, television reality show judge, and model **Shirin Shila** (Shirin Akter).
+The official, production-ready cinematic portfolio, media repository, and Zero-Database Content Management System (CMS) for celebrated Bangladeshi film actress, reality show judge, and model **Shirin Shila** (Shirin Akter).
 
-Designed with dark luxury crimson aesthetics, smooth-scrolling 3D perspective parallax matrices, full two-column filmography modals, career milestone accolade timelines, curated press clippings, 7 official verified social portals, and an automated broadcaster logo ticker.
+Built with Next.js 14 App Router, React 18, TypeScript, and Tailwind CSS, featuring luxury dark cinematic aesthetics, interactive 3D perspective parallax matrices, full theatrical filmography modals, career milestone accolade timelines, newspaper clippings zoom lightboxes, 8 verified social/portal links, and a TailAdmin-inspired management console.
 
 ---
 
-## ✨ Key Features & Architectural Highlights
+## 🌟 Key Architecture & Capabilities
 
-### 1. Cinematic One-Page Experience
-- **Kinetic Hero Section (`#home`)**: Parallax-driven portrait imagery, dynamic ambient glow orbs, designation highlights, and customizable call-to-actions.
-- **Biographical Journey (`#about`)**: Natural multi-paragraph biographical story, profile facts card, and downloadable PDF Comp Card.
-- **Showreel Gallery (`#showreel`)**: Positioned directly beneath About Us; embeds high-definition cinema screen tests and performance reels.
-- **Notable Works & Theatrical Modals (`#filmography`)**: 
-  - Comprehensive category filter: *Film*, *Television Drama*, *TV Show Judge (বিচারক)*, *Music Video*, *Commercial & Modelling*.
-  - Rich two-column modal preview showcasing the theatrical poster, release year, category badge, production house, character role, co-stars, awards, and complete synopsis.
-- **Visual Archive (`#gallery`)**: 3D perspective parallax matrix displaying official red-carpet appearances and photoshoots.
-- **Awards & Honors Milestone Timeline (`#timeline`)**: Double-tracked interactive horizontal timeline featuring high-resolution trophy and gala award photos (115×148px).
-- **Media & Press Coverage (`#press`)**: Unified, aligned carousel cards for online news articles and authentic newspaper clippings with high-res zoom lightbox.
-- **Management & Official Socials (`#contact`)**: Direct talent desk representation with one-click copyable emails and verified links for **Facebook ID**, **Facebook Page**, **Instagram**, **YouTube**, **TikTok**, **IMDb**, and **Wikipedia**.
-- **Broadcaster & Film Studio Logo Ticker (`#broadcasters`)**: Pure auto-scrolling brand showcase featuring 15 official vector logos of Bangladeshi television channels and production houses.
+### 1. Zero-Database JSON Persistence Engine
+- **No External Database Overhead**: Operates entirely with server-side JSON file persistence in `src/data/store/`, requiring zero database servers (no MySQL, PostgreSQL, MongoDB, or Redis needed).
+- **Instant Global Persistence**: All content published via the `/admin` console immediately writes to atomic server-side JSON files and automatically updates the public website.
+- **Server-Side Rendering (SSR)**: The public frontend preloads verified store data on the server, guaranteeing zero client-side layout shift, no flashing placeholders, and 100% crawlable content for search engines.
 
-### 2. Zero-DB Server-Side Persistence
-- Backed by robust JSON server storage in `src/data/store/` with atomic write safety and self-healing initialization.
-- Full CRUD APIs for instant content updates with anti-stale browser `Cache-Control: no-store` headers.
+### 2. Public Frontend Sections
+- **Kinetic Hero Section (`#home`)**: High-resolution transparent cutout portrait with responsive mouse and scroll parallax over an ambient glowing orb. Consistent, glitch-free image loading on every visit.
+- **Biographical Story (`#about`)**: Multi-paragraph biographical narrative, native Bengali titles, and key profile facts.
+- **Cinema Video Showreel (`#showreel`)**: Interactive coverflow video showcase featuring acting reels, dramatic scenes, and trailer highlights.
+- **Notable Works Archive (`#filmography`)**: 
+  - Comprehensive category filtering: *Film*, *Television Drama*, *TV Show Judge (বিচারক)*, *Music Video*, *Commercial & Modelling*.
+  - Rich dialog modal displaying full theatrical poster, synopsis, director, co-stars, production company, and accolades.
+- **Visual Honors Archive (`#gallery`)**: Interactive 3D perspective parallax matrix presenting high-resolution trophy, red carpet, and gala photographs with fullscreen zoom lightbox.
+- **Accolades & Career Timeline (`#timeline`)**: Chronological dual-track milestone timeline highlighting major film debuts and industry awards (Babisas Best Actress Winner, Meril-Prothom Alo Nominee).
+- **Press & Media Coverage (`#press`)**: Unified carousel presenting online news articles and authentic newspaper clippings with zoom inspection.
+- **Talent Management & Booking Desk (`#contact`)**: Direct talent representation desk, email inquiry submission form with server-side CRM logging, and 8 verified portal links (Facebook Profile, Facebook Page, Instagram, YouTube, TikTok, IMDb, Wikipedia, Google Knowledge Panel).
+- **Broadcaster & Studio Logo Ticker (`#broadcasters`)**: Seamless, infinite auto-scrolling ticker showcasing vector logos of Bangladesh's premier television channels and film production houses.
+- **Footer**: Brand mark, direct portal shortcuts, developer attribution, and back-to-top navigation.
 
-### 3. Integrated Admin CMS (`/admin`)
-- **Hero & About Editors**: Update portraits, headlines, and bio copy directly from the browser.
-- **Notable Works Manager**: Add, edit, or remove films with direct poster image upload.
-- **Awards & Timeline Manager**: Upload trophy photos and update milestone details.
-- **Showreels & Press Managers**: Universal auto-fetching capabilities.
-- **TV & Media Logos Manager**: Add, remove, or toggle broadcaster logos.
-- **Contact & Socials Editor**: Manage official emails and all 7 portal URLs.
-- **CRM Inquiries Desk**: Manage bookings and incoming inquiries from the public form.
+### 3. TailAdmin Management Console (`/admin`)
+- **Protected Editorial Portal**: Session-based HTTP-only authentication with bcrypt password hashing and IP rate limiting.
+- **Section Editors**: Dedicated visual editors for Hero Banner, About Biography, Video Showreels, Notable Works, Photo Gallery, Awards Timeline, Press Coverage, Broadcaster Logos, and Contact Channels.
+- **Central Media Library (`/admin/media`)**: Deduplicated asset manager with drag-and-drop file uploader, folder filtering, and instant copyable URLs.
+- **Inquiries CRM Inbox (`/admin/inquiries`)**: Real-time management of incoming booking, casting, and press requests submitted through the public contact form with status updates (New, Read, Replied) and direct mailto / WhatsApp reply shortcuts.
+- **SEO & Search Console Settings (`/admin/seo`)**: Visual management of page title, meta description, OpenGraph share preview image, browser favicons, and custom `<head>` verification script injection (Google Search Console, analytics).
 
-### 4. Universal Multi-Source Auto-Importer
-- **Keyword / Topic Search**: Type any words (e.g. *"Shirin Shila Hitman"* or *"Shirin Shila Prothom Alo"*) to automatically fetch live news headlines, dates, publisher sources, and links via Google News BD RSS & Wikipedia.
-- **Direct Article URLs**: Paste any news link to extract OpenGraph titles, publishers, publish dates, and lead imagery with automatic slug fallbacks.
-- **YouTube Auto-Import**: Paste video links to automatically extract YouTube oEmbed metadata, titles, and HD maxres thumbnails.
-- **Project Auto-Fetch**: Pre-fills film credits, director, co-stars, and role information.
+---
 
-### 5. SEO & High-Security Production Ready
-- **Meta & OpenGraph**: Comprehensive tags, Twitter summary large image cards, and canonical definitions.
-- **JSON-LD Structured Data**: Embedded `schema.org/Person` with awards, filmography credits, and official social profiles.
-- **Crawlers**: Dynamic `sitemap.ts` and `robots.ts` configuration.
-- **Branded Favicons**: Custom SVG badges, 32×32 `.ico`, and 180×180 Apple touch icons.
-- **Custom 404 Page**: Thematic "Scene Not Found" page with fast navigation shortcuts.
-- **Security Headers**: Hardened with `X-Content-Type-Options`, `X-Frame-Options: SAMEORIGIN`, `X-XSS-Protection`, `Referrer-Policy`, and strict permission policies.
+## 🛠️ Technology Stack
+
+| Layer | Technology |
+|---|---|
+| **Framework** | Next.js 14.2 (App Router) |
+| **UI Library** | React 18.3 |
+| **Language** | TypeScript 5.7 |
+| **Styling** | Tailwind CSS 3.4 & Custom Vanilla CSS |
+| **Motion & Parallax** | Framer Motion 11.15 & GSAP 3.15 |
+| **Image Processing** | Sharp 0.35 |
+| **Icons** | Lucide React |
+| **Authentication** | Custom HMAC-SHA256 Session Tokens + bcryptjs |
+| **Data Engine** | Zero-Database Atomic JSON File Storage (`src/data/store/`) |
+| **Server Entry** | Custom `server.js` optimized for Hostinger Node.js Application Manager |
+
+---
+
+## 📁 Repository Structure
+
+```
+├── public/
+│   ├── favicon.ico                 # 32x32 Favicon icon
+│   ├── icon.svg                    # Vector monogram brand crest
+│   ├── apple-icon.png              # 180x180 Apple touch icon
+│   ├── images/
+│   │   ├── logos/                  # 15 Broadcaster & studio SVG logos
+│   │   ├── shirin-akter.png        # Transparent cutout hero portrait
+│   │   ├── award-*.jpg             # High-res award trophy & stage photos
+│   │   ├── newspaper-cut-*.jpg     # Authentic newsprint clipping scans
+│   │   └── poster-*.jpg            # Theatrical movie posters
+│   └── uploads/                    # User-uploaded files from Admin CMS
+├── src/
+│   ├── app/
+│   │   ├── admin/                  # Admin management console
+│   │   │   ├── hero/               # Hero section editor
+│   │   │   ├── about/              # About biography editor
+│   │   │   ├── works/              # Notable works CRUD editor
+│   │   │   ├── showreel/           # Video showreel manager
+│   │   │   ├── gallery/            # 3D parallax photo gallery editor
+│   │   │   ├── timeline/           # Awards & honors manager
+│   │   │   ├── press/              # Press & news clippings editor
+│   │   │   ├── media-partners/     # Broadcaster & studio logos editor
+│   │   │   ├── contact/            # Contact info & social links editor
+│   │   │   ├── inquiries/          # Public inquiries CRM inbox
+│   │   │   ├── media/              # Media library & asset manager
+│   │   │   ├── seo/                # SEO meta & header code injector
+│   │   │   └── login/              # Secure administrator login page
+│   │   ├── api/                    # 17 Secure REST API routes
+│   │   ├── layout.tsx              # Root HTML shell & JSON-LD schema
+│   │   ├── page.tsx                # Main SSR portfolio page assembly
+│   │   ├── robots.ts               # Crawler indexing directives
+│   │   └── sitemap.ts              # XML Sitemap generator
+│   ├── components/                 # Reusable UI & animation components
+│   │   ├── ui/                     # Coverflow, glassy carousel, & reveal text
+│   │   └── admin/                  # Admin media picker modal
+│   ├── data/
+│   │   └── store/                  # JSON server-side persistence store
+│   └── lib/                        # Auth, media service, storage, & head injector
+├── server.js                       # Production Node.js server entry point
+├── package.json
+└── README.md
+```
 
 ---
 
 ## 🚀 Getting Started
 
 ### Prerequisites
-- Node.js 18.17+ or 20+
-- npm or yarn
+- Node.js 18.18+ or 20.x+
+- npm (bundled with Node.js)
 
 ### 1. Clone the Repository
 ```bash
@@ -74,130 +125,135 @@ npm install
 ```
 
 ### 3. Environment Configuration
-Create a `.env.local` file from `.env.example`:
+Copy `.env.example` to `.env.local`:
 ```bash
 cp .env.example .env.local
 ```
-Configure your credentials:
+
+Configure your environment settings in `.env.local`:
 ```env
-ADMIN_EMAIL=admin@shirinshila.com
-ADMIN_PASSWORD=shirinshila2026
-ADMIN_SECRET=shirin_shila_production_jwt_secret_token_secure_2026
+PORT=3000
+HOSTNAME=0.0.0.0
+ADMIN_SECRET=your_secure_random_secret_key_here
 ```
 
-### 4. Run Development Server
+> **Security Note**: Never commit `.env.local` to version control. It is already included in `.gitignore`.
+
+### 4. Run the Development Server
 ```bash
 npm run dev
 ```
-Open [http://localhost:3000](http://localhost:3000) in your browser. Access the Admin CMS at [http://localhost:3000/admin](http://localhost:3000/admin).
 
-### 5. Production Build
+Visit [http://localhost:3000](http://localhost:3000) to view the live portfolio.  
+Access the Admin CMS at [http://localhost:3000/admin](http://localhost:3000/admin).
+
+### 5. Production Build & Test
 ```bash
 npm run build
 npm start
 ```
 
+Or run using the production Hostinger server entry point:
+```bash
+npm run start:hostinger
+```
+
 ---
 
-## 🌐 Deploying to Hostinger (VPS / Cloud / Node.js App)
+## 🔒 Admin CMS Setup & Authentication
 
-Deploying on Hostinger using the **Node.js Application Manager** or **Hostinger VPS** is straightforward:
+The administrative portal (`/admin`) is protected by secure session authentication:
+- **Zero-DB User Management**: Authorized administrator accounts are initialized with salted bcrypt hashes in `src/data/store/admin-users.json`. Plaintext passwords are never stored.
+- **Brute-Force Protection**: Built-in IP rate limiter locks login attempts after 5 consecutive failures.
+- **Secure Sessions**: Authentication sets an HTTP-only, secure, `SameSite=Lax` session cookie (`shirin_shila_admin_session`).
+- **Media Uploads**: File uploads are validated by MIME type (JPEG, PNG, WebP, GIF, SVG) and written to the persistent `public/uploads/` directory with automatic reindexing in `media-manifest.json`.
+
+---
+
+## 🌐 Deploying to Hostinger
 
 ### Method A: Hostinger Node.js Application Manager (hPanel)
-1. In Hostinger hPanel, navigate to **Websites** → **Node.js**.
-2. Select your domain/subdomain and click **Create Application**.
-3. Set:
-   - **Node.js version**: `20.x` or `18.x`
-   - **Application mode**: `Production`
-   - **Application root**: `public_html` (or your chosen subdirectory)
-   - **Application startup file**: `server.js` or configure Next.js start script
-4. Clone or upload your repository files (excluding `node_modules` and `.next`).
-5. Upload your `.env.local` file with your production credentials.
-6. Open the terminal or use the hPanel console to run:
-   ```bash
-   npm install
-   npm run build
-   ```
-7. Start the application via the hPanel UI.
+
+1. **Create Node.js Application**:
+   - Log into Hostinger hPanel → navigate to **Websites** → **Node.js**.
+   - Click **Create Application**.
+   - **Node.js version**: Select `20.x` (or `18.x`).
+   - **Application mode**: `Production`.
+   - **Application root**: `public_html` (or your chosen subdirectory).
+   - **Application startup file**: `server.js`.
+
+2. **Upload / Clone Project Files**:
+   - Deploy your repository files to the application root on Hostinger (via Git deployment or File Manager).
+   - Ensure the `.next` and `node_modules` folders are NOT uploaded (they will be built directly on the server).
+
+3. **Configure Environment Variables**:
+   - In the hPanel Node.js dashboard, add the environment variable:
+     - `ADMIN_SECRET`: A strong, randomly generated string.
+     - `NODE_ENV`: `production`
+
+4. **Install Dependencies & Build**:
+   - Open the hPanel SSH/terminal console and run:
+     ```bash
+     npm install
+     npm run build
+     ```
+
+5. **Start the Application**:
+   - Click **Start Application** (or **Restart Application**) in the Hostinger hPanel.
+   - Your website will immediately be live and accessible at your domain.
+
+---
 
 ### Method B: Hostinger VPS (Ubuntu / Debian with PM2 & Nginx)
-1. SSH into your Hostinger VPS:
+
+1. **Connect to your VPS**:
    ```bash
-   ssh root@your-vps-ip
+   ssh root@your-server-ip
    ```
-2. Clone your repository:
+
+2. **Clone the Repository**:
    ```bash
    git clone https://github.com/mrrajrumel/Shirin-Shila.git /var/www/shirin-shila
    cd /var/www/shirin-shila
    ```
-3. Set up environment:
+
+3. **Set Up Environment**:
    ```bash
    cp .env.example .env.local
-   nano .env.local # update your secret credentials
+   nano .env.local
    ```
-4. Install dependencies and build:
+   Set your production `ADMIN_SECRET`.
+
+4. **Install Dependencies & Build**:
    ```bash
    npm install
    npm run build
    ```
-5. Run with PM2 Process Manager:
+
+5. **Start with PM2**:
    ```bash
    npm install -g pm2
-   pm2 start npm --name "shirin-shila" -- start
+   pm2 start server.js --name "shirin-shila"
    pm2 save
    pm2 startup
    ```
-6. Configure Nginx reverse proxy to pass traffic from port 80/443 to `http://127.0.0.1:3000`.
 
----
+6. **Configure Nginx Reverse Proxy**:
+   Point your domain to `http://127.0.0.1:3000`:
+   ```nginx
+   server {
+       server_name shirinshila.com www.shirinshila.com;
 
-## 📁 Project Directory Layout
-
-```
-├── public/
-│   ├── favicon.ico             # 32x32 Favicon icon
-│   ├── icon.svg                # Vector monogram SS crest
-│   ├── apple-touch-icon.png    # 180x180 Apple touch icon
-│   ├── images/
-│   │   ├── logos/              # 15 Broadcaster & studio SVG logos
-│   │   ├── hero.jpg            # Hero portrait
-│   │   └── poster-*.jpg        # Theatrical movie posters
-│   └── uploads/                # User-uploaded files from Admin CMS
-├── src/
-│   ├── app/
-│   │   ├── admin/              # Full Admin CMS subpages
-│   │   │   ├── hero/           # Hero section editor
-│   │   │   ├── about/          # About Us editor
-│   │   │   ├── works/          # Notable Works CRUD & auto-fetch
-│   │   │   ├── showreel/       # Showreels manager & YouTube importer
-│   │   │   ├── press/          # Press & Media auto-importer
-│   │   │   ├── timeline/       # Awards & honors manager
-│   │   │   ├── media-partners/ # TV & studio logos manager
-│   │   │   ├── contact/        # Contact & socials editor
-│   │   │   └── inquiries/      # CRM bookings desk
-│   │   ├── api/                # Secure REST API endpoints
-│   │   ├── not-found.tsx       # Custom cinematic 404 page
-│   │   ├── sitemap.ts          # Search engine sitemap XML generator
-│   │   ├── robots.ts           # Search crawler directives
-│   │   ├── layout.tsx          # Root layout & JSON-LD schema
-│   │   └── page.tsx            # Main one-page portfolio assembly
-│   ├── components/             # Reusable UI & animation components
-│   ├── data/
-│   │   └── store/              # JSON server-side persistence files
-│   └── lib/                    # Auth, security, and storage helpers
-├── next.config.mjs             # Next.js config with security headers
-├── package.json
-└── README.md
-```
-
----
-
-## 🔒 Security & Best Practices
-
-- **Zero-DB Server Persistence**: Stored files in `src/data/store/*.json` persist safely across server restarts without external database downtime risks.
-- **JWT Session Verification**: Secure HTTP-only cookies protect all `/admin` routes and sensitive mutations.
-- **Repository Hygiene**: `.env`, `.env.local`, and sensitive secrets are strictly excluded via `.gitignore`.
-- **Content Security Headers**: Pre-configured protection against MIME sniffing, clickjacking, and XSS attacks.
+       location / {
+           proxy_pass http://127.0.0.1:3000;
+           proxy_http_version 1.1;
+           proxy_set_header Upgrade $http_upgrade;
+           proxy_set_header Connection 'upgrade';
+           proxy_set_header Host $host;
+           proxy_cache_bypass $http_upgrade;
+       }
+   }
+   ```
 
 ---
 

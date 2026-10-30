@@ -9,12 +9,13 @@ import { RevealText } from "@/components/ui/reveal-text";
 
 export interface HeroSectionProps {
   id?: string;
+  initialProfile?: HeroProfile;
 }
 
-export function HeroMotion({ id = "home" }: HeroSectionProps) {
+export function HeroMotion({ id = "home", initialProfile }: HeroSectionProps) {
   const containerRef = useRef<HTMLElement>(null);
   const [isClient, setIsClient] = useState(false);
-  const [profile, setProfile] = useState<HeroProfile>(heroProfile);
+  const [profile, setProfile] = useState<HeroProfile>(initialProfile || heroProfile);
 
   const loadHeroData = () => {
     fetch("/api/hero", { cache: "no-store" })
@@ -29,7 +30,10 @@ export function HeroMotion({ id = "home" }: HeroSectionProps) {
 
   useEffect(() => {
     setIsClient(true);
-    loadHeroData();
+    // Only fetch on initial mount if server profile was not supplied
+    if (!initialProfile) {
+      loadHeroData();
+    }
 
     const handleUpdate = () => {
       loadHeroData();
@@ -45,7 +49,7 @@ export function HeroMotion({ id = "home" }: HeroSectionProps) {
       window.removeEventListener("shirin_shila_hero_updated", handleUpdate);
       window.removeEventListener("shirin_shila_reset", handleUpdate);
     };
-  }, []);
+  }, [initialProfile]);
 
   // Mouse Parallax Values
   const mouseX = useMotionValue(0);

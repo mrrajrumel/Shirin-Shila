@@ -3,8 +3,16 @@
 import React, { useState, useEffect } from "react";
 import { defaultMediaPartners, MediaPartner, mediaPartnersMeta } from "@/data/media-partners";
 
-export function MediaTickerSection({ id = "media-ticker" }: { id?: string }) {
-  const [partners, setPartners] = useState<MediaPartner[]>(defaultMediaPartners);
+export function MediaTickerSection({
+  id = "media-ticker",
+  initialPartners,
+}: {
+  id?: string;
+  initialPartners?: MediaPartner[];
+}) {
+  const [partners, setPartners] = useState<MediaPartner[]>(
+    initialPartners && initialPartners.length > 0 ? initialPartners : defaultMediaPartners
+  );
 
   const loadPartners = () => {
     fetch("/api/media-partners", { cache: "no-store" })
@@ -18,7 +26,9 @@ export function MediaTickerSection({ id = "media-ticker" }: { id?: string }) {
   };
 
   useEffect(() => {
-    loadPartners();
+    if (!initialPartners || initialPartners.length === 0) {
+      loadPartners();
+    }
 
     const handleUpdate = () => {
       loadPartners();

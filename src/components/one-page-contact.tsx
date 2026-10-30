@@ -18,10 +18,11 @@ import {
   saveStoredInquiries,
   getStoredContactInfo,
 } from "@/data/storage";
-import { ContactInfo, InquiryItem, inquiryTypes, contactMeta } from "@/data/contact";
+import { ContactInfo, InquiryItem, inquiryTypes, contactMeta, initialContactInfo } from "@/data/contact";
 
 export interface ContactSectionProps {
   id?: string;
+  initialInfo?: ContactInfo;
 }
 
 function TikTokIcon({ size = 16, color = "currentColor" }: { size?: number; color?: string }) {
@@ -51,8 +52,8 @@ function GoogleIcon({ size = 16, color = "currentColor" }: { size?: number; colo
   );
 }
 
-export function OnePageContact({ id = "contact" }: ContactSectionProps) {
-  const [contactInfo, setContactInfo] = useState<ContactInfo | null>(null);
+export function OnePageContact({ id = "contact", initialInfo }: ContactSectionProps) {
+  const [contactInfo, setContactInfo] = useState<ContactInfo>(initialInfo || initialContactInfo);
   const [form, setForm] = useState({
     name: "",
     email: "",
@@ -74,14 +75,14 @@ export function OnePageContact({ id = "contact" }: ContactSectionProps) {
         .then((data) => {
           if (data && data.info) {
             setContactInfo(data.info);
-          } else {
-            setContactInfo(getStoredContactInfo());
           }
         })
-        .catch(() => setContactInfo(getStoredContactInfo()));
+        .catch(() => {});
     };
 
-    loadContactInfo();
+    if (!initialInfo) {
+      loadContactInfo();
+    }
 
     const handleUpdate = () => {
       loadContactInfo();

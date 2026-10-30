@@ -94,8 +94,6 @@ export default function CareerJourneyTimeline({
   };
 
   useEffect(() => {
-    loadTimeline();
-
     const handleUpdate = () => loadTimeline();
     window.addEventListener("shirin_shila_timeline_updated", handleUpdate);
     window.addEventListener("shirin_shila_reset", handleUpdate);

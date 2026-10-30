@@ -7,12 +7,20 @@ import { biography as defaultBio, profileFacts as defaultFacts, aboutMeta as def
 
 export interface AboutSectionProps {
   id?: string;
+  initialData?: {
+    meta?: typeof defaultMeta;
+    biography?: typeof defaultBio;
+    profileFacts?: typeof defaultFacts;
+  };
 }
 
-export function OnePageAbout({ id = "about" }: AboutSectionProps) {
-  const [aboutMeta, setAboutMeta] = useState(defaultMeta);
-  const [biography, setBiography] = useState(defaultBio);
-  const [profileFacts, setProfileFacts] = useState(defaultFacts);
+export function OnePageAbout({ id = "about", initialData }: AboutSectionProps) {
+  const [aboutMeta, setAboutMeta] = useState(initialData?.meta || defaultMeta);
+  const [biography, setBiography] = useState(initialData?.biography || defaultBio);
+  const [profileFacts, setProfileFacts] = useState(() => {
+    const raw = initialData?.profileFacts || defaultFacts;
+    return raw.filter((f: any) => !/representation|email/i.test(f.label || ""));
+  });
 
   const loadAboutData = () => {
     fetch("/api/about", { cache: "no-store" })
@@ -33,7 +41,9 @@ export function OnePageAbout({ id = "about" }: AboutSectionProps) {
   };
 
   useEffect(() => {
-    loadAboutData();
+    if (!initialData) {
+      loadAboutData();
+    }
 
     const handleUpdate = () => {
       loadAboutData();

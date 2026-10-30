@@ -1,4 +1,4 @@
-import { filmography as defaultFilmography, ProjectItem } from './projects';
+import { filmography as defaultFilmography, ProjectItem } from './filmography';
 import { pressItems as defaultPressItems, PressItem } from './press';
 import {
   initialContactInfo,
@@ -28,7 +28,7 @@ export function getStoredWorks(): ProjectItem[] {
       const parsed = JSON.parse(raw);
       if (Array.isArray(parsed) && parsed.length > 0) {
         return parsed.map((item: ProjectItem) => {
-          const def = defaultFilmography.find((d) => d.id === item.id || d.title === item.title);
+          const def = defaultFilmography.find((d: ProjectItem) => d.id === item.id || d.title === item.title);
           if (def) {
             return {
               ...def,

@@ -4,14 +4,15 @@ import React, { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import { ExternalLink, X, ZoomIn, ChevronLeft, ChevronRight } from "lucide-react";
 import { getStoredPress } from "@/data/storage";
-import { PressItem, pressMeta } from "@/data/press";
+import { PressItem, pressItems as defaultPressItems, pressMeta } from "@/data/press";
 
 export interface PressSectionProps {
   id?: string;
+  initialItems?: PressItem[];
 }
 
-export function OnePagePress({ id = "press" }: PressSectionProps) {
-  const [items, setItems] = useState<PressItem[]>([]);
+export function OnePagePress({ id = "press", initialItems }: PressSectionProps) {
+  const [items, setItems] = useState<PressItem[]>(initialItems && initialItems.length > 0 ? initialItems : defaultPressItems);
   const [activeTab, setActiveTab] = useState<"All" | "News article" | "Newspaper clipping">("All");
   const [activeClipping, setActiveClipping] = useState<PressItem | null>(null);
   const carouselRef = useRef<HTMLDivElement>(null);
@@ -30,7 +31,9 @@ export function OnePagePress({ id = "press" }: PressSectionProps) {
         .catch(() => setItems(getStoredPress()));
     };
 
-    loadItems();
+    if (!initialItems || initialItems.length === 0) {
+      loadItems();
+    }
 
     const handleUpdate = () => {
       loadItems();

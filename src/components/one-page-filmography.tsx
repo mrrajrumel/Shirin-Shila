@@ -13,10 +13,11 @@ import GlassyCarousel, { GlassyCarouselItem } from "@/components/ui/glassy-carou
 
 export interface FilmographySectionProps {
   id?: string;
+  initialItems?: ProjectItem[];
 }
 
-export function OnePageFilmography({ id = "filmography" }: FilmographySectionProps) {
-  const [items, setItems] = useState<ProjectItem[]>(filmography);
+export function OnePageFilmography({ id = "filmography", initialItems }: FilmographySectionProps) {
+  const [items, setItems] = useState<ProjectItem[]>(initialItems && initialItems.length > 0 ? initialItems : filmography);
   const [filter, setFilter] = useState<string>("All");
 
   useEffect(() => {
@@ -33,7 +34,9 @@ export function OnePageFilmography({ id = "filmography" }: FilmographySectionPro
         .catch(() => setItems(getStoredWorks()));
     };
 
-    loadItems();
+    if (!initialItems || initialItems.length === 0) {
+      loadItems();
+    }
 
     const handleUpdate = () => loadItems();
 

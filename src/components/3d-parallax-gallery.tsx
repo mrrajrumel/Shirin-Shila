@@ -14,10 +14,11 @@ export type { GalleryImage };
 
 export interface GallerySectionProps {
   id?: string;
+  initialImages?: GalleryImage[];
 }
 
-export function ParallaxGallery({ id = "gallery" }: GallerySectionProps) {
-  const [images, setImages] = useState<GalleryImage[]>(galleryImages);
+export function ParallaxGallery({ id = "gallery", initialImages }: GallerySectionProps) {
+  const [images, setImages] = useState<GalleryImage[]>(initialImages && initialImages.length > 0 ? initialImages : galleryImages);
   const ref = useRef<HTMLElement>(null);
   const [activeModalItem, setActiveModalItem] = useState<GalleryImage | null>(null);
 
@@ -33,7 +34,9 @@ export function ParallaxGallery({ id = "gallery" }: GallerySectionProps) {
         .catch(() => {});
     };
 
-    loadImages();
+    if (!initialImages || initialImages.length === 0) {
+      loadImages();
+    }
 
     const handleUpdate = () => loadImages();
     window.addEventListener("shirin_shila_gallery_updated", handleUpdate);

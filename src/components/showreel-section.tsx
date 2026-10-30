@@ -7,10 +7,11 @@ import { CoverflowCarousel, CoverflowSlide } from "@/components/ui/coverflow-car
 
 export interface ShowreelSectionProps {
   id?: string;
+  initialVideos?: ShowreelItem[];
 }
 
-export function ShowreelSection({ id = "showreel" }: ShowreelSectionProps) {
-  const [videos, setVideos] = useState<ShowreelItem[]>(showreelVideos);
+export function ShowreelSection({ id = "showreel", initialVideos }: ShowreelSectionProps) {
+  const [videos, setVideos] = useState<ShowreelItem[]>(initialVideos && initialVideos.length > 0 ? initialVideos : showreelVideos);
 
   useEffect(() => {
     const loadVideos = () => {
@@ -24,7 +25,9 @@ export function ShowreelSection({ id = "showreel" }: ShowreelSectionProps) {
         .catch(() => {});
     };
 
-    loadVideos();
+    if (!initialVideos || initialVideos.length === 0) {
+      loadVideos();
+    }
 
     const handleUpdate = () => loadVideos();
     window.addEventListener("shirin_shila_showreels_updated", handleUpdate);
