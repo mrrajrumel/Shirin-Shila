@@ -117,6 +117,9 @@ export function HeroMotion({ id = "home", initialProfile }: HeroSectionProps) {
         className="hero-image"
         src={profile.image}
         alt={profile.imageAlt}
+        onError={(e) => {
+          (e.currentTarget as HTMLImageElement).src = "/images/shirin-akter.png";
+        }}
         style={{
           x: imgX,
           y: imgY,

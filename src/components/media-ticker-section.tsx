@@ -84,6 +84,9 @@ export function MediaTickerSection({
                     alt={partner.name}
                     className="media-logo-img"
                     loading="lazy"
+                    onError={(e) => {
+                      (e.currentTarget as HTMLImageElement).src = "/images/logos/channel-i.svg";
+                    }}
                   />
                 </a>
               ) : (
@@ -93,6 +96,9 @@ export function MediaTickerSection({
                     alt={partner.name}
                     className="media-logo-img"
                     loading="lazy"
+                    onError={(e) => {
+                      (e.currentTarget as HTMLImageElement).src = "/images/logos/channel-i.svg";
+                    }}
                   />
                 </div>
               )}

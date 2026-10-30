@@ -136,6 +136,9 @@ export function OnePageAbout({ id = "about", initialData }: AboutSectionProps) {
                 src={aboutMeta.portraitSrc}
                 alt={aboutMeta.portraitAlt}
                 className="about-dossier-portrait-img"
+                onError={(e) => {
+                  (e.currentTarget as HTMLImageElement).src = "/images/portrait.jpg";
+                }}
               />
               <div className="about-dossier-badge-bottom">
                 <span className="badge-name">Shirin Shila</span>

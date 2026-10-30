@@ -217,6 +217,9 @@ export default function CareerJourneyTimeline({
                 src={imageUrl}
                 alt={imageAlt}
                 className="absolute inset-0 w-full h-full object-cover filter saturate-[0.9] opacity-75"
+                onError={(e) => {
+                  (e.currentTarget as HTMLImageElement).src = "/images/award-trophy-stage.jpg";
+                }}
               />
               <div className="absolute inset-0 bg-gradient-to-t from-[#0e0810] via-[#0e0810]/50 to-transparent pointer-events-none" />
 

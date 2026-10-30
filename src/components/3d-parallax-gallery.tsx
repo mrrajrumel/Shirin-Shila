@@ -113,7 +113,14 @@ export function ParallaxGallery({ id = "gallery", initialImages }: GallerySectio
                   style={{ cursor: "pointer" }}
                   title="Click to view full image"
                 >
-                  <img src={item.src} alt={item.label} loading="lazy" />
+                  <img
+                    src={item.src}
+                    alt={item.label}
+                    loading="lazy"
+                    onError={(e) => {
+                      (e.currentTarget as HTMLImageElement).src = "/images/gallery-1.jpg";
+                    }}
+                  />
                   <figcaption>
                     <span>{item.label}</span>
                     <span style={{ opacity: 0.7, marginLeft: 6 }}>• {item.year}</span>
@@ -153,6 +160,9 @@ export function ParallaxGallery({ id = "gallery", initialImages }: GallerySectio
                 src={activeModalItem.src}
                 alt={activeModalItem.label}
                 className="gallery-modal-img"
+                onError={(e) => {
+                  (e.currentTarget as HTMLImageElement).src = "/images/gallery-1.jpg";
+                }}
               />
               <div className="gallery-modal-caption">
                 <span className="section-kicker">

@@ -160,6 +160,9 @@ export function OnePagePress({ id = "press", initialItems }: PressSectionProps) 
                       alt={item.headline || "Newspaper Clipping"}
                       loading="lazy"
                       className="papercut-img"
+                      onError={(e) => {
+                        (e.currentTarget as HTMLImageElement).src = "/images/newspaper-cut-1.jpg";
+                      }}
                     />
                     <div className="papercut-overlay">
                       <span className="papercut-zoom-badge">
@@ -202,6 +205,9 @@ export function OnePagePress({ id = "press", initialItems }: PressSectionProps) 
                     alt={item.headline}
                     loading="lazy"
                     className="news-cover-img"
+                    onError={(e) => {
+                      (e.currentTarget as HTMLImageElement).src = "/images/newspaper-cut-1.jpg";
+                    }}
                   />
                 </div>
 
@@ -257,6 +263,9 @@ export function OnePagePress({ id = "press", initialItems }: PressSectionProps) 
                 src={activeClipping.image}
                 alt={activeClipping.headline || "Archived Newspaper Clipping"}
                 className="papercut-modal-img"
+                onError={(e) => {
+                  (e.currentTarget as HTMLImageElement).src = "/images/newspaper-cut-1.jpg";
+                }}
               />
             </div>
             <div className="papercut-modal-footer">
