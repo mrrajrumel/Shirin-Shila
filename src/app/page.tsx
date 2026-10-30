@@ -21,6 +21,9 @@ import { pressItems, PressItem } from "@/data/press";
 import { initialContactInfo, ContactInfo } from "@/data/contact";
 import { defaultMediaPartners, MediaPartner } from "@/data/media-partners";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 export default async function Home() {
   const [
     hero,
