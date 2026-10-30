@@ -3,6 +3,10 @@ const nextConfig = {
   images: { unoptimized: true },
   transpilePackages: ['framer-motion', 'lucide-react'],
   serverExternalPackages: ['mysql2', 'bcryptjs', 'sharp'],
+  experimental: {
+    cpus: 2,
+    workerThreads: false,
+  },
   async headers() {
     return [
       {
@@ -30,7 +34,7 @@ const nextConfig = {
           },
           {
             key: 'Link',
-            value: '</llms.txt>; rel="describedby", </llms-full.txt>; rel="describedby", </api/markdown>; rel="alternate"; type="text/markdown", </.well-known/mcp/server-card.json>; rel="service-desc"',
+            value: '</api/markdown>; rel="alternate"; type="text/markdown", </.well-known/mcp/server-card.json>; rel="service-desc"',
           },
         ],
       },
