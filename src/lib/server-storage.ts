@@ -1,7 +1,8 @@
 import fs from 'fs';
 import path from 'path';
+import { getPersistentStoreDir, getPersistentBackupsDir } from './persistent-paths';
 
-// Import default seed data
+// Import default seed data from codebase
 import { filmography as defaultFilmography, ProjectItem } from '../data/filmography';
 import { showreelVideos as defaultShowreels, ShowreelItem } from '../data/showreel';
 import { pressItems as defaultPress, PressItem } from '../data/press';
@@ -24,14 +25,6 @@ import { aboutData as defaultAbout } from '../data/about';
 import { defaultMediaPartners, MediaPartner } from '../data/media-partners';
 import { defaultSeoData, SiteSeoData } from '../data/seo';
 
-const STORE_DIR = path.join(process.cwd(), 'src', 'data', 'store');
-
-function ensureStoreDir() {
-  if (!fs.existsSync(STORE_DIR)) {
-    fs.mkdirSync(STORE_DIR, { recursive: true });
-  }
-}
-
 export interface TimelineStoreData {
   top: JourneyItem[];
   bottom: JourneyItem[];
@@ -51,8 +44,22 @@ export type StoreKey =
   | 'mediaPartners'
   | 'seo';
 
-function getFilePath(key: StoreKey): string {
-  return path.join(STORE_DIR, `${key}.json`);
+export const ALL_STORE_KEYS: StoreKey[] = [
+  'hero',
+  'about',
+  'filmography',
+  'showreels',
+  'gallery',
+  'timeline',
+  'press',
+  'contactInfo',
+  'inquiries',
+  'mediaPartners',
+  'seo',
+];
+
+function getStoreFilePath(key: StoreKey): string {
+  return path.join(getPersistentStoreDir(), `${key}.json`);
 }
 
 function getDefaultData(key: StoreKey): any {
@@ -87,47 +94,91 @@ function getDefaultData(key: StoreKey): any {
 }
 
 /**
- * Read data from local JSON store. Initializes from default code dataset if file doesn't exist.
+ * Read data from local JSON store.
+ * Priority:
+ * 1. Persistent file in getPersistentStoreDir() (survives Git deployments)
+ * 2. If absent in persistent dir: copy from repository's src/data/store/{key}.json (first-time seed)
+ * 3. Fallback: getDefaultData(key) from code
  */
 export async function readStore<T>(key: StoreKey): Promise<T> {
-  ensureStoreDir();
-  const filePath = getFilePath(key);
+  const filePath = getStoreFilePath(key);
 
-  try {
-    if (fs.existsSync(filePath)) {
+  // 1. If file already exists in persistent directory, read and return it
+  if (fs.existsSync(filePath)) {
+    try {
       const raw = await fs.promises.readFile(filePath, 'utf-8');
       return JSON.parse(raw) as T;
+    } catch (err) {
+      console.error(`[ServerStore] Error reading persistent ${key}.json:`, err);
     }
-  } catch (err) {
-    console.error(`[ServerStore] Error reading ${key}.json:`, err);
   }
 
-  // File doesn't exist or error reading -> seed with default data and save
-  const seed = getDefaultData(key) as T;
-  await writeStore(key, seed);
-  return seed;
+  // 2. First-time initialization: check if repository has a seed file
+  const repoSeedPath = path.join(process.cwd(), 'src', 'data', 'store', `${key}.json`);
+  let initialData: T;
+
+  if (fs.existsSync(repoSeedPath)) {
+    try {
+      const raw = await fs.promises.readFile(repoSeedPath, 'utf-8');
+      initialData = JSON.parse(raw) as T;
+    } catch {
+      initialData = getDefaultData(key) as T;
+    }
+  } else {
+    initialData = getDefaultData(key) as T;
+  }
+
+  // Write once to persistent storage without creating rolling backup for the initial seed
+  await writeStore(key, initialData, false);
+  return initialData;
 }
 
 /**
- * Write data to local JSON store on server disk.
+ * Write data to persistent JSON store with atomic file renaming and rolling safety backups.
  */
-export async function writeStore<T>(key: StoreKey, data: T): Promise<void> {
-  ensureStoreDir();
-  const filePath = getFilePath(key);
+export async function writeStore<T>(key: StoreKey, data: T, createBackup = true): Promise<void> {
+  const filePath = getStoreFilePath(key);
   const tempPath = `${filePath}.tmp.${Date.now()}`;
+  const serialized = JSON.stringify(data, null, 2);
 
+  // 1. Atomic write to persistent file
   try {
-    const serialized = JSON.stringify(data, null, 2);
     await fs.promises.writeFile(tempPath, serialized, 'utf-8');
     await fs.promises.rename(tempPath, filePath);
   } catch (err) {
-    console.error(`[ServerStore] Error writing ${key}.json:`, err);
-    // Fallback direct write if atomic rename encounters file-lock on Windows
+    console.error(`[ServerStore] Atomic rename failed for ${key}, falling back to direct write:`, err);
     try {
-      await fs.promises.writeFile(filePath, JSON.stringify(data, null, 2), 'utf-8');
+      await fs.promises.writeFile(filePath, serialized, 'utf-8');
     } catch (writeErr) {
       console.error(`[ServerStore] Direct write failed for ${key}:`, writeErr);
       throw writeErr;
+    }
+  }
+
+  // 2. Rolling backup (keeps last 5 revisions for disaster recovery)
+  if (createBackup) {
+    try {
+      const backupsDir = path.join(getPersistentBackupsDir(), key);
+      if (!fs.existsSync(backupsDir)) {
+        fs.mkdirSync(backupsDir, { recursive: true });
+      }
+
+      const backupPath = path.join(backupsDir, `${key}.${Date.now()}.json`);
+      await fs.promises.writeFile(backupPath, serialized, 'utf-8');
+
+      // Prune backups older than the 5 most recent
+      const files = (await fs.promises.readdir(backupsDir))
+        .filter((f) => f.startsWith(`${key}.`) && f.endsWith('.json'))
+        .sort();
+
+      if (files.length > 5) {
+        const toDelete = files.slice(0, files.length - 5);
+        for (const file of toDelete) {
+          await fs.promises.unlink(path.join(backupsDir, file)).catch(() => {});
+        }
+      }
+    } catch (backupErr) {
+      console.warn(`[ServerStore] Rolling backup warning for ${key}:`, backupErr);
     }
   }
 }

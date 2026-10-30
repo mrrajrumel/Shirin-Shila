@@ -20,6 +20,8 @@ import {
   Share2,
   TrendingUp,
   Sparkles,
+  ShieldCheck,
+  Download,
 } from "lucide-react";
 import { ProjectItem } from "@/data/filmography";
 import { ShowreelItem } from "@/data/showreel";
@@ -210,6 +212,63 @@ export default function AdminOverviewPage() {
           <Share2 size={14} />
           <span>Contact &amp; Portals</span>
         </Link>
+      </div>
+
+      {/* Data Protection & Persistence Banner */}
+      <div
+        className="adm-card"
+        style={{
+          marginBottom: "24px",
+          padding: "16px 20px",
+          display: "flex",
+          flexWrap: "wrap",
+          alignItems: "center",
+          justifyContent: "space-between",
+          gap: "12px",
+          background: "#f0fdf4",
+          border: "1px solid #bbf7d0",
+        }}
+      >
+        <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+          <div
+            style={{
+              width: "36px",
+              height: "36px",
+              borderRadius: "8px",
+              background: "#dcfce7",
+              color: "#16a34a",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <ShieldCheck size={20} />
+          </div>
+          <div>
+            <div style={{ fontSize: "14px", fontWeight: 700, color: "#166534" }}>
+              Live Data &amp; Media Protection Shield Active
+            </div>
+            <div style={{ fontSize: "12px", color: "#15803d" }}>
+              All CMS content edits and media files persist safely across GitHub commits, releases, and server rebuilds.
+            </div>
+          </div>
+        </div>
+        <div style={{ display: "flex", gap: "8px" }}>
+          <a
+            href="/api/backup?download=true"
+            className="adm-btn adm-btn-secondary adm-btn-sm"
+            style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}
+          >
+            <Download size={13} />
+            <span>Download Backup</span>
+          </a>
+          <Link
+            href="/admin/backup"
+            className="adm-btn adm-btn-primary adm-btn-sm"
+          >
+            <span>Manage Persistence</span>
+          </Link>
+        </div>
       </div>
 
       {/* TailAdmin Recent Inquiries Table Card */}

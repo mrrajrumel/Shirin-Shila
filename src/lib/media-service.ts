@@ -1,6 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import crypto from 'crypto';
+import { getPersistentStoreDir, getPersistentUploadsDir } from './persistent-paths';
 
 export interface MediaAsset {
   id: string;
@@ -23,17 +24,24 @@ export interface MediaUsageReference {
   field: string;
 }
 
-const STORE_DIR = path.join(process.cwd(), 'src', 'data', 'store');
-const MANIFEST_PATH = path.join(STORE_DIR, 'media-manifest.json');
-const UPLOADS_ROOT = path.join(process.cwd(), 'public', 'uploads');
+export function getManifestPath(): string {
+  return path.join(getPersistentStoreDir(), 'media-manifest.json');
+}
+
+export function getUploadsDir(): string {
+  return getPersistentUploadsDir();
+}
+
 const IMAGES_ROOT = path.join(process.cwd(), 'public', 'images');
 
 function ensureDirectories() {
-  if (!fs.existsSync(STORE_DIR)) {
-    fs.mkdirSync(STORE_DIR, { recursive: true });
+  const storeDir = getPersistentStoreDir();
+  const uploadsDir = getPersistentUploadsDir();
+  if (!fs.existsSync(storeDir)) {
+    fs.mkdirSync(storeDir, { recursive: true });
   }
-  if (!fs.existsSync(UPLOADS_ROOT)) {
-    fs.mkdirSync(UPLOADS_ROOT, { recursive: true });
+  if (!fs.existsSync(uploadsDir)) {
+    fs.mkdirSync(uploadsDir, { recursive: true });
   }
 }
 
@@ -135,10 +143,11 @@ export function validateFileSignature(
  */
 export async function getMediaManifest(): Promise<MediaAsset[]> {
   ensureDirectories();
+  const manifestPath = getManifestPath();
 
-  if (fs.existsSync(MANIFEST_PATH)) {
+  if (fs.existsSync(manifestPath)) {
     try {
-      const raw = await fs.promises.readFile(MANIFEST_PATH, 'utf-8');
+      const raw = await fs.promises.readFile(manifestPath, 'utf-8');
       const data = JSON.parse(raw);
       if (Array.isArray(data) && data.length > 0) {
         return data;
@@ -146,6 +155,19 @@ export async function getMediaManifest(): Promise<MediaAsset[]> {
     } catch (err) {
       console.error('[MediaService] Error reading manifest:', err);
     }
+  }
+
+  // Check if repository seed manifest exists
+  const seedManifest = path.join(process.cwd(), 'src', 'data', 'store', 'media-manifest.json');
+  if (fs.existsSync(seedManifest)) {
+    try {
+      const raw = await fs.promises.readFile(seedManifest, 'utf-8');
+      const data = JSON.parse(raw);
+      if (Array.isArray(data) && data.length > 0) {
+        await saveMediaManifest(data);
+        return data;
+      }
+    } catch {}
   }
 
   // First-time or empty manifest -> auto-index existing files
@@ -157,25 +179,27 @@ export async function getMediaManifest(): Promise<MediaAsset[]> {
  */
 export async function saveMediaManifest(manifest: MediaAsset[]): Promise<void> {
   ensureDirectories();
-  const tempPath = `${MANIFEST_PATH}.tmp.${Date.now()}`;
+  const manifestPath = getManifestPath();
+  const tempPath = `${manifestPath}.tmp.${Date.now()}`;
   const serialized = JSON.stringify(manifest, null, 2);
 
   try {
     await fs.promises.writeFile(tempPath, serialized, 'utf-8');
-    await fs.promises.rename(tempPath, MANIFEST_PATH);
+    await fs.promises.rename(tempPath, manifestPath);
   } catch (err) {
     console.error('[MediaService] Temp rename failed, direct write fallback:', err);
-    await fs.promises.writeFile(MANIFEST_PATH, serialized, 'utf-8');
+    await fs.promises.writeFile(manifestPath, serialized, 'utf-8');
   }
 }
 
 /**
- * Scans public/uploads and public/images to build an initial canonical manifest.
+ * Scans uploads and public/images to build an initial canonical manifest.
  */
 export async function scanAndIndexExistingMedia(): Promise<MediaAsset[]> {
   ensureDirectories();
   const assets: MediaAsset[] = [];
   const seenHashes = new Set<string>();
+  const uploadsRoot = getUploadsDir();
 
   const scanDir = (dir: string, baseFolder: string, urlPrefix: string) => {
     if (!fs.existsSync(dir)) return;
@@ -222,7 +246,7 @@ export async function scanAndIndexExistingMedia(): Promise<MediaAsset[]> {
     }
   };
 
-  scanDir(UPLOADS_ROOT, 'uploads', '/uploads');
+  scanDir(uploadsRoot, 'uploads', '/uploads');
   scanDir(IMAGES_ROOT, 'images', '/images');
 
   await saveMediaManifest(assets);
@@ -261,7 +285,8 @@ export async function uploadMediaAsset({
 
   // 3. New file: create collision-resistant name in appropriate folder
   const sanitizedFolder = folder.replace(/[^a-zA-Z0-9_-]/g, '') || 'general';
-  const targetDir = path.join(UPLOADS_ROOT, sanitizedFolder);
+  const uploadsRoot = getUploadsDir();
+  const targetDir = path.join(uploadsRoot, sanitizedFolder);
   if (!fs.existsSync(targetDir)) {
     fs.mkdirSync(targetDir, { recursive: true });
   }
@@ -324,8 +349,9 @@ export async function checkMediaUsage(assetUrl: string): Promise<MediaUsageRefer
     { file: 'seo.json', section: 'SEO & Metadata' },
   ];
 
+  const storeDir = getPersistentStoreDir();
   for (const { file, section } of storeFiles) {
-    const filePath = path.join(STORE_DIR, file);
+    const filePath = path.join(storeDir, file);
     if (fs.existsSync(filePath)) {
       try {
         const raw = await fs.promises.readFile(filePath, 'utf-8');
@@ -396,13 +422,14 @@ export async function deleteMediaAsset(
     };
   }
 
-  // Safe file removal: only delete if path resolves within public/uploads
+  // Safe file removal: only delete if path resolves within uploads root
   if (asset.url.startsWith('/uploads/')) {
     const rel = asset.url.replace(/^\/uploads\//, '');
-    const absolutePath = path.resolve(UPLOADS_ROOT, rel);
+    const uploadsRoot = getUploadsDir();
+    const absolutePath = path.resolve(uploadsRoot, rel);
 
-    // Prevent path traversal outside UPLOADS_ROOT
-    if (absolutePath.startsWith(UPLOADS_ROOT)) {
+    // Prevent path traversal outside uploadsRoot
+    if (absolutePath.startsWith(uploadsRoot)) {
       if (fs.existsSync(absolutePath)) {
         try {
           await fs.promises.unlink(absolutePath);

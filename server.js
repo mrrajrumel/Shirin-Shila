@@ -3,6 +3,8 @@ process.env.NODE_ENV = process.env.NODE_ENV || 'production';
 
 const { createServer } = require('http');
 const { parse } = require('url');
+const fs = require('fs');
+const path = require('path');
 const next = require('next');
 
 const dev = process.env.NODE_ENV === 'development';
@@ -12,10 +14,62 @@ const port = parseInt(process.env.PORT || '3000', 10);
 const app = next({ dev, hostname, port });
 const handle = app.getRequestHandler();
 
+const MIME_MAP = {
+  '.jpg': 'image/jpeg',
+  '.jpeg': 'image/jpeg',
+  '.png': 'image/png',
+  '.webp': 'image/webp',
+  '.gif': 'image/gif',
+  '.svg': 'image/svg+xml',
+  '.mp4': 'video/mp4',
+  '.webm': 'video/webm',
+  '.pdf': 'application/pdf',
+  '.ico': 'image/x-icon',
+};
+
+function getPersistentUploadsDir() {
+  if (process.env.MEDIA_UPLOADS_DIR && process.env.MEDIA_UPLOADS_DIR.trim()) {
+    return path.resolve(process.env.MEDIA_UPLOADS_DIR.trim());
+  }
+  if (process.platform === 'linux') {
+    const homeMatch = process.cwd().match(/^(\/home\/[^/]+)/);
+    if (homeMatch) {
+      return path.join(homeMatch[1], 'shirin_shila_persistent_data', 'uploads');
+    }
+  }
+  return path.join(process.cwd(), 'public', 'uploads');
+}
+
 app.prepare().then(() => {
+  const uploadsDir = getPersistentUploadsDir();
+
   createServer(async (req, res) => {
     try {
       const parsedUrl = parse(req.url, true);
+      const { pathname } = parsedUrl;
+
+      // Fast streaming static uploads handler
+      if (pathname && pathname.startsWith('/uploads/')) {
+        const rel = decodeURIComponent(pathname.replace(/^\/uploads\//, ''));
+        const safeRel = path.normalize(rel).replace(/^(\.\.[\/\\])+/, '');
+        const targetPath = path.resolve(uploadsDir, safeRel);
+
+        if (targetPath.startsWith(uploadsDir) && fs.existsSync(targetPath)) {
+          const stat = fs.statSync(targetPath);
+          if (stat.isFile()) {
+            const ext = path.extname(targetPath).toLowerCase();
+            res.writeHead(200, {
+              'Content-Type': MIME_MAP[ext] || 'application/octet-stream',
+              'Content-Length': stat.size,
+              'Cache-Control': 'public, max-age=31536000, immutable',
+              'X-Content-Type-Options': 'nosniff',
+            });
+            fs.createReadStream(targetPath).pipe(res);
+            return;
+          }
+        }
+      }
+
       await handle(req, res, parsedUrl);
     } catch (err) {
       console.error('Error occurred handling', req.url, err);
@@ -26,4 +80,3 @@ app.prepare().then(() => {
     console.log(`> Shirin Shila Portfolio production server ready on http://${hostname}:${port}`);
   });
 });
-

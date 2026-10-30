@@ -2,6 +2,7 @@ import crypto from 'crypto';
 import fs from 'fs';
 import path from 'path';
 import bcrypt from 'bcryptjs';
+import { getPersistentStoreDir } from './persistent-paths';
 
 const ADMIN_SECRET =
   process.env.ADMIN_SECRET || 'shirin_shila_secret_session_token_2026_secured_tso';
@@ -25,8 +26,10 @@ export interface SessionUser {
   role: 'admin';
 }
 
-const STORE_DIR = path.join(process.cwd(), 'src', 'data', 'store');
-const USERS_FILE = path.join(STORE_DIR, 'admin-users.json');
+function getUsersFile(): string {
+  const storeDir = getPersistentStoreDir();
+  return path.join(storeDir, 'admin-users.json');
+}
 
 // In-memory rate limiting map: identifier -> { count, lockedUntil }
 const loginAttempts = new Map<string, { count: number; lockedUntil: number }>();
@@ -41,19 +44,36 @@ const LOCKOUT_DURATION_MS = 15 * 60 * 1000; // 15 minutes
  * Plaintext passwords are NEVER saved.
  */
 export function ensureAdminAccounts(): AdminUserRecord[] {
-  if (!fs.existsSync(STORE_DIR)) {
-    fs.mkdirSync(STORE_DIR, { recursive: true });
+  const usersFile = getUsersFile();
+  const storeDir = getPersistentStoreDir();
+
+  if (!fs.existsSync(storeDir)) {
+    fs.mkdirSync(storeDir, { recursive: true });
   }
 
   let users: AdminUserRecord[] = [];
-  if (fs.existsSync(USERS_FILE)) {
+
+  // Check if persistent users file exists
+  if (fs.existsSync(usersFile)) {
     try {
-      const raw = fs.readFileSync(USERS_FILE, 'utf-8');
+      const raw = fs.readFileSync(usersFile, 'utf-8');
       users = JSON.parse(raw);
       if (!Array.isArray(users)) users = [];
     } catch (err) {
       console.error('[Auth] Error reading admin-users.json, re-initializing:', err);
       users = [];
+    }
+  } else {
+    // Check if seed file exists in repository
+    const seedUsersFile = path.join(process.cwd(), 'src', 'data', 'store', 'admin-users.json');
+    if (fs.existsSync(seedUsersFile)) {
+      try {
+        const raw = fs.readFileSync(seedUsersFile, 'utf-8');
+        users = JSON.parse(raw);
+        if (!Array.isArray(users)) users = [];
+      } catch {
+        users = [];
+      }
     }
   }
 
@@ -107,8 +127,8 @@ export function ensureAdminAccounts(): AdminUserRecord[] {
     modified = true;
   }
 
-  if (modified || !fs.existsSync(USERS_FILE)) {
-    fs.writeFileSync(USERS_FILE, JSON.stringify(users, null, 2), 'utf-8');
+  if (modified || !fs.existsSync(usersFile)) {
+    fs.writeFileSync(usersFile, JSON.stringify(users, null, 2), 'utf-8');
   }
 
   return users;

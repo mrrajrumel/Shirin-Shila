@@ -21,6 +21,7 @@ import {
   X,
   Globe,
   FolderKanban,
+  ShieldCheck,
 } from "lucide-react";
 import "./admin.css";
 
@@ -123,6 +124,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       group: "SEO & SYSTEM SETTINGS",
       items: [
         { href: "/admin/seo", label: "SEO & Meta Settings", icon: Globe },
+        { href: "/admin/backup", label: "Data & Persistence", icon: ShieldCheck },
       ],
     },
   ];

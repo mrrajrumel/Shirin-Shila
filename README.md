@@ -14,9 +14,11 @@ Built with Next.js 14 App Router, React 18, TypeScript, and Tailwind CSS, featur
 
 ## 🌟 Key Architecture & Capabilities
 
-### 1. Zero-Database JSON Persistence Engine
-- **No External Database Overhead**: Operates entirely with server-side JSON file persistence in `src/data/store/`, requiring zero database servers (no MySQL, PostgreSQL, MongoDB, or Redis needed).
-- **Instant Global Persistence**: All content published via the `/admin` console immediately writes to atomic server-side JSON files and automatically updates the public website.
+### 1. Zero-Database Persistent Storage & Deployment Shield
+- **Zero External Database Overhead**: Operates entirely with lightweight, structured JSON file persistence, requiring zero database servers (no MySQL, PostgreSQL, MongoDB, or Redis needed).
+- **Hostinger Deployment Immunity**: Data modified or created via the Admin CMS is persisted outside ephemeral Git release folders (at `/home/u473489494/shirin_shila_persistent_data/`). Pushing code updates to GitHub and auto-deploying via Hostinger will **never** overwrite or reset live content.
+- **Atomic Operations & Rolling Revisions**: Writes use atomic file renames and automatically archive timestamped rolling snapshots (retaining the last 5 revisions per section) to prevent corruption.
+- **1-Click Offline Backup & Restore**: Full JSON backup archives can be downloaded directly from the CMS or restored with automatic pre-restore safety snapshots. See [`PRODUCTION_DATA_PERSISTENCE.md`](file:///c:/Users/RajRu/Downloads/Shirin%20Shila/PRODUCTION_DATA_PERSISTENCE.md) and [`DEPLOYMENT_SAFETY.md`](file:///c:/Users/RajRu/Downloads/Shirin%20Shila/DEPLOYMENT_SAFETY.md).
 - **Server-Side Rendering (SSR)**: The public frontend preloads verified store data on the server, guaranteeing zero client-side layout shift, no flashing placeholders, and 100% crawlable content for search engines.
 
 ### 2. Public Frontend Sections
