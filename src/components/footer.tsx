@@ -12,26 +12,21 @@ export function Footer() {
   useEffect(() => {
     const loadLinks = async () => {
       try {
-        const [seoRes, pagesRes] = await Promise.all([
-          fetch("/api/seo", { cache: "no-store" }).then((r) => (r.ok ? r.json() : null)),
-          fetch("/api/pages", { cache: "no-store" }).then((r) => (r.ok ? r.json() : null)),
-        ]);
-
-        const llmsPublished = pagesRes?.pages?.llms?.isPublished !== false;
+        const seoRes = await fetch("/api/seo", { cache: "no-store" }).then((r) => (r.ok ? r.json() : null));
 
         if (seoRes?.seo?.footerLinks && Array.isArray(seoRes.seo.footerLinks) && seoRes.seo.footerLinks.length > 0) {
           const activeLinks = seoRes.seo.footerLinks
             .filter((item: any) => {
               if (item.isVisible === false) return false;
-              // Strict rule: only show llms.txt if pages.llms is explicitly published
+              // Never display llms.txt in the public user-facing footer
               if (item.href === "/llms.txt" || item.id === "llms") {
-                return llmsPublished;
+                return false;
               }
               return true;
             })
             .sort((a: any, b: any) => (a.order || 0) - (b.order || 0))
             .map((item: any) => ({
-              label: item.label,
+              label: item.label === "About Actor" ? "About Us" : item.label,
               href: item.href,
             }));
 
@@ -41,12 +36,8 @@ export function Footer() {
           }
         }
 
-        // Fallback default links: If llms.txt is published, include it
-        if (llmsPublished) {
-          setLinks([...defaultFooterLinks, { label: "llms.txt", href: "/llms.txt" }]);
-        } else {
-          setLinks(defaultFooterLinks);
-        }
+        // Default to the 4 approved public pages
+        setLinks(defaultFooterLinks);
       } catch {
         setLinks(defaultFooterLinks);
       }

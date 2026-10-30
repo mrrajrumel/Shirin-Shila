@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   FileText,
   Save,
@@ -19,8 +19,12 @@ import {
   Bot,
   Plus,
   Trash2,
+  Upload,
+  FolderKanban,
+  ImageIcon,
 } from 'lucide-react';
 import { PagesRegistry, defaultPagesRegistry, ManagedPageData } from '@/data/pages';
+import { MediaPickerModal } from '@/components/admin/media-picker-modal';
 
 type PageKey = keyof PagesRegistry;
 
@@ -41,6 +45,9 @@ export default function AdminPagesManagement() {
   const [revisions, setRevisions] = useState<any[]>([]);
   const [loadingRevisions, setLoadingRevisions] = useState(false);
   const [rollingBackId, setRollingBackId] = useState<number | null>(null);
+  const [isUploadingPortrait, setIsUploadingPortrait] = useState(false);
+  const [portraitPickerOpen, setPortraitPickerOpen] = useState(false);
+  const portraitFileInputRef = useRef<HTMLInputElement>(null);
 
   const loadPages = async () => {
     setLoading(true);
@@ -193,6 +200,32 @@ export default function AdminPagesManagement() {
     }
   };
 
+  const handlePortraitUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setIsUploadingPortrait(true);
+    const body = new FormData();
+    body.append('file', file);
+    body.append('folder', 'about');
+
+    try {
+      const res = await fetch('/api/upload', {
+        method: 'POST',
+        body,
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Upload failed');
+
+      handleMetaChange('portraitImage', data.url);
+    } catch (err: any) {
+      alert(`Image upload error: ${err.message}`);
+    } finally {
+      setIsUploadingPortrait(false);
+    }
+  };
+
   const activePage = pages[activeTab] || defaultPagesRegistry[activeTab];
 
   if (loading) {
@@ -206,15 +239,6 @@ export default function AdminPagesManagement() {
   return (
     <>
       <header className="adm-header">
-        <div className="adm-header-left">
-          <div className="adm-breadcrumbs">
-            <span>Admin</span> / <span>CMS</span> / <span>Page Management</span>
-          </div>
-          <h1 className="adm-title">Pages &amp; Policy Management</h1>
-          <p className="adm-subtitle">
-            Centralized editor for public pages (About Us, Contact &amp; Book, Privacy Policy, Terms of Representation, and llms.txt machine manifest).
-          </p>
-        </div>
         <div className="adm-header-actions">
           <button
             type="button"
@@ -386,7 +410,74 @@ export default function AdminPagesManagement() {
                   {/* Tab-Specific Rich Customization Sections */}
                   {activeTab === 'about' && (
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', paddingTop: '10px', borderTop: '1px solid var(--adm-border)' }}>
-                      <span style={{ fontSize: '13px', fontWeight: 600, color: 'var(--tail-primary)' }}>
+                      {/* Portrait Image Manager */}
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                        <span style={{ fontSize: '13px', fontWeight: 600, color: 'var(--tail-primary)' }}>
+                          About Page Featured Portrait Image
+                        </span>
+                        <div style={{ display: 'grid', gridTemplateColumns: '140px 1fr', gap: '16px', alignItems: 'center' }}>
+                          <div
+                            style={{
+                              width: '140px',
+                              height: '170px',
+                              borderRadius: '10px',
+                              overflow: 'hidden',
+                              border: '1px solid var(--adm-border)',
+                              background: 'var(--adm-bg-page)',
+                              position: 'relative',
+                            }}
+                          >
+                            <img
+                              src={activePage.meta?.portraitImage || '/images/hero.jpg'}
+                              alt="About Portrait Preview"
+                              style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                            />
+                          </div>
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                            <input
+                              type="file"
+                              ref={portraitFileInputRef}
+                              onChange={handlePortraitUpload}
+                              accept="image/*"
+                              style={{ display: 'none' }}
+                            />
+                            <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+                              <button
+                                type="button"
+                                onClick={() => portraitFileInputRef.current?.click()}
+                                disabled={isUploadingPortrait}
+                                className="adm-btn adm-btn-secondary adm-btn-sm"
+                              >
+                                <Upload size={13} />
+                                <span>{isUploadingPortrait ? 'Uploading...' : 'Upload Image'}</span>
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => setPortraitPickerOpen(true)}
+                                className="adm-btn adm-btn-secondary adm-btn-sm"
+                              >
+                                <FolderKanban size={13} />
+                                <span>Media Library</span>
+                              </button>
+                            </div>
+                            <div>
+                              <label className="adm-label">Image URL / Path</label>
+                              <input
+                                type="text"
+                                className="adm-input"
+                                value={activePage.meta?.portraitImage || ''}
+                                onChange={(e) => handleMetaChange('portraitImage', e.target.value)}
+                                placeholder="/images/hero.jpg or /uploads/about/..."
+                              />
+                              <span style={{ fontSize: '11px', color: 'var(--adm-text-muted)', marginTop: '4px', display: 'block' }}>
+                                Displays prominently as the main biographical portrait on /about.
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      <span style={{ fontSize: '13px', fontWeight: 600, color: 'var(--tail-primary)', marginTop: '6px' }}>
                         Career Statistics (Highlights Grid)
                       </span>
                       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px' }}>
@@ -703,6 +794,16 @@ export default function AdminPagesManagement() {
           </div>
         </form>
       </main>
+
+      <MediaPickerModal
+        isOpen={portraitPickerOpen}
+        onClose={() => setPortraitPickerOpen(false)}
+        onSelect={(url) => {
+          handleMetaChange('portraitImage', url);
+          setPortraitPickerOpen(false);
+        }}
+        targetFolder="about"
+      />
     </>
   );
 }

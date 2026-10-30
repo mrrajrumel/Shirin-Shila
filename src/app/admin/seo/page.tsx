@@ -116,15 +116,6 @@ export default function AdminSeoPage() {
   return (
     <>
       <header className="adm-header">
-        <div className="adm-header-left">
-          <div className="adm-breadcrumbs">
-            <span>Admin</span> / <span>Settings</span> / <span>SEO &amp; Social</span>
-          </div>
-          <h1 className="adm-title">Search Engine Optimization (SEO) &amp; Social Sharing</h1>
-          <p className="adm-subtitle">
-            Configure global website metadata, canonical domain URL, OpenGraph social sharing previews, and browser tab favicons.
-          </p>
-        </div>
         <div className="adm-header-actions">
           <button
             type="button"

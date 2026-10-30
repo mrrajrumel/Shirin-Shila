@@ -81,3 +81,4 @@ ADMIN_SECRET=[CONFIGURED_IN_HOSTINGER_HPANEL]
    - `npm run build` (`next build --webpack` with 2 CPU workers)
 3. Application restarts gracefully under LiteSpeed Node.js process manager.
 4. Database tables and schema verified idempotently on first incoming request.
+

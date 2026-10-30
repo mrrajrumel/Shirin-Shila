@@ -96,3 +96,4 @@ If the MySQL database is dropped or corrupted:
 4. `ensureDatabaseSchema()` automatically re-creates all 6 tables (`cms_content`, `cms_audit_logs`, `inquiries`, `media_assets`, `admin_users`, `page_revisions`).
 5. `readStore()` automatically seeds MySQL from `/persistent_data/store/` or repo seed files.
 6. The site is fully recovered with zero manual SQL typing.
+

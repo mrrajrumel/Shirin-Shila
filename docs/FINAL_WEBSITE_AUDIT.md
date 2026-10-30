@@ -124,3 +124,4 @@ Every admin section follows a verified, bidirectional, transactional data flow:
 
 1. **DNS Propagation Monitoring**: Apex `shirinshila.com` resolves directly to Hostinger server IP `195.35.48.243`. Verify that `www.shirinshila.com` CNAME points to `@` in Hostinger DNS Zone Editor.
 2. **Contact Email Inboxes**: Ensure email forwarding or mailbox accounts are active on Hostinger for `booking@shirinshila.com`, `press@shirinshila.com`, and `privacy@shirinshila.com`.
+

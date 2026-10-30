@@ -69,7 +69,7 @@ export default async function AboutPage() {
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '30px', marginBottom: '40px' }}>
           <div style={{ borderRadius: '14px', overflow: 'hidden', border: '1px solid #27272a', maxHeight: '420px' }}>
             <img
-              src={pageConfig.meta?.portraitImage || '/images/hero.jpg'}
+              src={pageConfig.meta?.portraitImage || activeAbout?.meta?.portraitSrc || '/images/hero.jpg'}
               alt="Shirin Shila"
               style={{ width: '100%', height: '100%', objectFit: 'cover' }}
             />
