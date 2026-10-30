@@ -112,6 +112,24 @@ export async function readStore<T>(key: StoreKey): Promise<T> {
     try {
       const dbData = await getDbContent<T>(key);
       if (dbData !== null && dbData !== undefined) {
+        if (key === 'pages') {
+          const pages = dbData as unknown as PagesRegistry;
+          let modified = false;
+          for (const k of ['about', 'contact', 'privacy', 'terms', 'llms'] as (keyof PagesRegistry)[]) {
+            if (!pages[k]) {
+              pages[k] = defaultPagesRegistry[k];
+              modified = true;
+            }
+          }
+          if (pages.llms && pages.llms.isPublished !== true) {
+            pages.llms.isPublished = true;
+            modified = true;
+          }
+          if (modified) {
+            saveDbContent(key, pages, 'auto_pages_sync').catch(() => {});
+          }
+          return pages as unknown as T;
+        }
         return dbData;
       }
     } catch (dbErr) {
@@ -126,6 +144,27 @@ export async function readStore<T>(key: StoreKey): Promise<T> {
     try {
       const raw = await fs.promises.readFile(filePath, 'utf-8');
       const parsed = JSON.parse(raw) as T;
+      if (key === 'pages') {
+        const pages = parsed as unknown as PagesRegistry;
+        let modified = false;
+        for (const k of ['about', 'contact', 'privacy', 'terms', 'llms'] as (keyof PagesRegistry)[]) {
+          if (!pages[k]) {
+            pages[k] = defaultPagesRegistry[k];
+            modified = true;
+          }
+        }
+        if (pages.llms && pages.llms.isPublished !== true) {
+          pages.llms.isPublished = true;
+          modified = true;
+        }
+        if (modified) {
+          fs.promises.writeFile(filePath, JSON.stringify(pages, null, 2), 'utf-8').catch(() => {});
+          if (isDatabaseConfigured()) {
+            saveDbContent(key, pages, 'auto_pages_sync').catch(() => {});
+          }
+        }
+        return pages as unknown as T;
+      }
       // If DB is configured but empty for this key, seed it now
       if (isDatabaseConfigured()) {
         saveDbContent(key, parsed, 'initial_file_sync').catch(() => {});

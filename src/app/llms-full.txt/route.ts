@@ -13,18 +13,6 @@ export const revalidate = 0;
 export async function GET() {
   const pages = (await readStore<PagesRegistry>('pages').catch(() => defaultPagesRegistry)) || defaultPagesRegistry;
 
-  // Strict check: if public publication is OFF (default), return 404
-  if (!pages?.llms?.isPublished) {
-    return new NextResponse('Not Found\n\nThe requested machine manifest is currently disabled.', {
-      status: 404,
-      statusText: 'Not Found',
-      headers: {
-        'Content-Type': 'text/plain; charset=utf-8',
-        'Cache-Control': 'no-store, no-cache, must-revalidate',
-      },
-    });
-  }
-
   const [siteUrl, about, filmography, contact, seo] = await Promise.all([
     resolveCanonicalSiteUrl(),
     readStore<any>('about').catch(() => defaultAbout),

@@ -17,7 +17,7 @@ export function Footer() {
           fetch("/api/pages", { cache: "no-store" }).then((r) => (r.ok ? r.json() : null)),
         ]);
 
-        const llmsPublished = Boolean(pagesRes?.pages?.llms?.isPublished);
+        const llmsPublished = pagesRes?.pages?.llms?.isPublished !== false;
 
         if (seoRes?.seo?.footerLinks && Array.isArray(seoRes.seo.footerLinks) && seoRes.seo.footerLinks.length > 0) {
           const activeLinks = seoRes.seo.footerLinks

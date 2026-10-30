@@ -23,8 +23,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { path: '/privacy', priority: 0.7, freq: 'yearly' },
   ];
 
-  // Include /llms.txt ONLY if it is published in Pages Management
-  if (pages?.llms?.isPublished) {
+  // Include /llms.txt in sitemap
+  if (pages?.llms?.isPublished !== false) {
     paths.push({ path: '/llms.txt', priority: 0.8, freq: 'weekly' });
   }
 
