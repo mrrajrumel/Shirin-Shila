@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { SESSION_COOKIE_NAME, verifySessionToken } from '@/lib/auth';
 
 export const dynamic = 'force-dynamic';
 
@@ -241,6 +242,11 @@ const KNOWN_PROJECTS: Record<
 };
 
 export async function GET(request: NextRequest) {
+  const token = request.cookies.get(SESSION_COOKIE_NAME)?.value;
+  if (!verifySessionToken(token)) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
   const { searchParams } = new URL(request.url);
   const input = (searchParams.get('query') || searchParams.get('url') || '').trim();
 
@@ -427,6 +433,19 @@ export async function GET(request: NextRequest) {
   if (isUrl) {
     try {
       const urlObj = new URL(input.startsWith('http') ? input : `https://${input}`);
+      const host = urlObj.hostname.toLowerCase();
+      if (
+        host === 'localhost' ||
+        host === '127.0.0.1' ||
+        host === '::1' ||
+        host === '0.0.0.0' ||
+        /^10\./.test(host) ||
+        /^192\.168\./.test(host) ||
+        /^172\.(1[6-9]|2[0-9]|3[0-1])\./.test(host) ||
+        /^169\.254\./.test(host)
+      ) {
+        return NextResponse.json({ error: 'Requests to private network addresses are prohibited' }, { status: 400 });
+      }
       const res = await fetch(urlObj.toString(), {
         headers: {
           'User-Agent':
