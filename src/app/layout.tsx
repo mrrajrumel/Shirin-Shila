@@ -20,6 +20,16 @@ export async function generateMetadata(): Promise<Metadata> {
   const keywords = (seo.keywords || defaultSeoData.keywords).split(',').map((k) => k.trim());
   const ogImage = seo.ogImage || '/images/hero.jpg';
 
+  const customFavicon = seo.faviconUrl && seo.faviconUrl.trim() ? seo.faviconUrl.trim() : null;
+  const customApple = seo.appleTouchIconUrl && seo.appleTouchIconUrl.trim() ? seo.appleTouchIconUrl.trim() : null;
+
+  const iconList = customFavicon
+    ? [{ url: customFavicon }]
+    : [
+        { url: '/icon.svg', type: 'image/svg+xml' },
+        { url: '/favicon.ico', sizes: 'any' },
+      ];
+
   return {
     metadataBase: new URL(siteUrl),
     alternates: {
@@ -39,13 +49,10 @@ export async function generateMetadata(): Promise<Metadata> {
     creator: 'Rumel Ahmed',
     publisher: 'Shirin Shila Official Management Desk',
     icons: {
-      icon: [
-        { url: '/favicon.ico', sizes: 'any' },
-        { url: seo.faviconUrl || '/icon.svg', type: 'image/svg+xml' },
-      ],
-      shortcut: '/favicon.ico',
+      icon: iconList,
+      shortcut: customFavicon || '/favicon.ico',
       apple: [
-        { url: seo.appleTouchIconUrl || '/apple-icon.png', sizes: '180x180', type: 'image/png' },
+        { url: customApple || '/apple-icon.png', sizes: '180x180', type: 'image/png' },
       ],
     },
     manifest: '/site.webmanifest',
@@ -110,7 +117,54 @@ export default async function RootLayout({
         "url": siteUrl,
         "name": "Shirin Shila Official Cinema Portfolio",
         "description": "Official casting and film portfolio of Bangladeshi silver-screen actress Shirin Shila.",
+        "publisher": { "@id": `${siteUrl}/#organization` },
         "inLanguage": ["en", "bn"]
+      },
+      {
+        "@type": "Organization",
+        "@id": `${siteUrl}/#organization`,
+        "name": "Shirin Shila Talent Management Desk",
+        "alternateName": ["Shirin Shila Management", "Shirin Shila Official Agency", "Shirin Shila Production & Booking Desk"],
+        "url": siteUrl,
+        "logo": {
+          "@type": "ImageObject",
+          "url": `${siteUrl}/images/hero.jpg`,
+          "caption": "Shirin Shila Official Logo"
+        },
+        "image": `${siteUrl}/images/hero.jpg`,
+        "description": "Official talent representation, casting coordination, and brand endorsement management agency for Bangladeshi film actress Shirin Shila (Shirin Akter).",
+        "email": managementEmail,
+        ...(managementPhone ? { "telephone": managementPhone } : {}),
+        "address": {
+          "@type": "PostalAddress",
+          "addressLocality": "Dhaka",
+          "addressRegion": "Dhaka Division",
+          "addressCountry": "BD"
+        },
+        "founder": {
+          "@id": `${siteUrl}/#person`
+        },
+        "contactPoint": [
+          {
+            "@type": "ContactPoint",
+            "@id": `${siteUrl}/#booking-desk`,
+            "contactType": "Talent Booking & Management Desk",
+            "email": managementEmail,
+            ...(managementPhone ? { "telephone": managementPhone } : {}),
+            "url": `${siteUrl}/contact`,
+            "availableLanguage": ["English", "Bengali"]
+          }
+        ],
+        "sameAs": [
+          "https://www.facebook.com/shirin.shila.5",
+          "https://www.facebook.com/shirinshilaofficial",
+          "https://www.instagram.com/shirin_shila",
+          "https://www.youtube.com/@shirinshilaofficial",
+          "https://www.tiktok.com/@shirinshilaofficial",
+          "https://www.imdb.com/name/nm6897284/",
+          "https://bn.wikipedia.org/wiki/%E0%A6%B6%E0%A6%BF%E0%A6%B0%E0%A6%BF%E0%A6%A8_%E0%A6%B6%E0%A6%BF%E0%A6%B2%E0%A6%BE",
+          "https://share.google/t32VCGGg4i72ZQ1nq"
+        ]
       },
       {
         "@type": "ProfilePage",
@@ -131,6 +185,7 @@ export default async function RootLayout({
         },
         "gender": "Female",
         "jobTitle": "Dhallywood Film Actress, Television Star & Cultural Fashion Model",
+        "worksFor": { "@id": `${siteUrl}/#organization` },
         "nationality": {
           "@type": "Country",
           "name": "Bangladesh"
@@ -228,6 +283,10 @@ export default async function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <head>
         <link rel="canonical" href={siteUrl} />
+        {/* Dynamic Verified Favicon & Browser Icons */}
+        <link rel="icon" href={seo.faviconUrl || '/icon.svg'} />
+        <link rel="shortcut icon" href={seo.faviconUrl || '/favicon.ico'} />
+        <link rel="apple-touch-icon" href={seo.appleTouchIconUrl || '/apple-icon.png'} />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link

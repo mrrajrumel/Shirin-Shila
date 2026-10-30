@@ -6,32 +6,31 @@ import {
   Save,
   RefreshCw,
   Check,
-  ExternalLink,
+  ArrowUpRight,
   Eye,
   EyeOff,
   History,
   RotateCcw,
   ShieldCheck,
-  AlertTriangle,
-  Layers,
+  User,
+  Share2,
   Lock,
-  BookOpen,
-  ArrowRight,
-  Info,
+  Scale,
+  Bot,
+  Plus,
+  Trash2,
 } from 'lucide-react';
 import { PagesRegistry, defaultPagesRegistry, ManagedPageData } from '@/data/pages';
 
 type PageKey = keyof PagesRegistry;
 
-const PAGE_KEYS: PageKey[] = ['about', 'contact', 'privacy', 'terms', 'llms'];
-
-const PAGE_DESCRIPTIONS: Record<PageKey, string> = {
-  about: 'Public biography, screen credentials, and silver-screen awards profile.',
-  contact: 'Official representation desk, booking inquiry intake, and agent channels.',
-  privacy: 'Data protection, script confidentiality, and inquiry retention terms.',
-  terms: 'Talent representation scope, booking retainers, and AI likeness protections.',
-  llms: 'Factual plain-text context manifest for AI crawlers and LLM search agents.',
-};
+const PAGE_KEYS: { key: PageKey; label: string; icon: any }[] = [
+  { key: 'about', label: 'About Us', icon: User },
+  { key: 'contact', label: 'Contact & Book', icon: Share2 },
+  { key: 'privacy', label: 'Privacy Policy', icon: Lock },
+  { key: 'terms', label: 'Terms of Representation', icon: Scale },
+  { key: 'llms', label: 'llms.txt Manifest', icon: Bot },
+];
 
 export default function AdminPagesManagement() {
   const [pages, setPages] = useState<PagesRegistry>(defaultPagesRegistry);
@@ -94,8 +93,38 @@ export default function AdminPagesManagement() {
     }));
   };
 
-  const handleSave = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleMetaChange = (metaKey: string, value: any) => {
+    setPages((prev) => ({
+      ...prev,
+      [activeTab]: {
+        ...prev[activeTab],
+        meta: {
+          ...(prev[activeTab]?.meta || {}),
+          [metaKey]: value,
+        },
+      },
+    }));
+  };
+
+  const handleAddAccolade = () => {
+    const current = pages.about?.meta?.accolades || [];
+    handleMetaChange('accolades', [...current, 'New Award / Industry Honor (Year) — Description']);
+  };
+
+  const handleUpdateAccolade = (index: number, text: string) => {
+    const current = [...(pages.about?.meta?.accolades || [])];
+    current[index] = text;
+    handleMetaChange('accolades', current);
+  };
+
+  const handleRemoveAccolade = (index: number) => {
+    const current = [...(pages.about?.meta?.accolades || [])];
+    current.splice(index, 1);
+    handleMetaChange('accolades', current);
+  };
+
+  const handleSave = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
     setSaving(true);
     setSavedSuccess(false);
 
@@ -110,18 +139,14 @@ export default function AdminPagesManagement() {
       });
 
       const data = await res.json();
-      if (!res.ok) {
-        throw new Error(data.error || 'Failed to save page');
-      }
+      if (!res.ok) throw new Error(data.error || 'Failed to save page');
 
       setSavedSuccess(true);
       if (typeof window !== 'undefined') {
         window.dispatchEvent(new CustomEvent('shirin_shila_pages_updated'));
       }
 
-      // Reload revisions after save
       await loadRevisions(activeTab);
-
       setTimeout(() => setSavedSuccess(false), 3000);
     } catch (err: any) {
       alert(`Save error: ${err.message}`);
@@ -131,7 +156,7 @@ export default function AdminPagesManagement() {
   };
 
   const handleRollback = async (revId: number) => {
-    if (!confirm('Are you sure you want to rollback to this historical revision? Current edits will be superseded.')) {
+    if (!confirm('Are you sure you want to rollback to this historical revision snapshot?')) {
       return;
     }
 
@@ -148,9 +173,7 @@ export default function AdminPagesManagement() {
       });
 
       const data = await res.json();
-      if (!res.ok) {
-        throw new Error(data.error || 'Rollback failed');
-      }
+      if (!res.ok) throw new Error(data.error || 'Rollback failed');
 
       if (data.pages) {
         setPages(data.pages);
@@ -174,404 +197,512 @@ export default function AdminPagesManagement() {
 
   if (loading) {
     return (
-      <div className="adm-page-loading">
-        <RefreshCw className="adm-spin" size={32} />
-        <span>Loading Page Management System...</span>
+      <div style={{ padding: '40px', color: 'var(--adm-text-muted)' }}>
+        Loading Page Management System...
       </div>
     );
   }
 
   return (
-    <div className="adm-page">
-      {/* Header */}
-      <div className="adm-page-header">
-        <div>
+    <>
+      <header className="adm-header">
+        <div className="adm-header-left">
           <div className="adm-breadcrumbs">
-            <span>Admin</span> / <span>CMS</span> / <span>Pages Management</span>
+            <span>Admin</span> / <span>CMS</span> / <span>Page Management</span>
           </div>
           <h1 className="adm-title">Pages &amp; Policy Management</h1>
           <p className="adm-subtitle">
-            Centralized control for official public pages, representation terms, booking intake, privacy disclosures, and AI agent manifests.
+            Centralized editor for public pages (About Us, Contact &amp; Book, Privacy Policy, Terms of Representation, and llms.txt machine manifest).
           </p>
         </div>
-
-        <div className="adm-actions">
+        <div className="adm-header-actions">
           <button
             type="button"
             onClick={loadPages}
-            className="adm-btn adm-btn-secondary"
-            title="Refresh from server"
+            className="adm-btn adm-btn-secondary adm-btn-sm"
+            title="Reload from server"
           >
-            <RefreshCw size={15} />
-            <span>Reload</span>
+            <RefreshCw size={13} />
+            <span>Reset</span>
           </button>
-
           <button
             type="button"
-            onClick={handleSave}
+            onClick={() => handleSave()}
             disabled={saving}
-            className="adm-btn adm-btn-primary"
+            className="adm-btn adm-btn-primary adm-btn-sm"
           >
-            {saving ? (
-              <>
-                <RefreshCw className="adm-spin" size={15} />
-                <span>Saving to MySQL...</span>
-              </>
-            ) : savedSuccess ? (
-              <>
-                <Check size={15} color="#10b981" />
-                <span>Saved &amp; Published!</span>
-              </>
-            ) : (
-              <>
-                <Save size={15} />
-                <span>Save {activePage.title}</span>
-              </>
-            )}
+            {savedSuccess ? <Check size={13} /> : <Save size={13} />}
+            <span>{saving ? 'Saving...' : savedSuccess ? 'Saved!' : `Save ${activePage.title}`}</span>
           </button>
         </div>
-      </div>
+      </header>
 
-      {/* Pages Overview Strip */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '14px', marginBottom: '24px' }}>
-        {PAGE_KEYS.map((key) => {
-          const p = pages[key];
-          const isSelected = activeTab === key;
-          const isPub = p?.isPublished !== false;
+      <main className="adm-content">
+        {/* Sleek Tab Navigation Bar */}
+        <div
+          style={{
+            display: 'flex',
+            gap: '8px',
+            marginBottom: '20px',
+            overflowX: 'auto',
+            paddingBottom: '4px',
+            borderBottom: '1px solid var(--adm-border)',
+          }}
+        >
+          {PAGE_KEYS.map((tab) => {
+            const isSelected = activeTab === tab.key;
+            const p = pages[tab.key];
+            const isPub = p?.isPublished !== false;
+            const Icon = tab.icon;
 
-          return (
-            <button
-              key={key}
-              type="button"
-              onClick={() => setActiveTab(key)}
-              style={{
-                background: isSelected ? '#1e1b4b' : '#18181b',
-                border: isSelected ? '2px solid #8b5cf6' : '1px solid #27272a',
-                borderRadius: '10px',
-                padding: '16px',
-                textAlign: 'left',
-                cursor: 'pointer',
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '8px',
-                transition: 'all 0.15s ease',
-              }}
-            >
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span style={{ fontSize: '14px', fontWeight: 700, color: isSelected ? '#ffffff' : '#e4e4e7' }}>
-                  {p?.title || key}
-                </span>
+            return (
+              <button
+                key={tab.key}
+                type="button"
+                onClick={() => setActiveTab(tab.key)}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  padding: '10px 16px',
+                  borderRadius: '8px 8px 0 0',
+                  border: isSelected ? '1px solid var(--adm-border)' : '1px solid transparent',
+                  borderBottom: isSelected ? '2px solid var(--tail-primary)' : '1px solid transparent',
+                  background: isSelected ? 'var(--adm-bg-card)' : 'transparent',
+                  color: isSelected ? '#ffffff' : 'var(--adm-text-muted)',
+                  cursor: 'pointer',
+                  fontWeight: isSelected ? 600 : 500,
+                  fontSize: '13.5px',
+                  transition: 'all 0.15s ease',
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                <Icon size={15} style={{ color: isSelected ? 'var(--tail-primary)' : 'inherit' }} />
+                <span>{tab.label}</span>
                 <span
                   style={{
                     fontSize: '11px',
-                    padding: '2px 8px',
-                    borderRadius: '12px',
+                    padding: '2px 7px',
+                    borderRadius: '10px',
                     fontWeight: 600,
                     background: isPub ? 'rgba(16, 185, 129, 0.15)' : 'rgba(239, 68, 68, 0.15)',
                     color: isPub ? '#34d399' : '#f87171',
                   }}
                 >
-                  {isPub ? 'Published' : 'Draft / Off'}
+                  {isPub ? 'Live' : 'Draft'}
                 </span>
-              </div>
-              <span style={{ fontSize: '12px', color: '#a1a1aa' }}>
-                {p?.slug}
-              </span>
-            </button>
-          );
-        })}
-      </div>
+              </button>
+            );
+          })}
+        </div>
 
-      {/* Main Content Area */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 340px', gap: '24px', alignItems: 'start' }}>
-        {/* Editor Column */}
-        <form onSubmit={handleSave} className="adm-card" style={{ padding: '28px' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', paddingBottom: '16px', borderBottom: '1px solid #27272a' }}>
-            <div>
-              <h2 style={{ fontSize: '20px', fontWeight: 700, color: '#ffffff', display: 'flex', alignItems: 'center', gap: '10px' }}>
-                <FileText size={20} color="#ec4899" />
-                <span>Editing: {activePage.title}</span>
-              </h2>
-              <p style={{ fontSize: '13px', color: '#a1a1aa', margin: '4px 0 0' }}>
-                {PAGE_DESCRIPTIONS[activeTab]}
-              </p>
-            </div>
-
-            <a
-              href={activePage.slug}
-              target="_blank"
-              rel="noopener noreferrer"
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '6px',
-                fontSize: '13px',
-                color: '#ec4899',
-                textDecoration: 'none',
-                background: 'rgba(236, 72, 153, 0.1)',
-                padding: '8px 14px',
-                borderRadius: '6px',
-                fontWeight: 600,
-              }}
-            >
-              <span>View Live</span>
-              <ExternalLink size={14} />
-            </a>
-          </div>
-
-          {/* llms.txt Specific Notice Banner */}
-          {activeTab === 'llms' && (
-            <div style={{ background: '#1c1917', border: '1px solid #f97316', borderRadius: '8px', padding: '16px', marginBottom: '20px', display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
-              <AlertTriangle size={20} color="#fb923c" style={{ flexShrink: 0, marginTop: '2px' }} />
-              <div>
-                <strong style={{ fontSize: '14px', color: '#fdba74', display: 'block' }}>
-                  Default Publication Policy: OFF (Strict 404)
-                </strong>
-                <p style={{ fontSize: '13px', color: '#fed7aa', margin: '4px 0 0', lineHeight: 1.5 }}>
-                  Per non-negotiable security requirements, when publication is <strong>OFF</strong>, requests to <code>/llms.txt</code> return a strict 404 response, and the manifest is completely hidden from the footer navigation and <code>sitemap.xml</code>. When set to <strong>ON</strong>, the approved manifest text below is served.
-                </p>
-              </div>
-            </div>
-          )}
-
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '20px' }}>
-            <div>
-              <label className="adm-label">Page Title (Header H1 &amp; Display)</label>
-              <input
-                type="text"
-                className="adm-input"
-                value={activePage.title || ''}
-                onChange={(e) => handleFieldChange('title', e.target.value)}
-                placeholder="Page Title"
-                required
-              />
-            </div>
-
-            <div>
-              <label className="adm-label">Navigation / Footer Label</label>
-              <input
-                type="text"
-                className="adm-input"
-                value={activePage.navLabel || ''}
-                onChange={(e) => handleFieldChange('navLabel', e.target.value)}
-                placeholder="Footer Link Text"
-                required
-              />
-            </div>
-          </div>
-
-          <div style={{ marginBottom: '20px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-              <label className="adm-label" style={{ margin: 0 }}>
-                {activeTab === 'llms' ? 'Manifest Content (Plain Text / Markdown)' : 'Page Body Content (Markdown Supported)'}
-              </label>
-              <span style={{ fontSize: '12px', color: '#71717a' }}>
-                {(activePage.content || '').length} characters • {(activePage.content || '').split(/\s+/).filter(Boolean).length} words
-              </span>
-            </div>
-
-            <textarea
-              className="adm-input"
-              rows={activeTab === 'llms' || activeTab === 'privacy' || activeTab === 'terms' ? 18 : 6}
-              value={activePage.content || ''}
-              onChange={(e) => handleFieldChange('content', e.target.value)}
-              placeholder="Enter approved page content..."
-              style={{
-                fontFamily: activeTab === 'llms' ? 'monospace' : 'inherit',
-                fontSize: '13px',
-                lineHeight: 1.6,
-              }}
-            />
-          </div>
-
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '24px' }}>
-            <div>
-              <label className="adm-label">SEO Meta Title (Optional)</label>
-              <input
-                type="text"
-                className="adm-input"
-                value={activePage.seoTitle || ''}
-                onChange={(e) => handleFieldChange('seoTitle', e.target.value)}
-                placeholder="Custom title tag for search engines"
-              />
-            </div>
-
-            <div>
-              <label className="adm-label">SEO Meta Description (Optional)</label>
-              <input
-                type="text"
-                className="adm-input"
-                value={activePage.seoDescription || ''}
-                onChange={(e) => handleFieldChange('seoDescription', e.target.value)}
-                placeholder="Custom description tag"
-              />
-            </div>
-          </div>
-
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '16px', borderTop: '1px solid #27272a' }}>
-            <div style={{ fontSize: '12px', color: '#71717a' }}>
-              Last synchronized: {activePage.updatedAt ? new Date(activePage.updatedAt).toLocaleString() : 'System Default'}
-            </div>
-
-            <button
-              type="submit"
-              disabled={saving}
-              className="adm-btn adm-btn-primary"
-            >
-              {saving ? (
-                <>
-                  <RefreshCw className="adm-spin" size={15} />
-                  <span>Saving...</span>
-                </>
-              ) : (
-                <>
-                  <Save size={15} />
-                  <span>Save &amp; Persist Changes</span>
-                </>
-              )}
-            </button>
-          </div>
-        </form>
-
-        {/* Sidebar Settings & Revisions */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-          {/* Publication Control Card */}
-          <div className="adm-card" style={{ padding: '20px' }}>
-            <h3 style={{ fontSize: '16px', fontWeight: 700, color: '#ffffff', marginBottom: '14px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <ShieldCheck size={18} color="#ec4899" />
-              <span>Publication Control</span>
-            </h3>
-
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px', background: '#09090b', borderRadius: '8px', border: '1px solid #27272a' }}>
-                <div>
-                  <strong style={{ fontSize: '14px', color: '#ffffff', display: 'block' }}>
-                    Public State
-                  </strong>
-                  <span style={{ fontSize: '12px', color: activePage.isPublished ? '#34d399' : '#f87171' }}>
-                    {activePage.isPublished ? '● Published (Active)' : '○ Offline / Draft'}
-                  </span>
+        <form onSubmit={handleSave}>
+          <div className="adm-grid-2col">
+            {/* Left Column: Form Content */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+              <div className="adm-card">
+                <div className="adm-card-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <FileText size={16} style={{ color: 'var(--tail-primary)' }} />
+                    <span className="adm-card-title">Content &amp; Page Details: {activePage.title}</span>
+                  </div>
+                  <a
+                    href={activePage.slug}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="adm-btn adm-btn-secondary adm-btn-sm"
+                    style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '5px' }}
+                  >
+                    <span>View Live Page</span>
+                    <ArrowUpRight size={13} />
+                  </a>
                 </div>
 
-                <button
-                  type="button"
-                  onClick={() => handleFieldChange('isPublished', !activePage.isPublished)}
-                  style={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '6px',
-                    padding: '8px 14px',
-                    borderRadius: '6px',
-                    border: 'none',
-                    fontWeight: 600,
-                    fontSize: '13px',
-                    cursor: 'pointer',
-                    background: activePage.isPublished ? '#065f46' : '#7f1d1d',
-                    color: '#ffffff',
-                  }}
-                >
-                  {activePage.isPublished ? <Eye size={14} /> : <EyeOff size={14} />}
-                  <span>{activePage.isPublished ? 'Live' : 'Hidden'}</span>
-                </button>
-              </div>
+                <div className="adm-card-body" style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
+                    <div className="adm-form-group">
+                      <label className="adm-label">Page Title (H1 Heading)</label>
+                      <input
+                        type="text"
+                        className="adm-input"
+                        value={activePage.title || ''}
+                        onChange={(e) => handleFieldChange('title', e.target.value)}
+                        placeholder="Page Title"
+                        required
+                      />
+                    </div>
+                    <div className="adm-form-group">
+                      <label className="adm-label">Navigation / Footer Label</label>
+                      <input
+                        type="text"
+                        className="adm-input"
+                        value={activePage.navLabel || ''}
+                        onChange={(e) => handleFieldChange('navLabel', e.target.value)}
+                        placeholder="Footer link text"
+                        required
+                      />
+                    </div>
+                  </div>
 
-              <div style={{ fontSize: '12px', color: '#a1a1aa', lineHeight: 1.5 }}>
-                {activeTab === 'llms' ? (
-                  <span>
-                    When <strong>Hidden</strong>, <code>/llms.txt</code> returns HTTP 404, preventing crawling or premature indexing.
-                  </span>
-                ) : (
-                  <span>
-                    Changes are automatically backed up to MySQL revision tables and local persistent disks.
-                  </span>
-                )}
+                  <div className="adm-form-group">
+                    <label className="adm-label">Subheading / Kicker</label>
+                    <input
+                      type="text"
+                      className="adm-input"
+                      value={activePage.subheading || ''}
+                      onChange={(e) => handleFieldChange('subheading', e.target.value)}
+                      placeholder="Page subtitle or status kicker..."
+                    />
+                  </div>
+
+                  {/* Main Content Area */}
+                  <div className="adm-form-group">
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+                      <label className="adm-label" style={{ margin: 0 }}>
+                        {activeTab === 'llms'
+                          ? 'Plaintext Manifest Body (Markdown Format)'
+                          : activeTab === 'privacy' || activeTab === 'terms'
+                          ? 'Legal & Policy Terms (Markdown Formatted)'
+                          : 'Main Story & Overview Body'}
+                      </label>
+                      <span style={{ fontSize: '11px', color: 'var(--adm-text-muted)' }}>
+                        {(activePage.content || '').length} characters • {(activePage.content || '').split(/\s+/).filter(Boolean).length} words
+                      </span>
+                    </div>
+                    <textarea
+                      className="adm-textarea"
+                      rows={activeTab === 'llms' || activeTab === 'privacy' || activeTab === 'terms' ? 14 : 5}
+                      value={activePage.content || ''}
+                      onChange={(e) => handleFieldChange('content', e.target.value)}
+                      placeholder="Enter verified page content..."
+                      style={{
+                        fontFamily: activeTab === 'llms' ? 'monospace' : 'inherit',
+                        fontSize: activeTab === 'llms' ? '12.5px' : '13.5px',
+                        lineHeight: 1.6,
+                      }}
+                    />
+                  </div>
+
+                  {/* Tab-Specific Rich Customization Sections */}
+                  {activeTab === 'about' && (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', paddingTop: '10px', borderTop: '1px solid var(--adm-border)' }}>
+                      <span style={{ fontSize: '13px', fontWeight: 600, color: 'var(--tail-primary)' }}>
+                        Career Statistics (Highlights Grid)
+                      </span>
+                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px' }}>
+                        <div>
+                          <label className="adm-label">Feature Films</label>
+                          <input
+                            type="text"
+                            className="adm-input"
+                            value={activePage.meta?.featureFilms || '10+'}
+                            onChange={(e) => handleMetaChange('featureFilms', e.target.value)}
+                            placeholder="10+"
+                          />
+                        </div>
+                        <div>
+                          <label className="adm-label">Babisas Award Year</label>
+                          <input
+                            type="text"
+                            className="adm-input"
+                            value={activePage.meta?.babisasYear || '2019'}
+                            onChange={(e) => handleMetaChange('babisasYear', e.target.value)}
+                            placeholder="2019"
+                          />
+                        </div>
+                        <div>
+                          <label className="adm-label">DIFF Trophy Year</label>
+                          <input
+                            type="text"
+                            className="adm-input"
+                            value={activePage.meta?.diffYear || '2024'}
+                            onChange={(e) => handleMetaChange('diffYear', e.target.value)}
+                            placeholder="2024"
+                          />
+                        </div>
+                      </div>
+
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '6px' }}>
+                        <span style={{ fontSize: '13px', fontWeight: 600, color: 'var(--tail-primary)' }}>
+                          Notable Accolades &amp; Honors
+                        </span>
+                        <button
+                          type="button"
+                          onClick={handleAddAccolade}
+                          className="adm-btn adm-btn-secondary adm-btn-sm"
+                        >
+                          <Plus size={12} />
+                          <span>Add Accolade</span>
+                        </button>
+                      </div>
+
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                        {(activePage.meta?.accolades || []).map((accolade: string, idx: number) => (
+                          <div key={idx} style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                            <input
+                              type="text"
+                              className="adm-input"
+                              value={accolade}
+                              onChange={(e) => handleUpdateAccolade(idx, e.target.value)}
+                            />
+                            <button
+                              type="button"
+                              onClick={() => handleRemoveAccolade(idx)}
+                              style={{
+                                background: 'transparent',
+                                border: 'none',
+                                color: '#ef4444',
+                                cursor: 'pointer',
+                                padding: '6px',
+                              }}
+                              title="Delete honor"
+                            >
+                              <Trash2 size={14} />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {activeTab === 'contact' && (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', paddingTop: '10px', borderTop: '1px solid var(--adm-border)' }}>
+                      <span style={{ fontSize: '13px', fontWeight: 600, color: 'var(--tail-primary)' }}>
+                        Management Office &amp; Booking Contacts
+                      </span>
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                        <div>
+                          <label className="adm-label">Booking &amp; Casting Email</label>
+                          <input
+                            type="email"
+                            className="adm-input"
+                            value={activePage.meta?.managementEmail || 'booking@shirinshila.com'}
+                            onChange={(e) => handleMetaChange('managementEmail', e.target.value)}
+                          />
+                        </div>
+                        <div>
+                          <label className="adm-label">Press &amp; Media Email</label>
+                          <input
+                            type="email"
+                            className="adm-input"
+                            value={activePage.meta?.pressEmail || 'press@shirinshila.com'}
+                            onChange={(e) => handleMetaChange('pressEmail', e.target.value)}
+                          />
+                        </div>
+                      </div>
+
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                        <div>
+                          <label className="adm-label">Telephone / WhatsApp</label>
+                          <input
+                            type="text"
+                            className="adm-input"
+                            value={activePage.meta?.phone || '+880 1711-000000'}
+                            onChange={(e) => handleMetaChange('phone', e.target.value)}
+                          />
+                        </div>
+                        <div>
+                          <label className="adm-label">Representation Base</label>
+                          <input
+                            type="text"
+                            className="adm-input"
+                            value={activePage.meta?.representationBase || 'Dhaka, Bangladesh (Available for Worldwide Shoots)'}
+                            onChange={(e) => handleMetaChange('representationBase', e.target.value)}
+                          />
+                        </div>
+                      </div>
+
+                      <div className="adm-form-group">
+                        <label className="adm-label">Turnaround Guarantee</label>
+                        <input
+                          type="text"
+                          className="adm-input"
+                          value={activePage.meta?.turnaroundTime || 'All verified casting inquiries answered within 24-48 business hours'}
+                          onChange={(e) => handleMetaChange('turnaroundTime', e.target.value)}
+                        />
+                      </div>
+                    </div>
+                  )}
+
+                  {/* SEO Meta Tags */}
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', paddingTop: '10px', borderTop: '1px solid var(--adm-border)' }}>
+                    <span style={{ fontSize: '13px', fontWeight: 600, color: 'var(--tail-primary)' }}>
+                      Search Engine Metadata Override (Optional)
+                    </span>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                      <div>
+                        <label className="adm-label">Meta Title</label>
+                        <input
+                          type="text"
+                          className="adm-input"
+                          value={activePage.seoTitle || ''}
+                          onChange={(e) => handleFieldChange('seoTitle', e.target.value)}
+                          placeholder="Page custom title"
+                        />
+                      </div>
+                      <div>
+                        <label className="adm-label">Meta Description</label>
+                        <input
+                          type="text"
+                          className="adm-input"
+                          value={activePage.seoDescription || ''}
+                          onChange={(e) => handleFieldChange('seoDescription', e.target.value)}
+                          placeholder="Search snippet description"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
-          </div>
 
-          {/* Historical Revisions & Rollback Card */}
-          <div className="adm-card" style={{ padding: '20px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
-              <h3 style={{ fontSize: '16px', fontWeight: 700, color: '#ffffff', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <History size={18} color="#ec4899" />
-                <span>Revision Recovery</span>
-              </h3>
-              <button
-                type="button"
-                onClick={() => loadRevisions(activeTab)}
-                disabled={loadingRevisions}
-                style={{ background: 'none', border: 'none', color: '#a1a1aa', cursor: 'pointer', padding: 0 }}
-                title="Reload history"
-              >
-                <RefreshCw size={13} className={loadingRevisions ? 'adm-spin' : ''} />
-              </button>
-            </div>
-
-            {loadingRevisions ? (
-              <div style={{ fontSize: '13px', color: '#71717a', textAlign: 'center', padding: '16px 0' }}>
-                Loading revisions...
-              </div>
-            ) : revisions.length === 0 ? (
-              <div style={{ fontSize: '13px', color: '#71717a', textAlign: 'center', padding: '16px 0' }}>
-                No revisions logged yet. Save changes to create revision checkpoints.
-              </div>
-            ) : (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', maxHeight: '340px', overflowY: 'auto' }}>
-                {revisions.map((rev) => (
+            {/* Right Column: Status, Live Controls & Revision History */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+              {/* Publication Status Card */}
+              <div className="adm-card">
+                <div className="adm-card-header">
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <ShieldCheck size={16} style={{ color: 'var(--tail-primary)' }} />
+                    <span className="adm-card-title">Publication &amp; Live Status</span>
+                  </div>
+                </div>
+                <div className="adm-card-body" style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
                   <div
-                    key={rev.id}
                     style={{
-                      background: '#09090b',
-                      border: '1px solid #27272a',
-                      borderRadius: '8px',
-                      padding: '10px 12px',
                       display: 'flex',
-                      justifyContent: 'space-between',
                       alignItems: 'center',
+                      justifyContent: 'space-between',
+                      padding: '12px 14px',
+                      background: '#090d16',
+                      borderRadius: '8px',
+                      border: '1px solid var(--adm-border)',
                     }}
                   >
                     <div>
-                      <div style={{ fontSize: '13px', fontWeight: 600, color: '#f43f5e' }}>
-                        Rev #{rev.revisionNum}
-                      </div>
-                      <div style={{ fontSize: '11px', color: '#a1a1aa' }}>
-                        {new Date(rev.createdAt).toLocaleString()}
-                      </div>
-                      <div style={{ fontSize: '11px', color: '#71717a' }}>
-                        By {rev.savedBy}
-                      </div>
+                      <strong style={{ fontSize: '13.5px', color: '#ffffff', display: 'block' }}>
+                        Live Public State
+                      </strong>
+                      <span
+                        style={{
+                          fontSize: '12px',
+                          fontWeight: 600,
+                          color: activePage.isPublished ? '#34d399' : '#f87171',
+                        }}
+                      >
+                        {activePage.isPublished ? '● Published (Active Live)' : '○ Offline (Draft / 404)'}
+                      </span>
                     </div>
 
                     <button
                       type="button"
-                      disabled={rollingBackId === rev.id}
-                      onClick={() => handleRollback(rev.id)}
+                      onClick={() => handleFieldChange('isPublished', !activePage.isPublished)}
                       style={{
                         display: 'inline-flex',
                         alignItems: 'center',
-                        gap: '4px',
-                        background: 'rgba(236, 72, 153, 0.1)',
-                        border: '1px solid rgba(236, 72, 153, 0.3)',
-                        color: '#ec4899',
-                        padding: '6px 10px',
+                        gap: '6px',
+                        padding: '7px 14px',
                         borderRadius: '6px',
-                        fontSize: '12px',
+                        border: 'none',
                         fontWeight: 600,
+                        fontSize: '12.5px',
                         cursor: 'pointer',
+                        background: activePage.isPublished ? '#065f46' : '#7f1d1d',
+                        color: '#ffffff',
                       }}
-                      title="Rollback to this snapshot"
                     >
-                      <RotateCcw size={12} className={rollingBackId === rev.id ? 'adm-spin' : ''} />
-                      <span>Rollback</span>
+                      {activePage.isPublished ? <Eye size={13} /> : <EyeOff size={13} />}
+                      <span>{activePage.isPublished ? 'Turn Offline' : 'Publish Live'}</span>
                     </button>
                   </div>
-                ))}
+
+                  <span style={{ fontSize: '12px', color: 'var(--adm-text-muted)', lineHeight: 1.5 }}>
+                    {activeTab === 'llms'
+                      ? 'When Published, /llms.txt serves the machine manifest to AI agents and is listed in sitemap.xml. When Offline, it returns HTTP 404.'
+                      : 'Changes are written atomically to MySQL database and local persistent files with rolling backups.'}
+                  </span>
+
+                  <div style={{ padding: '8px 12px', background: 'rgba(255,255,255,0.03)', borderRadius: '6px', border: '1px solid var(--adm-border)' }}>
+                    <span style={{ fontSize: '11px', color: 'var(--adm-text-muted)', display: 'block' }}>Route Slug</span>
+                    <code style={{ fontSize: '12px', color: 'var(--tail-primary)' }}>{activePage.slug}</code>
+                  </div>
+                </div>
               </div>
-            )}
+
+              {/* Revision History & Recovery Card */}
+              <div className="adm-card">
+                <div className="adm-card-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <History size={16} style={{ color: 'var(--tail-primary)' }} />
+                    <span className="adm-card-title">Revision Recovery</span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => loadRevisions(activeTab)}
+                    disabled={loadingRevisions}
+                    className="adm-btn adm-btn-secondary adm-btn-sm"
+                    style={{ padding: '4px 8px' }}
+                    title="Reload revision snapshots"
+                  >
+                    <RefreshCw size={12} className={loadingRevisions ? 'adm-spin' : ''} />
+                  </button>
+                </div>
+                <div className="adm-card-body">
+                  {loadingRevisions ? (
+                    <div style={{ fontSize: '12.5px', color: 'var(--adm-text-muted)', textAlign: 'center', padding: '16px 0' }}>
+                      Loading revisions...
+                    </div>
+                  ) : revisions.length === 0 ? (
+                    <div style={{ fontSize: '12px', color: 'var(--adm-text-muted)', textAlign: 'center', padding: '12px 0' }}>
+                      No prior revisions recorded. Every save creates an automated snapshot.
+                    </div>
+                  ) : (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', maxHeight: '300px', overflowY: 'auto' }}>
+                      {revisions.map((rev) => (
+                        <div
+                          key={rev.id}
+                          style={{
+                            background: '#090d16',
+                            border: '1px solid var(--adm-border)',
+                            borderRadius: '6px',
+                            padding: '8px 10px',
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            alignItems: 'center',
+                          }}
+                        >
+                          <div>
+                            <div style={{ fontSize: '12px', fontWeight: 600, color: 'var(--tail-primary)' }}>
+                              Rev #{rev.revisionNum}
+                            </div>
+                            <div style={{ fontSize: '11px', color: 'var(--adm-text-muted)' }}>
+                              {new Date(rev.createdAt).toLocaleString()}
+                            </div>
+                            <div style={{ fontSize: '10.5px', color: '#71717a' }}>
+                              By {rev.savedBy}
+                            </div>
+                          </div>
+
+                          <button
+                            type="button"
+                            disabled={rollingBackId === rev.id}
+                            onClick={() => handleRollback(rev.id)}
+                            className="adm-btn adm-btn-secondary adm-btn-sm"
+                            style={{ padding: '4px 8px', fontSize: '11px', gap: '4px' }}
+                            title="Rollback to this snapshot"
+                          >
+                            <RotateCcw size={11} className={rollingBackId === rev.id ? 'adm-spin' : ''} />
+                            <span>Rollback</span>
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
           </div>
-        </div>
-      </div>
-    </div>
+        </form>
+      </main>
+    </>
   );
 }
-

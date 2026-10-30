@@ -71,6 +71,13 @@ export default function ContactClientView({ pageConfig, contact }: ContactClient
     }
   };
 
+  const managementEmail = pageConfig.meta?.managementEmail || contact.managementEmail || 'booking@shirinshila.com';
+  const pressEmail = pageConfig.meta?.pressEmail || contact.pressEmail || 'press@shirinshila.com';
+  const phone = pageConfig.meta?.phone || (contact as any).phone || '+880 1711-000000';
+  const representationBase = pageConfig.meta?.representationBase || 'Dhaka, Bangladesh (Available for Worldwide Shoots)';
+  const turnaroundTime = pageConfig.meta?.turnaroundTime || 'All verified casting inquiries answered within 24-48 business hours';
+  const verificationNotice = pageConfig.meta?.verificationNotice || 'This portal is the sole official digital booking and media representation outlet for Shirin Shila. Unsolicited intermediaries are not authorized to contract on behalf of the artist.';
+
   return (
     <main style={{ minHeight: '100vh', backgroundColor: '#09090b', color: '#f8fafc', padding: '60px 20px' }}>
       <div style={{ maxWidth: '960px', margin: '0 auto' }}>
@@ -320,8 +327,8 @@ export default function ContactClientView({ pageConfig, contact }: ContactClient
                     <span style={{ fontSize: '12px', color: '#a1a1aa', textTransform: 'uppercase', fontWeight: 600, display: 'block' }}>
                       Email Representation
                     </span>
-                    <a href={`mailto:${contact.managementEmail || 'booking@shirinshila.com'}`} style={{ color: '#ffffff', textDecoration: 'none', fontSize: '15px', fontWeight: 500 }}>
-                      {contact.managementEmail || 'booking@shirinshila.com'}
+                    <a href={`mailto:${managementEmail}`} style={{ color: '#ffffff', textDecoration: 'none', fontSize: '15px', fontWeight: 500 }}>
+                      {managementEmail}
                     </a>
                   </div>
                 </div>
@@ -334,8 +341,8 @@ export default function ContactClientView({ pageConfig, contact }: ContactClient
                     <span style={{ fontSize: '12px', color: '#a1a1aa', textTransform: 'uppercase', fontWeight: 600, display: 'block' }}>
                       Press &amp; Media Desk
                     </span>
-                    <a href={`mailto:${contact.pressEmail || 'press@shirinshila.com'}`} style={{ color: '#ffffff', textDecoration: 'none', fontSize: '15px', fontWeight: 500 }}>
-                      {contact.pressEmail || 'press@shirinshila.com'}
+                    <a href={`mailto:${pressEmail}`} style={{ color: '#ffffff', textDecoration: 'none', fontSize: '15px', fontWeight: 500 }}>
+                      {pressEmail}
                     </a>
                   </div>
                 </div>
@@ -349,7 +356,7 @@ export default function ContactClientView({ pageConfig, contact }: ContactClient
                       Representation Base
                     </span>
                     <span style={{ color: '#ffffff', fontSize: '15px', fontWeight: 500 }}>
-                      Dhaka, Bangladesh (Available for Worldwide Shoots)
+                      {representationBase}
                     </span>
                   </div>
                 </div>
@@ -363,7 +370,7 @@ export default function ContactClientView({ pageConfig, contact }: ContactClient
                       Turnaround Guarantee
                     </span>
                     <span style={{ color: '#ffffff', fontSize: '15px', fontWeight: 500 }}>
-                      All verified inquiries answered within 24-48 business hours
+                      {turnaroundTime}
                     </span>
                   </div>
                 </div>
@@ -377,7 +384,7 @@ export default function ContactClientView({ pageConfig, contact }: ContactClient
                   Official Verification Notice
                 </span>
                 <p style={{ margin: '4px 0 0', fontSize: '13px', color: '#d8b4fe', lineHeight: 1.5 }}>
-                  This portal is the sole official digital booking and media representation outlet for Shirin Shila. Unsolicited intermediaries are not authorized to contract on behalf of the artist.
+                  {verificationNotice}
                 </p>
               </div>
             </section>

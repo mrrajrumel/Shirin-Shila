@@ -24,6 +24,16 @@ export default async function AboutPage() {
   const activeAbout = about || defaultAbout;
   const pageConfig = pages?.about || defaultPagesRegistry.about;
 
+  const accoladesList =
+    Array.isArray(pageConfig.meta?.accolades) && pageConfig.meta.accolades.length > 0
+      ? pageConfig.meta.accolades
+      : [
+          'Babisas Best Actress Award (2019) — Awarded for leading role in "Begum Jaan"',
+          'Meril-Prothom Alo Awards Nominee (2014) — Best Debut Performance for "Hitman"',
+          'DIFF Best Actress Trophy (2024) — International Film Festival recognition',
+          'National Star Excellence Honor (2025) — Television & Cinema Contribution Crest',
+        ];
+
   return (
     <main style={{ minHeight: '100vh', backgroundColor: '#09090b', color: '#f8fafc', padding: '60px 20px' }}>
       <div style={{ maxWidth: '900px', margin: '0 auto' }}>
@@ -52,14 +62,14 @@ export default async function AboutPage() {
             {pageConfig.title || 'About Us'}
           </h1>
           <p style={{ fontSize: '18px', color: '#a1a1aa', lineHeight: 1.6 }}>
-            {activeAbout.subheading || 'Silver-Screen Dhallywood Actress, Television Reality Judge & Cultural Fashion Icon'}
+            {pageConfig.subheading || activeAbout.subheading || 'Silver-Screen Dhallywood Actress, Television Reality Judge & Cultural Fashion Icon'}
           </p>
         </header>
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '30px', marginBottom: '40px' }}>
           <div style={{ borderRadius: '14px', overflow: 'hidden', border: '1px solid #27272a', maxHeight: '420px' }}>
             <img
-              src="/images/hero.jpg"
+              src={pageConfig.meta?.portraitImage || '/images/hero.jpg'}
               alt="Shirin Shila"
               style={{ width: '100%', height: '100%', objectFit: 'cover' }}
             />
@@ -70,23 +80,27 @@ export default async function AboutPage() {
               Artistic Background &amp; Journey
             </h2>
             <p style={{ fontSize: '15px', color: '#d4d4d8', lineHeight: 1.8, marginBottom: '16px' }}>
-              {pageConfig.content && pageConfig.content.length > 50
-                ? pageConfig.content
-                : activeAbout.bioText || activeAbout.storyText || (
-                  'Shirin Shila (born Shirin Akter) is a celebrated Bangladeshi film actress who captured nationwide attention with her silver-screen debut in the 2014 blockbuster hit "Hitman" alongside Shakib Khan. With classic expressive range, commanding screen presence, and dedication to challenging roles, she has built an enduring catalog across romantic dramas, action thrillers, and patriotic cinema.'
-                )}
+              {pageConfig.content || activeAbout.bioText || (
+                'Shirin Shila (born Shirin Akter) is a celebrated Bangladeshi film actress who captured nationwide attention with her silver-screen debut in the 2014 blockbuster hit "Hitman" alongside Shakib Khan. With classic expressive range, commanding screen presence, and dedication to challenging roles, she has built an enduring catalog across romantic dramas, action thrillers, and patriotic cinema.'
+              )}
             </p>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px' }}>
               <div style={{ background: '#18181b', padding: '12px 18px', borderRadius: '8px', border: '1px solid #27272a' }}>
-                <span style={{ fontSize: '20px', fontWeight: 800, color: '#ec4899', display: 'block' }}>10+</span>
+                <span style={{ fontSize: '20px', fontWeight: 800, color: '#ec4899', display: 'block' }}>
+                  {pageConfig.meta?.featureFilms || '10+'}
+                </span>
                 <span style={{ fontSize: '12px', color: '#a1a1aa' }}>Feature Films</span>
               </div>
               <div style={{ background: '#18181b', padding: '12px 18px', borderRadius: '8px', border: '1px solid #27272a' }}>
-                <span style={{ fontSize: '20px', fontWeight: 800, color: '#ec4899', display: 'block' }}>2019</span>
+                <span style={{ fontSize: '20px', fontWeight: 800, color: '#ec4899', display: 'block' }}>
+                  {pageConfig.meta?.babisasYear || '2019'}
+                </span>
                 <span style={{ fontSize: '12px', color: '#a1a1aa' }}>Babisas Best Actress</span>
               </div>
               <div style={{ background: '#18181b', padding: '12px 18px', borderRadius: '8px', border: '1px solid #27272a' }}>
-                <span style={{ fontSize: '20px', fontWeight: 800, color: '#ec4899', display: 'block' }}>2024</span>
+                <span style={{ fontSize: '20px', fontWeight: 800, color: '#ec4899', display: 'block' }}>
+                  {pageConfig.meta?.diffYear || '2024'}
+                </span>
                 <span style={{ fontSize: '12px', color: '#a1a1aa' }}>DIFF Best Actress Trophy</span>
               </div>
             </div>
@@ -99,22 +113,12 @@ export default async function AboutPage() {
             <span>Notable Accolades &amp; Industry Honors</span>
           </h3>
           <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'grid', gap: '12px' }}>
-            <li style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '14px', color: '#e4e4e7' }}>
-              <CheckCircle size={16} color="#10b981" />
-              <span><strong>Babisas Best Actress Award (2019)</strong> — Awarded for leading role in &quot;Begum Jaan&quot;</span>
-            </li>
-            <li style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '14px', color: '#e4e4e7' }}>
-              <CheckCircle size={16} color="#10b981" />
-              <span><strong>Meril-Prothom Alo Awards Nominee (2014)</strong> — Best Debut Performance for &quot;Hitman&quot;</span>
-            </li>
-            <li style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '14px', color: '#10b981' }}>
-              <CheckCircle size={16} color="#10b981" />
-              <span><strong>DIFF Best Actress Trophy (2024)</strong> — International Film Festival recognition</span>
-            </li>
-            <li style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '14px', color: '#e4e4e7' }}>
-              <CheckCircle size={16} color="#10b981" />
-              <span><strong>National Star Excellence Honor (2025)</strong> — Television &amp; Cinema Contribution Crest</span>
-            </li>
+            {accoladesList.map((item: string, idx: number) => (
+              <li key={idx} style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '14px', color: '#e4e4e7' }}>
+                <CheckCircle size={16} color="#10b981" />
+                <span>{item}</span>
+              </li>
+            ))}
           </ul>
         </section>
 
