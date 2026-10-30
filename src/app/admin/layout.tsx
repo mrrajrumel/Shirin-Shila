@@ -22,6 +22,7 @@ import {
   Globe,
   FolderKanban,
   ShieldCheck,
+  FileText,
 } from "lucide-react";
 import "./admin.css";
 
@@ -118,6 +119,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           icon: Inbox,
           badge: newInquiriesCount > 0 ? newInquiriesCount : undefined,
         },
+      ],
+    },
+    {
+      group: "PAGES & CMS POLICIES",
+      items: [
+        { href: "/admin/pages", label: "Page Management", icon: FileText },
       ],
     },
     {

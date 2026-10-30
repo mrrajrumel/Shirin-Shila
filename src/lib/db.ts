@@ -161,6 +161,22 @@ export async function ensureDatabaseSchema(): Promise<void> {
       ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
     `);
 
+    await db.query(`
+      CREATE TABLE IF NOT EXISTS page_revisions (
+        id BIGINT AUTO_INCREMENT PRIMARY KEY,
+        page_id VARCHAR(64) NOT NULL,
+        revision_num INT NOT NULL DEFAULT 1,
+        title VARCHAR(255) NOT NULL,
+        nav_label VARCHAR(255),
+        is_published TINYINT(1) NOT NULL DEFAULT 1,
+        content LONGTEXT NOT NULL,
+        saved_by VARCHAR(64) NOT NULL DEFAULT 'admin',
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        INDEX idx_page_id (page_id),
+        INDEX idx_created_at (created_at)
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+    `);
+
     schemaInitialized = true;
   } catch (err) {
     console.error('[MySQL Schema] Error ensuring schema:', (err as Error).message);
@@ -271,6 +287,25 @@ export async function saveDbContent<T>(
       }
     }
 
+    // Historical revision tracking for CMS pages
+    if (key === 'pages' && data && typeof data === 'object') {
+      const pagesObj = data as Record<string, any>;
+      for (const [pageId, pData] of Object.entries(pagesObj)) {
+        if (pData && typeof pData === 'object' && pData.title && pData.content !== undefined) {
+          await savePageRevision(
+            pageId,
+            {
+              title: pData.title,
+              navLabel: pData.navLabel,
+              isPublished: pData.isPublished !== false,
+              content: pData.content || '',
+            },
+            changedBy
+          ).catch(() => {});
+        }
+      }
+    }
+
     return true;
   } catch (err) {
     console.error(`[MySQL Write] Error persisting key "${key}":`, (err as Error).message);
@@ -316,5 +351,100 @@ export async function getDatabaseStatus(): Promise<{
       configured: true,
       error: (err as Error).message,
     };
+  }
+}
+
+/**
+ * Saves a snapshot of a page into page_revisions.
+ */
+export async function savePageRevision(
+  pageId: string,
+  pageData: {
+    title: string;
+    navLabel?: string;
+    isPublished: boolean;
+    content: string;
+  },
+  savedBy: string = 'admin'
+): Promise<boolean> {
+  const db = getDbPool();
+  if (!db) return false;
+
+  try {
+    await ensureDatabaseSchema();
+
+    // Determine current latest revision number
+    const [revRows] = await db.query(
+      'SELECT MAX(revision_num) as max_rev FROM page_revisions WHERE page_id = ?',
+      [pageId]
+    );
+    const nextRev = (((revRows as any[])[0]?.max_rev as number) || 0) + 1;
+
+    await db.query(
+      `INSERT INTO page_revisions (page_id, revision_num, title, nav_label, is_published, content, saved_by)
+       VALUES (?, ?, ?, ?, ?, ?, ?)`,
+      [
+        pageId,
+        nextRev,
+        pageData.title,
+        pageData.navLabel || pageData.title,
+        pageData.isPublished ? 1 : 0,
+        pageData.content,
+        savedBy,
+      ]
+    );
+
+    return true;
+  } catch (err) {
+    console.error(`[MySQL Page Revision] Error logging revision for ${pageId}:`, (err as Error).message);
+    return false;
+  }
+}
+
+/**
+ * Retrieves historical revisions for a page.
+ */
+export async function getPageRevisions(
+  pageId: string,
+  limit: number = 10
+): Promise<Array<{
+  id: number;
+  pageId: string;
+  revisionNum: number;
+  title: string;
+  navLabel: string;
+  isPublished: boolean;
+  content: string;
+  savedBy: string;
+  createdAt: string;
+}>> {
+  const db = getDbPool();
+  if (!db) return [];
+
+  try {
+    await ensureDatabaseSchema();
+    const [rows] = await db.query(
+      `SELECT id, page_id, revision_num, title, nav_label, is_published, content, saved_by, created_at
+       FROM page_revisions
+       WHERE page_id = ?
+       ORDER BY revision_num DESC
+       LIMIT ?`,
+      [pageId, limit]
+    );
+
+    return (rows as any[]).map((r) => ({
+      id: r.id,
+      pageId: r.page_id,
+      revisionNum: r.revision_num,
+      title: r.title,
+      navLabel: r.nav_label,
+      isPublished: Boolean(r.is_published),
+      content: r.content,
+      savedBy: r.saved_by,
+      createdAt: r.created_at ? new Date(r.created_at).toISOString() : new Date().toISOString(),
+    }));
+  } catch (err) {
+    console.error(`[MySQL Page Revision] Error fetching revisions for ${pageId}:`, (err as Error).message);
+    return [];
   }
 }

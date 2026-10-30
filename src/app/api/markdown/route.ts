@@ -27,7 +27,7 @@ export async function GET(request: NextRequest) {
 
 ## Quick Links
 - **Homepage**: ${baseUrl}/
-- **About Actor**: ${baseUrl}/about
+- **About Us**: ${baseUrl}/about
 - **Contact and Book**: ${baseUrl}/contact
 - **Terms of Representation**: ${baseUrl}/terms
 - **Privacy Policy**: ${baseUrl}/privacy

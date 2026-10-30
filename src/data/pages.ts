@@ -1,0 +1,144 @@
+export interface PageRevisionItem {
+  id: number | string;
+  pageId: string;
+  revisionNum: number;
+  title: string;
+  content: string;
+  isPublished: boolean;
+  savedBy: string;
+  createdAt: string;
+}
+
+export interface ManagedPageData {
+  id: string; // 'about' | 'contact' | 'privacy' | 'terms' | 'llms'
+  slug: string;
+  title: string;
+  navLabel: string;
+  isPublished: boolean;
+  content: string; // Full markdown or rich text
+  seoTitle?: string;
+  seoDescription?: string;
+  sections?: Record<string, any>;
+  updatedAt?: string;
+  updatedBy?: string;
+  revisionCount?: number;
+}
+
+export interface PagesRegistry {
+  about: ManagedPageData;
+  contact: ManagedPageData;
+  privacy: ManagedPageData;
+  terms: ManagedPageData;
+  llms: ManagedPageData;
+}
+
+export const defaultPrivacyContent = `## 1. Information We Collect
+When casting agents, producers, brand sponsors, or media partners submit inquiries through our contact and booking desk, we collect identity and professional contact details (name, corporate email, telephone, production house, and project specifications). This information is utilized strictly to evaluate casting offers and coordinate professional appointments.
+
+## 2. Confidentiality of Screenplays & Treatments
+We treat all artistic treatments, screenplays, concept pitches, and commercial storyboards transmitted through this portal with strict non-disclosure confidentiality. Unreleased creative materials are never shared beyond authorized talent representation personnel.
+
+## 3. Data Protection & Secure Storage
+Inquiry submissions and client communication records are stored securely in encrypted databases protected by parameterized queries, access control policies, and rate-limiting safeguards. We do not sell, rent, or lease contact information to third parties.
+
+## 4. Machine Agent & Crawler Policies
+Autonomous search crawlers and AI agents interacting with this website are granted access to public biographical indices, structured schema representations, and our declared Content-Signals. Submissions via automated inquiry forms must include legitimate production identity.
+
+## 5. Contact Regarding Privacy
+For inquiries regarding our data handling or confidentiality policies, contact management at privacy@shirinshila.com.`;
+
+export const defaultTermsContent = `## 1. Scope & Official Representation
+This website serves as the sole official digital portfolio and primary representation contact desk for Bangladeshi silver-screen actress and model Shirin Shila. All casting inquiries, commercial endorsements, event appearances, and television reality show appointments must be confirmed in writing by authorized talent management.
+
+## 2. Talent Booking & Contractual Commitments
+Preliminary inquiries submitted through this website do not constitute a binding legal agreement until formal contracts specifying production schedules, remuneration, travel logistics, and credit billing are mutually executed. A standard booking retainer is required to lock production dates on the artist's schedule.
+
+## 3. Intellectual Property & Media Usage Rights
+All promotional photography, showreels, movie posters, press clippings, and brand marks displayed on this portfolio are the exclusive intellectual property of Shirin Shila, production houses, and respective copyright holders. Unauthorized scraping, commercial exploitation, or reproduction without prior written consent is strictly prohibited.
+
+## 4. Artificial Intelligence & Digital Likeness Protection
+In alignment with international creative rights standards and our declared Content-Signal: search=yes, ai-train=no policy: the voice, biometric face likeness, performance recordings, and video showreels of Shirin Shila may not be ingested or trained upon for synthetic generative voice/video models (deepfakes or uncredited generative AI clones) without an explicit licensed talent contract.
+
+## 5. Governing Law
+All professional representation agreements and digital operations of this portfolio are governed by and construed in accordance with the laws of the People's Republic of Bangladesh. Questions regarding representation terms may be directed to booking@shirinshila.com.`;
+
+export const defaultLlmsContent = `# Shirin Shila — Dhallywood Film Actress & Casting Portfolio
+
+> Official, verified portfolio of Bangladeshi silver-screen cinema actress, model, and television reality show judge Shirin Shila (Shirin Akter).
+
+## Core Pages
+- [Home](/): Official portfolio homepage featuring silver-screen showreels, career highlights, and news archive.
+- [About Us](/about): Comprehensive biography, acting background, feature filmography, and major industry awards.
+- [Contact and Book](/contact): Direct talent management desk for casting directors, filmmakers, brand endorsement agencies, and press requests.
+- [Terms of Representation](/terms): Professional representation terms, casting guidelines, intellectual property, and AI voice/likeness usage protection.
+- [Privacy Policy](/privacy): Data protection, script confidentiality, and inquiry handling standards.
+
+## Content Usage & AI Policy
+- **Content-Signal Directive**: search=yes, ai-train=no
+- **Search & Discovery**: Authorized for search indexing, conversational discovery, factual summaries, and knowledge queries.
+- **Likeness Protection**: Synthetic voice cloning, biometric generative facial likeness models, and uncredited generative replicas are strictly prohibited without an explicit licensed talent agreement.
+
+## Talent Desk Contact
+- **Email**: booking@shirinshila.com
+- **Representation Base**: Dhaka, Bangladesh (Available for Worldwide Productions)`;
+
+export const defaultPagesRegistry: PagesRegistry = {
+  about: {
+    id: 'about',
+    slug: '/about',
+    title: 'About Us',
+    navLabel: 'About Us',
+    isPublished: true,
+    content: 'Biographical overview and artistic background of Bangladeshi silver-screen actress Shirin Shila.',
+    seoTitle: 'About Us | Shirin Shila Official Portfolio',
+    seoDescription: 'Biographical overview of Bangladeshi silver-screen film actress, television reality show judge, and model Shirin Shila (Shirin Akter).',
+    updatedAt: new Date().toISOString(),
+  },
+  contact: {
+    id: 'contact',
+    slug: '/contact',
+    title: 'Contact and Book',
+    navLabel: 'Contact and Book',
+    isPublished: true,
+    content: 'Official representation, casting inquiries, brand endorsement, and talent booking desk.',
+    seoTitle: 'Contact and Book | Shirin Shila Talent Management Desk',
+    seoDescription: 'Direct booking desk for casting directors, filmmakers, brand advertising agencies, and television networks.',
+    updatedAt: new Date().toISOString(),
+  },
+  privacy: {
+    id: 'privacy',
+    slug: '/privacy',
+    title: 'Privacy Policy',
+    navLabel: 'Privacy Policy',
+    isPublished: true,
+    content: defaultPrivacyContent,
+    seoTitle: 'Privacy Policy | Shirin Shila Official Portfolio',
+    seoDescription: 'Data protection and confidentiality policy for casting inquiries, talent management desk, and website communications.',
+    updatedAt: new Date().toISOString(),
+  },
+  terms: {
+    id: 'terms',
+    slug: '/terms',
+    title: 'Terms of Representation',
+    navLabel: 'Terms of Representation',
+    isPublished: true,
+    content: defaultTermsContent,
+    seoTitle: 'Terms of Representation & Booking | Shirin Shila',
+    seoDescription: 'Official talent booking terms, media appearance policies, intellectual property, and representation guidelines.',
+    updatedAt: new Date().toISOString(),
+  },
+  llms: {
+    id: 'llms',
+    slug: '/llms.txt',
+    title: 'llms.txt',
+    navLabel: 'llms.txt',
+    isPublished: false, // Non-negotiable requirement: Default publication state is OFF!
+    content: defaultLlmsContent,
+    seoTitle: 'llms.txt Machine Manifest | Shirin Shila',
+    seoDescription: 'Machine-readable factual context profile for AI systems and LLMs.',
+    updatedAt: new Date().toISOString(),
+  },
+};
+
+export default defaultPagesRegistry;
+

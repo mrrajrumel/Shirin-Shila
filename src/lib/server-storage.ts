@@ -25,6 +25,7 @@ import { heroProfile as defaultHero, HeroProfile } from '../data/hero';
 import { aboutData as defaultAbout } from '../data/about';
 import { defaultMediaPartners, MediaPartner } from '../data/media-partners';
 import { defaultSeoData, SiteSeoData } from '../data/seo';
+import { defaultPagesRegistry, PagesRegistry } from '../data/pages';
 
 export interface TimelineStoreData {
   top: JourneyItem[];
@@ -43,7 +44,8 @@ export type StoreKey =
   | 'hero'
   | 'about'
   | 'mediaPartners'
-  | 'seo';
+  | 'seo'
+  | 'pages';
 
 export const ALL_STORE_KEYS: StoreKey[] = [
   'hero',
@@ -57,6 +59,7 @@ export const ALL_STORE_KEYS: StoreKey[] = [
   'inquiries',
   'mediaPartners',
   'seo',
+  'pages',
 ];
 
 function getStoreFilePath(key: StoreKey): string {
@@ -91,6 +94,8 @@ function getDefaultData(key: StoreKey): any {
       return defaultMediaPartners;
     case 'seo':
       return defaultSeoData;
+    case 'pages':
+      return defaultPagesRegistry;
   }
 }
 

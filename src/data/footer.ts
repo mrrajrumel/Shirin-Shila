@@ -14,11 +14,10 @@ export interface FooterData {
 }
 
 export const defaultFooterLinks: FooterLink[] = [
-  { label: "About Actor", href: "/about" },
+  { label: "About Us", href: "/about" },
   { label: "Contact and Book", href: "/contact" },
   { label: "Privacy Policy", href: "/privacy" },
   { label: "Terms of Representation", href: "/terms" },
-  { label: "llms.txt", href: "/llms.txt" },
 ];
 
 export const footerData: FooterData = {

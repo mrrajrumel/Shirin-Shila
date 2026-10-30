@@ -1,0 +1,53 @@
+{
+  "about": {
+    "id": "about",
+    "slug": "/about",
+    "title": "About Us",
+    "navLabel": "About Us",
+    "isPublished": true,
+    "content": "Biographical overview and artistic background of Bangladeshi silver-screen actress Shirin Shila.",
+    "seoTitle": "About Us | Shirin Shila Official Portfolio",
+    "seoDescription": "Biographical overview of Bangladeshi silver-screen film actress, television reality show judge, and model Shirin Shila (Shirin Akter)."
+  },
+  "contact": {
+    "id": "contact",
+    "slug": "/contact",
+    "title": "Contact and Book",
+    "navLabel": "Contact and Book",
+    "isPublished": true,
+    "content": "Official representation, casting inquiries, brand endorsement, and talent booking desk.",
+    "seoTitle": "Contact and Book | Shirin Shila Talent Management Desk",
+    "seoDescription": "Direct booking desk for casting directors, filmmakers, brand advertising agencies, and television networks."
+  },
+  "privacy": {
+    "id": "privacy",
+    "slug": "/privacy",
+    "title": "Privacy Policy",
+    "navLabel": "Privacy Policy",
+    "isPublished": true,
+    "content": "## 1. Information We Collect\nWhen casting agents, producers, brand sponsors, or media partners submit inquiries through our contact and booking desk, we collect identity and professional contact details (name, corporate email, telephone, production house, and project specifications). This information is utilized strictly to evaluate casting offers and coordinate professional appointments.\n\n## 2. Confidentiality of Screenplays & Treatments\nWe treat all artistic treatments, screenplays, concept pitches, and commercial storyboards transmitted through this portal with strict non-disclosure confidentiality. Unreleased creative materials are never shared beyond authorized talent representation personnel.\n\n## 3. Data Protection & Secure Storage\nInquiry submissions and client communication records are stored securely in encrypted databases protected by parameterized queries, access control policies, and rate-limiting safeguards. We do not sell, rent, or lease contact information to third parties.\n\n## 4. Machine Agent & Crawler Policies\nAutonomous search crawlers and AI agents interacting with this website are granted access to public biographical indices, structured schema representations, and our declared Content-Signals. Submissions via automated inquiry forms must include legitimate production identity.\n\n## 5. Contact Regarding Privacy\nFor inquiries regarding our data handling or confidentiality policies, contact management at privacy@shirinshila.com.",
+    "seoTitle": "Privacy Policy | Shirin Shila Official Portfolio",
+    "seoDescription": "Data protection and confidentiality policy for casting inquiries, talent management desk, and website communications."
+  },
+  "terms": {
+    "id": "terms",
+    "slug": "/terms",
+    "title": "Terms of Representation",
+    "navLabel": "Terms of Representation",
+    "isPublished": true,
+    "content": "## 1. Scope & Official Representation\nThis website serves as the sole official digital portfolio and primary representation contact desk for Bangladeshi silver-screen actress and model Shirin Shila. All casting inquiries, commercial endorsements, event appearances, and television reality show appointments must be confirmed in writing by authorized talent management.\n\n## 2. Talent Booking & Contractual Commitments\nPreliminary inquiries submitted through this website do not constitute a binding legal agreement until formal contracts specifying production schedules, remuneration, travel logistics, and credit billing are mutually executed. A standard booking retainer is required to lock production dates on the artist's schedule.\n\n## 3. Intellectual Property & Media Usage Rights\nAll promotional photography, showreels, movie posters, press clippings, and brand marks displayed on this portfolio are the exclusive intellectual property of Shirin Shila, production houses, and respective copyright holders. Unauthorized scraping, commercial exploitation, or reproduction without prior written consent is strictly prohibited.\n\n## 4. Artificial Intelligence & Digital Likeness Protection\nIn alignment with international creative rights standards and our declared Content-Signal: search=yes, ai-train=no policy: the voice, biometric face likeness, performance recordings, and video showreels of Shirin Shila may not be ingested or trained upon for synthetic generative voice/video models (deepfakes or uncredited generative AI clones) without an explicit licensed talent contract.\n\n## 5. Governing Law\nAll professional representation agreements and digital operations of this portfolio are governed by and construed in accordance with the laws of the People's Republic of Bangladesh. Questions regarding representation terms may be directed to booking@shirinshila.com.",
+    "seoTitle": "Terms of Representation & Booking | Shirin Shila",
+    "seoDescription": "Official talent booking terms, media appearance policies, intellectual property, and representation guidelines."
+  },
+  "llms": {
+    "id": "llms",
+    "slug": "/llms.txt",
+    "title": "llms.txt",
+    "navLabel": "llms.txt",
+    "isPublished": false,
+    "content": "# Shirin Shila — Dhallywood Film Actress & Casting Portfolio\n\n> Official, verified portfolio of Bangladeshi silver-screen cinema actress, model, and television reality show judge Shirin Shila (Shirin Akter).\n\n## Core Pages\n- [Home](/): Official portfolio homepage featuring silver-screen showreels, career highlights, and news archive.\n- [About Us](/about): Comprehensive biography, acting background, feature filmography, and major industry awards.\n- [Contact and Book](/contact): Direct talent management desk for casting directors, filmmakers, brand endorsement agencies, and press requests.\n- [Terms of Representation](/terms): Professional representation terms, casting guidelines, intellectual property, and AI voice/likeness usage protection.\n- [Privacy Policy](/privacy): Data protection, script confidentiality, and inquiry handling standards.\n\n## Content Usage & AI Policy\n- **Content-Signal Directive**: search=yes, ai-train=no\n- **Search & Discovery**: Authorized for search indexing, conversational discovery, factual summaries, and knowledge queries.\n- **Likeness Protection**: Synthetic voice cloning, biometric generative facial likeness models, and uncredited generative replicas are strictly prohibited without an explicit licensed talent agreement.\n\n## Talent Desk Contact\n- **Email**: booking@shirinshila.com\n- **Representation Base**: Dhaka, Bangladesh (Available for Worldwide Productions)",
+    "seoTitle": "llms.txt Machine Manifest | Shirin Shila",
+    "seoDescription": "Machine-readable factual context profile for AI systems and LLMs."
+  }
+}
+

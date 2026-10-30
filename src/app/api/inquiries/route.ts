@@ -31,9 +31,32 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
 
+    // Spam honeypot trap: if bot filled in hidden field, respond ok but discard
+    if (body.website || body.honeypot || body._hp) {
+      return NextResponse.json({
+        success: true,
+        message: 'Inquiry received successfully',
+      });
+    }
+
     if (!body.name?.trim() || !body.email?.trim() || !body.message?.trim()) {
       return NextResponse.json(
         { error: 'Name, email, and message are required fields' },
+        { status: 400 }
+      );
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(body.email.trim())) {
+      return NextResponse.json(
+        { error: 'Please provide a valid email address' },
+        { status: 400 }
+      );
+    }
+
+    if (body.message.trim().length < 5) {
+      return NextResponse.json(
+        { error: 'Message must be at least 5 characters long' },
         { status: 400 }
       );
     }

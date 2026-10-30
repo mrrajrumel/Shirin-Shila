@@ -3,12 +3,12 @@ import Link from 'next/link';
 import { ArrowLeft, Award, Film, Star, CheckCircle } from 'lucide-react';
 import { readStore } from '@/lib/server-storage';
 import { aboutData as defaultAbout } from '@/data/about';
-import { filmography as defaultFilmography } from '@/data/filmography';
+import { PagesRegistry, defaultPagesRegistry } from '@/data/pages';
 
 export const dynamic = 'force-dynamic';
 
 export const metadata = {
-  title: 'About Shirin Shila | Biography, Career & Honors',
+  title: 'About Us | Shirin Shila Official Biography & Honors',
   description: 'Biographical overview of Bangladeshi silver-screen film actress, television reality show judge, and model Shirin Shila (Shirin Akter).',
   alternates: {
     canonical: '/about',
@@ -16,7 +16,13 @@ export const metadata = {
 };
 
 export default async function AboutPage() {
-  const about = (await readStore<any>('about').catch(() => defaultAbout)) || defaultAbout;
+  const [about, pages] = await Promise.all([
+    readStore<any>('about').catch(() => defaultAbout),
+    readStore<PagesRegistry>('pages').catch(() => defaultPagesRegistry),
+  ]);
+
+  const activeAbout = about || defaultAbout;
+  const pageConfig = pages?.about || defaultPagesRegistry.about;
 
   return (
     <main style={{ minHeight: '100vh', backgroundColor: '#09090b', color: '#f8fafc', padding: '60px 20px' }}>
@@ -40,13 +46,13 @@ export default async function AboutPage() {
 
         <header style={{ marginBottom: '40px', borderBottom: '1px solid #27272a', paddingBottom: '24px' }}>
           <span style={{ fontSize: '13px', textTransform: 'uppercase', letterSpacing: '2px', color: '#ec4899', fontWeight: 700 }}>
-            Official Biography &amp; Profile
+            {pageConfig.navLabel || 'About Us'}
           </span>
           <h1 style={{ fontSize: '38px', fontWeight: 800, margin: '8px 0 12px', color: '#ffffff' }}>
-            About Shirin Shila
+            {pageConfig.title || 'About Us'}
           </h1>
           <p style={{ fontSize: '18px', color: '#a1a1aa', lineHeight: 1.6 }}>
-            {about.subheading || 'Silver-Screen Dhallywood Actress, Television Reality Judge & Cultural Fashion Icon'}
+            {activeAbout.subheading || 'Silver-Screen Dhallywood Actress, Television Reality Judge & Cultural Fashion Icon'}
           </p>
         </header>
 
@@ -64,9 +70,11 @@ export default async function AboutPage() {
               Artistic Background &amp; Journey
             </h2>
             <p style={{ fontSize: '15px', color: '#d4d4d8', lineHeight: 1.8, marginBottom: '16px' }}>
-              {about.bioText || about.storyText || (
-                'Shirin Shila (born Shirin Akter) is a celebrated Bangladeshi film actress who captured nationwide attention with her silver-screen debut in the 2014 blockbuster hit "Hitman" alongside Shakib Khan. With classic expressive range, commanding screen presence, and dedication to challenging roles, she has built an enduring catalog across romantic dramas, action thrillers, and patriotic cinema.'
-              )}
+              {pageConfig.content && pageConfig.content.length > 50
+                ? pageConfig.content
+                : activeAbout.bioText || activeAbout.storyText || (
+                  'Shirin Shila (born Shirin Akter) is a celebrated Bangladeshi film actress who captured nationwide attention with her silver-screen debut in the 2014 blockbuster hit "Hitman" alongside Shakib Khan. With classic expressive range, commanding screen presence, and dedication to challenging roles, she has built an enduring catalog across romantic dramas, action thrillers, and patriotic cinema.'
+                )}
             </p>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px' }}>
               <div style={{ background: '#18181b', padding: '12px 18px', borderRadius: '8px', border: '1px solid #27272a' }}>

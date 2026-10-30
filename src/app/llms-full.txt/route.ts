@@ -4,12 +4,27 @@ import { filmography as defaultFilmography } from '@/data/filmography';
 import { aboutData as defaultAbout } from '@/data/about';
 import { initialContactInfo } from '@/data/contact';
 import { SiteSeoData, defaultSeoData } from '@/data/seo';
+import { PagesRegistry, defaultPagesRegistry } from '@/data/pages';
 import { resolveCanonicalSiteUrl } from '@/lib/site-config';
 
 export const dynamic = 'force-dynamic';
-export const revalidate = 3600;
+export const revalidate = 0;
 
 export async function GET() {
+  const pages = (await readStore<PagesRegistry>('pages').catch(() => defaultPagesRegistry)) || defaultPagesRegistry;
+
+  // Strict check: if public publication is OFF (default), return 404
+  if (!pages?.llms?.isPublished) {
+    return new NextResponse('Not Found\n\nThe requested machine manifest is currently disabled.', {
+      status: 404,
+      statusText: 'Not Found',
+      headers: {
+        'Content-Type': 'text/plain; charset=utf-8',
+        'Cache-Control': 'no-store, no-cache, must-revalidate',
+      },
+    });
+  }
+
   const [siteUrl, about, filmography, contact, seo] = await Promise.all([
     resolveCanonicalSiteUrl(),
     readStore<any>('about').catch(() => defaultAbout),
@@ -51,7 +66,7 @@ ${filmLines}
 
 ## Key Site Links
 - Homepage: ${siteUrl}/
-- About Actor: ${siteUrl}/about
+- About Us: ${siteUrl}/about
 - Contact & Booking Desk: ${siteUrl}/contact
 - Terms of Representation: ${siteUrl}/terms
 - Privacy Policy: ${siteUrl}/privacy
@@ -72,7 +87,7 @@ ${filmLines}
   return new NextResponse(content, {
     headers: {
       'Content-Type': 'text/plain; charset=utf-8',
-      'Cache-Control': 'public, max-age=3600',
+      'Cache-Control': 'public, max-age=1800, stale-while-revalidate=86400',
     },
   });
 }

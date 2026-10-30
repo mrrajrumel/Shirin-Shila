@@ -10,24 +10,56 @@ export function Footer() {
   const [links, setLinks] = useState<FooterLink[]>(defaultFooterLinks);
 
   useEffect(() => {
-    // Load dynamic footer links if updated via Admin Panel (SEO & AI Visibility)
-    fetch("/api/seo", { cache: "no-store" })
-      .then((res) => (res.ok ? res.json() : null))
-      .then((data) => {
-        if (data?.seo?.footerLinks && Array.isArray(data.seo.footerLinks) && data.seo.footerLinks.length > 0) {
-          const activeLinks = data.seo.footerLinks
-            .filter((item: any) => item.isVisible !== false)
+    const loadLinks = async () => {
+      try {
+        const [seoRes, pagesRes] = await Promise.all([
+          fetch("/api/seo", { cache: "no-store" }).then((r) => (r.ok ? r.json() : null)),
+          fetch("/api/pages", { cache: "no-store" }).then((r) => (r.ok ? r.json() : null)),
+        ]);
+
+        const llmsPublished = Boolean(pagesRes?.pages?.llms?.isPublished);
+
+        if (seoRes?.seo?.footerLinks && Array.isArray(seoRes.seo.footerLinks) && seoRes.seo.footerLinks.length > 0) {
+          const activeLinks = seoRes.seo.footerLinks
+            .filter((item: any) => {
+              if (item.isVisible === false) return false;
+              // Strict rule: only show llms.txt if pages.llms is explicitly published
+              if (item.href === "/llms.txt" || item.id === "llms") {
+                return llmsPublished;
+              }
+              return true;
+            })
             .sort((a: any, b: any) => (a.order || 0) - (b.order || 0))
             .map((item: any) => ({
               label: item.label,
               href: item.href,
             }));
+
           if (activeLinks.length > 0) {
             setLinks(activeLinks);
+            return;
           }
         }
-      })
-      .catch(() => {});
+
+        // Fallback default links: If llms.txt is published, include it
+        if (llmsPublished) {
+          setLinks([...defaultFooterLinks, { label: "llms.txt", href: "/llms.txt" }]);
+        } else {
+          setLinks(defaultFooterLinks);
+        }
+      } catch {
+        setLinks(defaultFooterLinks);
+      }
+    };
+
+    loadLinks();
+
+    window.addEventListener("shirin_shila_seo_updated", loadLinks);
+    window.addEventListener("shirin_shila_pages_updated", loadLinks);
+    return () => {
+      window.removeEventListener("shirin_shila_seo_updated", loadLinks);
+      window.removeEventListener("shirin_shila_pages_updated", loadLinks);
+    };
   }, []);
 
   const handleScrollToTop = (e: React.MouseEvent<HTMLAnchorElement>) => {
