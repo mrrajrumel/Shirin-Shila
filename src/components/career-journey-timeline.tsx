@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useMemo } from "react";
 import { ChevronLeft, ChevronRight, Award, Trophy, Star } from "lucide-react";
 import {
   JourneyItem,
@@ -9,6 +9,7 @@ import {
   defaultTopJourneyData,
   defaultBottomJourneyData,
   timelineMeta,
+  computeTimelinePeriodLabel,
 } from "@/data/timeline";
 
 export type { JourneyItem, Month };
@@ -52,6 +53,13 @@ export default function CareerJourneyTimeline({
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(true);
   const [activeIndex, setActiveIndex] = useState(0);
+
+  const computedPeriodLabel = useMemo(() => {
+    if (periodLabel && !periodLabel.includes("2014 - 2026") && !periodLabel.includes("2014 — 2026")) {
+      return periodLabel;
+    }
+    return computeTimelinePeriodLabel(liveItems);
+  }, [liveItems, periodLabel]);
 
   const loadTimeline = () => {
     fetch("/api/timeline", { cache: "no-store" })
@@ -168,7 +176,7 @@ export default function CareerJourneyTimeline({
           {/* Navigation Controls & Period Tag */}
           <div className="flex items-center gap-3 self-start md:self-end">
             <span className="text-xs uppercase tracking-widest px-3 py-1.5 rounded-full bg-white/5 border border-white/10 text-[#ff8cab] font-mono">
-              {periodLabel}
+              {computedPeriodLabel}
             </span>
 
             <div className="flex items-center gap-2">

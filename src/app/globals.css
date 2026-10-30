@@ -830,10 +830,12 @@ a {
   content: '';
   position: absolute;
   inset: 0;
+  /* Left side has dark backdrop to ensure high text contrast; right side where portrait & face sit is 0% overlay so face is crystal clear, bright and vibrant */
   background:
-    linear-gradient(90deg, #0b080c 0%, #0b080cdd 45%, #0b080c30 100%),
-    linear-gradient(0deg, #0b080c 0%, transparent 60%);
+    linear-gradient(90deg, #0b080c 0%, rgba(11, 8, 12, 0.94) 38%, rgba(11, 8, 12, 0.5) 52%, rgba(11, 8, 12, 0) 66%, rgba(11, 8, 12, 0) 100%),
+    linear-gradient(0deg, #0b080c 0%, rgba(11, 8, 12, 0.3) 18%, transparent 35%);
   z-index: 1;
+  pointer-events: none;
 }
 
 .hero-orb {
@@ -858,14 +860,16 @@ a {
   width: min(47%, 680px);
   object-fit: cover;
   object-position: center 25%;
-  filter: saturate(0.85);
-  mask-image: linear-gradient(to bottom, black 72%, transparent 100%);
-  opacity: 0.85;
+  filter: brightness(1.02) saturate(1.02);
+  mask-image: linear-gradient(to bottom, black 82%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to bottom, black 82%, transparent 100%);
+  opacity: 1;
+  z-index: 2;
 }
 
 .hero-content {
   position: relative;
-  z-index: 2;
+  z-index: 10;
   max-width: 800px;
   animation: rise 0.9s ease both;
 }

@@ -15,7 +15,7 @@ import {
   ArrowUpRight,
   FolderKanban,
 } from 'lucide-react';
-import { JourneyItem, Month, monthOrder } from '@/data/timeline';
+import { JourneyItem, Month, monthOrder, computeTimelinePeriodLabel } from '@/data/timeline';
 import { MediaPickerModal } from '@/components/admin/media-picker-modal';
 
 const monthsList: Month[] = [
@@ -260,6 +260,12 @@ export default function AdminTimelinePage() {
           </div>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <span
+              className="adm-badge adm-badge-green"
+              style={{ padding: '6px 12px', fontSize: '12px' }}
+            >
+              Archive Period: {computeTimelinePeriodLabel(items)}
+            </span>
             <span
               className="adm-badge adm-badge-blue"
               style={{ padding: '6px 12px', fontSize: '12px' }}

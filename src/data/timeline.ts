@@ -149,10 +149,24 @@ export const careerTimeline: TimelineMilestone[] = [
   }
 ];
 
+export function computeTimelinePeriodLabel(items?: JourneyItem[]): string {
+  const currentYear = new Date().getFullYear();
+  if (!items || items.length === 0) {
+    return `2014 — ${currentYear}`;
+  }
+  const years = items
+    .map((item) => parseInt(item.year, 10))
+    .filter((y) => !isNaN(y) && y >= 1990);
+  const startYear = years.length > 0 ? Math.min(...years) : 2014;
+  const maxItemYear = years.length > 0 ? Math.max(...years) : currentYear;
+  const endYear = Math.max(currentYear, maxItemYear);
+  return startYear === endYear ? `${startYear}` : `${startYear} — ${endYear}`;
+}
+
 export const timelineMeta = {
   kicker: "Honors & Accolades",
   title: "Awards & Honors",
-  periodLabel: "2014 — 2026",
+  periodLabel: computeTimelinePeriodLabel([...topJourneyData, ...bottomJourneyData]),
   image: "/images/award-diff-stage.jpg",
   imageAlt: "Shirin Shila receiving Awards & Trophies",
 };
