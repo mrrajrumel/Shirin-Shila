@@ -421,8 +421,8 @@ export async function changePassword(
   if (newPassword.length < 8) {
     return { success: false, error: 'New password must be at least 8 characters.' };
   }
-  if (!/[a-zA-Z]/.test(newPassword) || !/[0-9]/.test(newPassword)) {
-    return { success: false, error: 'New password must contain at least one letter and one number.' };
+  if (!/[a-zA-Z]/.test(newPassword) || !/[0-9!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?~`]/.test(newPassword)) {
+    return { success: false, error: 'New password must contain at least one letter and one number or symbol.' };
   }
 
   const users = ensureAdminAccounts();
@@ -720,10 +720,10 @@ export async function createUser(
     };
   }
 
-  if (!/[a-zA-Z]/.test(password) || !/[0-9]/.test(password)) {
+  if (!/[a-zA-Z]/.test(password) || !/[0-9!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?~`]/.test(password)) {
     return {
       success: false,
-      error: 'Password must contain at least one letter and one number.',
+      error: 'Password must contain at least one letter and one number or symbol.',
     };
   }
 
