@@ -3,6 +3,7 @@ import {
   SESSION_COOKIE_NAME,
   verifySessionToken,
   changePassword,
+  createSessionToken,
 } from '@/lib/auth';
 
 export const dynamic = 'force-dynamic';
@@ -40,7 +41,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { currentPassword, newPassword } = body;
 
-    const result = changePassword(session.id, currentPassword, newPassword);
+    const result = await changePassword(session.id, currentPassword, newPassword);
     if (!result.success) {
       // Increment failure counter
       const existing = changePwAttempts.get(rateKey) || { count: 0, resetAt: now + PW_WINDOW_MS };
@@ -54,7 +55,21 @@ export async function POST(request: NextRequest) {
     // Clear rate-limit record on success
     changePwAttempts.delete(rateKey);
 
-    return NextResponse.json({ success: true, message: 'Password updated successfully.' });
+    const response = NextResponse.json({ success: true, message: 'Password updated successfully.' });
+
+    // Issue updated session token reflecting the new tokenVersion so current session persists while older sessions are invalidated
+    const refreshedToken = createSessionToken(session, result.tokenVersion);
+    response.cookies.set({
+      name: SESSION_COOKIE_NAME,
+      value: refreshedToken,
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      path: '/',
+      maxAge: 7 * 24 * 60 * 60, // 7 days
+    });
+
+    return response;
   } catch (err: any) {
     return NextResponse.json({ error: err.message }, { status: 500 });
   }

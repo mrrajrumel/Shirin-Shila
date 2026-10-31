@@ -95,7 +95,10 @@ export async function middleware(request: NextRequest) {
                   payload.exp &&
                   Date.now() < payload.exp &&
                   (payload.role === 'admin' || payload.role === 'manager') &&
-                  Boolean(payload.sub || payload.username)
+                  Boolean(payload.sub || payload.username) &&
+                  !['admin', 'raj', 'demo', 'test', 'demo_admin', 'test_manager', 'editor'].includes(
+                    String(payload.username || '').toLowerCase()
+                  )
                 ) {
                   isAuthenticated = true;
                 }

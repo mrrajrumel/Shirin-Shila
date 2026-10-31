@@ -7,6 +7,8 @@ import {
   createSessionToken,
   verifySessionToken,
   hasMinimumRole,
+  changePassword,
+  verifyAdminCredentials,
 } from '../src/lib/auth';
 
 async function runTests() {
@@ -37,10 +39,11 @@ async function runTests() {
 
   // 2. User Creation Test
   const testUsername = `qa_test_${Date.now().toString(36)}`;
-  const createResult = createUser({
+  const initialPassword = 'SecureTestPass123!';
+  const createResult = await createUser({
     username: testUsername,
     displayName: 'QA Test Specialist',
-    password: 'SecureTestPass123!',
+    password: initialPassword,
     role: 'manager',
   }, 'admin-shirin');
 
@@ -52,10 +55,10 @@ async function runTests() {
   const testUserId = createResult.user?.id!;
 
   // 3. Duplicate User Validation
-  const duplicateResult = createUser({
+  const duplicateResult = await createUser({
     username: testUsername,
     displayName: 'Duplicate Attempt',
-    password: 'SecureTestPass123!',
+    password: initialPassword,
     role: 'manager',
   }, 'admin-shirin');
 
@@ -65,8 +68,25 @@ async function runTests() {
     'Duplicate Validation: informative error returned'
   );
 
+  // 3b. Reserved Demo Username Rejection
+  const reservedAdminResult = await createUser({
+    username: 'admin',
+    displayName: 'Fake Admin',
+    password: 'SecurePass123!',
+    role: 'admin',
+  }, 'admin-shirin');
+  assert(!reservedAdminResult.success, 'Reserved Username: "admin" rejected upon creation');
+
+  const reservedRajResult = await createUser({
+    username: 'raj',
+    displayName: 'Fake Raj',
+    password: 'SecurePass123!',
+    role: 'manager',
+  }, 'admin-shirin');
+  assert(!reservedRajResult.success, 'Reserved Username: "raj" rejected upon creation');
+
   // 4. User Search and Role Filtering
-  const searchResults = getAllAdminUsers(testUsername, 'manager');
+  const searchResults = await getAllAdminUsers(testUsername, 'manager');
   assert(
     searchResults.some(u => u.id === testUserId),
     'Search & Filter: newly created user visible via search query and manager role filter'
@@ -78,6 +98,7 @@ async function runTests() {
     username: testUsername,
     displayName: 'QA Test Specialist',
     role: 'manager',
+    tokenVersion: 1,
   });
   const verifiedInitialSession = verifySessionToken(initialToken);
   assert(
@@ -90,7 +111,7 @@ async function runTests() {
   );
 
   // 6. Role Change: Promote test user to Administrator
-  const promoteResult = updateUser(
+  const promoteResult = await updateUser(
     testUserId,
     { role: 'admin' },
     'admin-shirin'
@@ -118,7 +139,7 @@ async function runTests() {
   );
 
   // 9. Role Change: Demote test user back to Manager
-  const demoteResult = updateUser(
+  const demoteResult = await updateUser(
     testUserId,
     { role: 'manager' },
     'admin-shirin'
@@ -137,8 +158,42 @@ async function runTests() {
     'RBAC Enforcement: demoted user immediately loses admin authorization'
   );
 
-  // 11. Last Administrator Protection: Attempt to demote Shirin (founder)
-  const demoteFounderResult = updateUser(
+  // 11. Password Change & Session Invalidation Verification
+  console.log('\n--- TESTING PASSWORD CHANGE & SESSION INVALIDATION ---');
+
+  // Verify initial login works
+  const preChangeLogin = await verifyAdminCredentials(testUsername, initialPassword);
+  assert(preChangeLogin.success, 'Pre-change login succeeds with original password');
+
+  // Create pre-change session token
+  const preChangeToken = createSessionToken(preChangeLogin.user!, preChangeLogin.user?.tokenVersion || 1);
+  assert(verifySessionToken(preChangeToken) !== null, 'Pre-change session token is initially valid');
+
+  // Change password for the test user
+  const newPassword = 'NewSecretPassword99!';
+  const pwChangeResult = await changePassword(testUserId, initialPassword, newPassword);
+  assert(pwChangeResult.success, 'Password Change: successfully updated password', pwChangeResult.error);
+  assert(typeof pwChangeResult.tokenVersion === 'number' && pwChangeResult.tokenVersion > 1, 'Password Change: tokenVersion incremented');
+
+  // Verify old password FAILS to authenticate after password change
+  const oldLoginResult = await verifyAdminCredentials(testUsername, initialPassword);
+  assert(!oldLoginResult.success, 'Password Security: old password fails to authenticate after password change');
+
+  // Verify new password SUCCEEDS
+  const newLoginResult = await verifyAdminCredentials(testUsername, newPassword);
+  assert(newLoginResult.success && newLoginResult.user?.username === testUsername, 'Password Security: new password successfully authenticates');
+
+  // Verify old pre-change session token is now REVOKED
+  const postChangeOldSession = verifySessionToken(preChangeToken);
+  assert(postChangeOldSession === null, 'Session Revocation: old session token revoked after password change');
+
+  // Verify fresh session token with new tokenVersion is valid
+  const freshToken = createSessionToken(newLoginResult.user!, pwChangeResult.tokenVersion);
+  const freshSession = verifySessionToken(freshToken);
+  assert(freshSession !== null && freshSession.username === testUsername, 'Session Validity: fresh session token with new tokenVersion is valid');
+
+  // 12. Last Administrator Protection: Attempt to demote Shirin (founder)
+  const demoteFounderResult = await updateUser(
     'admin-shirin',
     { role: 'manager' },
     'admin-shirin'
@@ -149,22 +204,22 @@ async function runTests() {
     'Last-Admin Protection: founder protection message returned'
   );
 
-  // 12. Self-Deletion Protection
-  const selfDeleteResult = deleteUser('admin-shirin', 'admin-shirin');
+  // 13. Self-Deletion Protection
+  const selfDeleteResult = await deleteUser('admin-shirin', 'admin-shirin');
   assert(!selfDeleteResult.success, 'Self-Deletion Protection: cannot delete own active account');
 
-  // 13. Clean Deletion of Test User
-  const deleteResult = deleteUser(testUserId, 'admin-shirin');
+  // 14. Clean Deletion of Test User
+  const deleteResult = await deleteUser(testUserId, 'admin-shirin');
   assert(deleteResult.success, 'User Deletion: delete test user', deleteResult.error);
 
-  // 14. Session Invalidation upon Account Deletion
-  const postDeleteSession = verifySessionToken(initialToken);
+  // 15. Session Invalidation upon Account Deletion
+  const postDeleteSession = verifySessionToken(freshToken);
   assert(
     postDeleteSession === null,
     'Session Invalidation: deleted user session token is immediately revoked (returns null)'
   );
 
-  // 15. Verify real accounts remain untouched
+  // 16. Verify real accounts remain untouched
   const finalUsers = ensureAdminAccounts();
   const finalShirin = finalUsers.find(u => u.username.toLowerCase() === 'shirin');
   const finalRumel = finalUsers.find(u => u.username.toLowerCase() === 'rumel');
@@ -184,4 +239,3 @@ runTests().catch((err) => {
   console.error('Fatal test error:', err);
   process.exit(1);
 });
-

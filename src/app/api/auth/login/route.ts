@@ -12,7 +12,7 @@ export async function POST(request: NextRequest) {
     const forwarded = request.headers.get('x-forwarded-for');
     const clientIp = forwarded ? forwarded.split(',')[0].trim() : '127.0.0.1';
 
-    const result = verifyAdminCredentials(identifier, password, clientIp);
+    const result = await verifyAdminCredentials(identifier, password, clientIp);
 
     if (!result.success || !result.user) {
       return NextResponse.json(
@@ -21,7 +21,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const token = createSessionToken(result.user);
+    const token = createSessionToken(result.user, result.user.tokenVersion);
     const response = NextResponse.json({
       success: true,
       user: {

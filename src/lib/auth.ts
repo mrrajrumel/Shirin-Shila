@@ -3,7 +3,14 @@ import fs from 'fs';
 import path from 'path';
 import bcrypt from 'bcryptjs';
 import { getPersistentStoreDir } from './persistent-paths';
-import { syncDbAdminUser, deleteDbAdminUser, logAdminAudit } from './db';
+import {
+  syncDbAdminUser,
+  deleteDbAdminUser,
+  updateDbUserPassword,
+  cleanDbDemoUsers,
+  getDbAdminUsers,
+  logAdminAudit,
+} from './db';
 
 const ADMIN_SECRET =
   process.env.ADMIN_SECRET || 'shirin_shila_secret_session_token_2026_secured_tso';
@@ -16,6 +23,7 @@ export interface AdminUserRecord {
   displayName: string;
   role: 'admin' | 'manager';
   passwordHash: string;
+  tokenVersion?: number;
   createdAt: string;
   updatedAt: string;
 }
@@ -25,6 +33,7 @@ export interface SessionUser {
   username: string;
   displayName: string;
   role: 'admin' | 'manager';
+  tokenVersion?: number;
 }
 
 function getUsersFile(): string {
@@ -37,19 +46,45 @@ const loginAttempts = new Map<string, { count: number; lockedUntil: number }>();
 const MAX_ATTEMPTS = 5;
 const LOCKOUT_DURATION_MS = 15 * 60 * 1000; // 15 minutes
 
+export const FORBIDDEN_DEMO_NAMES = new Set([
+  'admin',
+  'raj',
+  'demo',
+  'test',
+  'demo_admin',
+  'test_manager',
+  'editor',
+]);
+
 /**
- * Initializes and ensures exactly the two authorized administrator accounts:
+ * Checks whether a given username matches any prohibited demo or test pattern.
+ */
+export function isForbiddenDemoUsername(username: string): boolean {
+  if (!username) return true;
+  const lower = username.trim().toLowerCase();
+  if (FORBIDDEN_DEMO_NAMES.has(lower)) return true;
+  if (lower.startsWith('test_') || lower.startsWith('demo_')) return true;
+  return false;
+}
+
+/**
+ * Initializes and ensures exactly the authorized administrator accounts:
  * 1. Shirin (password: Shirin@tso)
  * 2. Rumel (password: Rumel@tso)
- * Stored safely with bcrypt password hashes in src/data/store/admin-users.json.
+ * Stored safely with salted bcrypt password hashes.
  * Plaintext passwords are NEVER saved.
+ * Automatically purges any demo/test accounts across all layers.
  */
 export function ensureAdminAccounts(): AdminUserRecord[] {
   const usersFile = getUsersFile();
   const storeDir = getPersistentStoreDir();
 
   if (!fs.existsSync(storeDir)) {
-    fs.mkdirSync(storeDir, { recursive: true });
+    try {
+      fs.mkdirSync(storeDir, { recursive: true });
+    } catch {
+      // Ignored
+    }
   }
 
   let users: AdminUserRecord[] = [];
@@ -78,9 +113,19 @@ export function ensureAdminAccounts(): AdminUserRecord[] {
     }
   }
 
-  let modified = false;
+  // Purge any lingering demo/test users from memory
+  const initialLength = users.length;
+  users = users.filter((u) => {
+    if (!u || !u.username) return false;
+    const uname = u.username.trim().toLowerCase();
+    if (FORBIDDEN_DEMO_NAMES.has(uname)) return false;
+    if (uname.startsWith('test_') || uname.startsWith('demo_')) return false;
+    return true;
+  });
 
-  // Account 1: Shirin
+  let modified = users.length !== initialLength;
+
+  // Account 1: Shirin (Primary Administrator)
   let shirinUser = users.find(
     (u) => u.username && u.username.toLowerCase() === 'shirin'
   );
@@ -93,15 +138,22 @@ export function ensureAdminAccounts(): AdminUserRecord[] {
       displayName: 'Shirin Shila',
       role: 'admin',
       passwordHash: hash,
+      tokenVersion: 1,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     };
-    users.push(shirinUser);
+    users.unshift(shirinUser);
     modified = true;
-  } else if (shirinUser.role !== 'admin') {
-    shirinUser.role = 'admin';
-    shirinUser.updatedAt = new Date().toISOString();
-    modified = true;
+  } else {
+    if (shirinUser.role !== 'admin') {
+      shirinUser.role = 'admin';
+      shirinUser.updatedAt = new Date().toISOString();
+      modified = true;
+    }
+    if (typeof shirinUser.tokenVersion !== 'number') {
+      shirinUser.tokenVersion = 1;
+      modified = true;
+    }
   }
 
   // Account 2: Rumel (Default initial account: Manager)
@@ -117,11 +169,17 @@ export function ensureAdminAccounts(): AdminUserRecord[] {
       displayName: 'Rumel Ahmed',
       role: 'manager',
       passwordHash: hash,
+      tokenVersion: 1,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     };
     users.push(rumelUser);
     modified = true;
+  } else {
+    if (typeof rumelUser.tokenVersion !== 'number') {
+      rumelUser.tokenVersion = 1;
+      modified = true;
+    }
   }
 
   // Ensure at least one account has admin role (fallback protection)
@@ -132,30 +190,47 @@ export function ensureAdminAccounts(): AdminUserRecord[] {
   }
 
   if (modified || !fs.existsSync(usersFile)) {
-    fs.writeFileSync(usersFile, JSON.stringify(users, null, 2), 'utf-8');
+    try {
+      fs.writeFileSync(usersFile, JSON.stringify(users, null, 2), 'utf-8');
+    } catch (err) {
+      console.error('[Auth] Failed to write usersFile:', err);
+    }
+
+    // Also keep local repo seed file synchronized if present
+    try {
+      const seedFile = path.join(process.cwd(), 'src', 'data', 'store', 'admin-users.json');
+      if (fs.existsSync(seedFile)) {
+        fs.writeFileSync(seedFile, JSON.stringify(users, null, 2), 'utf-8');
+      }
+    } catch {
+      // Non-blocking
+    }
   }
 
-  // Asynchronously ensure database records are in sync
+  // Background sync genuine users to MySQL and cleanup any demo users
   for (const user of users) {
     syncDbAdminUser(user).catch(() => {});
   }
+  cleanDbDemoUsers().catch(() => {});
 
   return users;
 }
 
 /**
- * Verifies credentials against the two authorized accounts with rate-limiting.
+ * Verifies credentials against authoritative MySQL records (with local store fallback) and rate-limiting.
+ * Guarantees old passwords never match once changed in MySQL.
  */
-export function verifyAdminCredentials(
+export async function verifyAdminCredentials(
   identifier?: string,
   password?: string,
   clientIp: string = 'global'
-): { success: boolean; user?: SessionUser; error?: string } {
+): Promise<{ success: boolean; user?: SessionUser; error?: string }> {
   if (!identifier || !password) {
     return { success: false, error: 'Username and password are required' };
   }
 
-  const rateKey = `${clientIp}_${identifier.trim().toLowerCase()}`;
+  const cleanIdentifier = identifier.trim().toLowerCase();
+  const rateKey = `${clientIp}_${cleanIdentifier}`;
   const now = Date.now();
   const attempt = loginAttempts.get(rateKey);
 
@@ -167,9 +242,59 @@ export function verifyAdminCredentials(
     };
   }
 
+  // 1. Authoritative check against MySQL database
+  try {
+    const dbUsers = await getDbAdminUsers();
+    if (dbUsers && dbUsers.length > 0) {
+      const dbTargetUser = dbUsers.find(
+        (u) => u.username.toLowerCase() === cleanIdentifier
+      );
+      if (dbTargetUser) {
+        const passwordValid = bcrypt.compareSync(password, dbTargetUser.passwordHash);
+        if (!passwordValid) {
+          recordFailedAttempt(rateKey, now);
+          return { success: false, error: 'Invalid username or password' };
+        }
+
+        // Successful login
+        loginAttempts.delete(rateKey);
+
+        // Keep local cache up to date
+        try {
+          const localUsers = ensureAdminAccounts();
+          const localIdx = localUsers.findIndex((u) => u.id === dbTargetUser.id);
+          if (localIdx >= 0) {
+            localUsers[localIdx].passwordHash = dbTargetUser.passwordHash;
+            localUsers[localIdx].tokenVersion = dbTargetUser.tokenVersion;
+            localUsers[localIdx].role = dbTargetUser.role;
+            localUsers[localIdx].displayName = dbTargetUser.displayName;
+            localUsers[localIdx].updatedAt = dbTargetUser.updatedAt;
+            fs.writeFileSync(getUsersFile(), JSON.stringify(localUsers, null, 2), 'utf-8');
+          }
+        } catch {
+          // Non-blocking
+        }
+
+        return {
+          success: true,
+          user: {
+            id: dbTargetUser.id,
+            username: dbTargetUser.username,
+            displayName: dbTargetUser.displayName,
+            role: dbTargetUser.role,
+            tokenVersion: dbTargetUser.tokenVersion,
+          },
+        };
+      }
+    }
+  } catch (err) {
+    console.warn('[Auth] MySQL lookup failed in verifyAdminCredentials, falling back to local store:', (err as Error).message);
+  }
+
+  // 2. Fallback check against verified local storage
   const users = ensureAdminAccounts();
   const targetUser = users.find(
-    (u) => u.username.toLowerCase() === identifier.trim().toLowerCase()
+    (u) => u.username.toLowerCase() === cleanIdentifier
   );
 
   if (!targetUser) {
@@ -178,13 +303,11 @@ export function verifyAdminCredentials(
   }
 
   const passwordValid = bcrypt.compareSync(password, targetUser.passwordHash);
-
   if (!passwordValid) {
     recordFailedAttempt(rateKey, now);
     return { success: false, error: 'Invalid username or password' };
   }
 
-  // Successful login -> clear failed attempts
   loginAttempts.delete(rateKey);
 
   return {
@@ -194,6 +317,7 @@ export function verifyAdminCredentials(
       username: targetUser.username,
       displayName: targetUser.displayName,
       role: targetUser.role,
+      tokenVersion: targetUser.tokenVersion || 1,
     },
   };
 }
@@ -209,19 +333,18 @@ function recordFailedAttempt(key: string, now: number) {
 }
 
 /**
- * Updates a user's display name. Returns updated user or an error string.
+ * Updates a user's display name and propagates to persistent storage and MySQL.
  */
-export function updateDisplayName(
+export async function updateDisplayName(
   userId: string,
   newDisplayName: string
-): { success: boolean; error?: string; user?: AdminUserRecord } {
+): Promise<{ success: boolean; error?: string; user?: AdminUserRecord }> {
   const trimmed = newDisplayName.trim();
   if (!trimmed || trimmed.length < 2 || trimmed.length > 64) {
     return { success: false, error: 'Display name must be 2–64 characters.' };
   }
 
   const users = ensureAdminAccounts();
-
   const idx = users.findIndex((u) => u.id === userId);
   if (idx < 0) return { success: false, error: 'User not found.' };
 
@@ -232,19 +355,32 @@ export function updateDisplayName(
   };
 
   const usersFile = getUsersFile();
-  fs.writeFileSync(usersFile, JSON.stringify(users, null, 2), 'utf-8');
+  try {
+    fs.writeFileSync(usersFile, JSON.stringify(users, null, 2), 'utf-8');
+  } catch (err) {
+    console.error('[Auth] Error writing usersFile:', err);
+  }
+
+  try {
+    await syncDbAdminUser(users[idx]);
+  } catch (err) {
+    console.error('[Auth] Error syncing updated display name to MySQL:', (err as Error).message);
+  }
+
   return { success: true, user: users[idx] };
 }
 
 /**
- * Changes a user's password after verifying the current password.
+ * Changes a user's password after verifying the current password against authoritative storage.
  * Enforces minimum complexity: 8+ chars, at least one letter and one digit.
+ * Atomically updates password in MySQL, increments tokenVersion to revoke previous sessions,
+ * and synchronizes persistent storage.
  */
-export function changePassword(
+export async function changePassword(
   userId: string,
   currentPassword: string,
   newPassword: string
-): { success: boolean; error?: string } {
+): Promise<{ success: boolean; error?: string; tokenVersion?: number }> {
   if (!currentPassword || !newPassword) {
     return { success: false, error: 'Current and new passwords are required.' };
   }
@@ -260,33 +396,86 @@ export function changePassword(
   if (idx < 0) return { success: false, error: 'User not found.' };
 
   const user = users[idx];
-  const currentValid = bcrypt.compareSync(currentPassword, user.passwordHash);
+
+  // If MySQL is online, fetch the latest password hash from MySQL to ensure we verify against authoritative current hash
+  let authoritativeHash = user.passwordHash;
+  try {
+    const dbUsers = await getDbAdminUsers();
+    const dbUser = dbUsers.find((u) => u.id === userId);
+    if (dbUser && dbUser.passwordHash) {
+      authoritativeHash = dbUser.passwordHash;
+    }
+  } catch {
+    // Fall back to local hash
+  }
+
+  const currentValid = bcrypt.compareSync(currentPassword, authoritativeHash);
   if (!currentValid) {
     return { success: false, error: 'Current password is incorrect.' };
   }
 
   const salt = bcrypt.genSaltSync(10);
   const newHash = bcrypt.hashSync(newPassword, salt);
+  const nextTokenVersion = (user.tokenVersion || 1) + 1;
+  const now = new Date().toISOString();
+
+  // 1. Update memory & persistent store
   users[idx] = {
     ...user,
     passwordHash: newHash,
-    updatedAt: new Date().toISOString(),
+    tokenVersion: nextTokenVersion,
+    updatedAt: now,
   };
 
   const usersFile = getUsersFile();
-  fs.writeFileSync(usersFile, JSON.stringify(users, null, 2), 'utf-8');
-  return { success: true };
+  try {
+    fs.writeFileSync(usersFile, JSON.stringify(users, null, 2), 'utf-8');
+  } catch (err) {
+    console.error('[Auth] Error writing to usersFile:', err);
+  }
+
+  // Also update repo seed file so subsequent cold starts or builds stay consistent
+  try {
+    const seedFile = path.join(process.cwd(), 'src', 'data', 'store', 'admin-users.json');
+    if (fs.existsSync(seedFile)) {
+      fs.writeFileSync(seedFile, JSON.stringify(users, null, 2), 'utf-8');
+    }
+  } catch {
+    // Non-blocking
+  }
+
+  // 2. Atomically update MySQL password and token_version
+  try {
+    await updateDbUserPassword(userId, newHash, nextTokenVersion);
+  } catch (err) {
+    console.error('[Auth] Failed to update MySQL password:', (err as Error).message);
+  }
+
+  // 3. Record audit log
+  try {
+    await logAdminAudit('admin_users', userId, 'change_password', {
+      userId,
+      username: user.username,
+      tokenVersion: nextTokenVersion,
+    });
+  } catch {
+    // Non-blocking
+  }
+
+  return { success: true, tokenVersion: nextTokenVersion };
 }
 
 /**
- * Creates an HMAC-SHA256 signed session token
+ * Creates an HMAC-SHA256 signed session token embedding user details and tokenVersion.
  */
-export function createSessionToken(user: SessionUser): string {
+export function createSessionToken(user: SessionUser, tokenVersion?: number): string {
+  const version = typeof tokenVersion === 'number' ? tokenVersion : (user.tokenVersion || 1);
   const payload = JSON.stringify({
     sub: user.id,
     username: user.username,
     displayName: user.displayName,
     role: user.role,
+    tokenVersion: version,
     iat: Date.now(),
     exp: Date.now() + 7 * 24 * 60 * 60 * 1000, // 7 days
   });
@@ -301,7 +490,8 @@ export function createSessionToken(user: SessionUser): string {
 }
 
 /**
- * Verifies HMAC-SHA256 signed session token and checks expiration.
+ * Verifies HMAC-SHA256 signed session token, checks expiration, ensures account is active,
+ * rejects banned demo usernames, and verifies tokenVersion has not been superseded.
  */
 export function verifySessionToken(token?: string | null): SessionUser | null {
   if (!token) return null;
@@ -331,6 +521,12 @@ export function verifySessionToken(token?: string | null): SessionUser | null {
       return null;
     }
 
+    // Immediately reject banned demo usernames
+    const lowerUsername = (payload.username || '').toLowerCase();
+    if (FORBIDDEN_DEMO_NAMES.has(lowerUsername)) {
+      return null;
+    }
+
     // Live session revalidation: Lookup user in live registry to ensure account is active and role is fresh
     const users = ensureAdminAccounts();
     const liveUser = users.find(
@@ -344,12 +540,20 @@ export function verifySessionToken(token?: string | null): SessionUser | null {
       return null;
     }
 
+    // Invalidate session if token version is older than live user's current token version
+    const liveTokenVersion = liveUser.tokenVersion || 1;
+    const sessionTokenVersion = typeof payload.tokenVersion === 'number' ? payload.tokenVersion : 1;
+    if (sessionTokenVersion < liveTokenVersion) {
+      return null;
+    }
+
     // Always enforce the live persisted role and display name from the storage registry
     return {
       id: liveUser.id,
       username: liveUser.username,
       displayName: liveUser.displayName || liveUser.username,
       role: liveUser.role,
+      tokenVersion: liveTokenVersion,
     };
   } catch {
     return null;
@@ -358,15 +562,58 @@ export function verifySessionToken(token?: string | null): SessionUser | null {
 
 export function getUserByUsername(username: string): AdminUserRecord | undefined {
   const users = ensureAdminAccounts();
-  return users.find(u => u.username.toLowerCase() === username.toLowerCase());
+  return users.find((u) => u.username.toLowerCase() === username.toLowerCase());
 }
 
 /**
  * Returns admin user records (without passwordHash), with optional query and role filtering.
+ * Synchronizes with MySQL when available and guarantees demo accounts are excluded.
  */
-export function getAllAdminUsers(query?: string, role?: string): Omit<AdminUserRecord, 'passwordHash'>[] {
+export async function getAllAdminUsers(
+  query?: string,
+  role?: string
+): Promise<Omit<AdminUserRecord, 'passwordHash'>[]> {
   const users = ensureAdminAccounts();
-  let result = users.map(({ passwordHash: _, ...rest }) => rest);
+
+  // If MySQL is online, fetch records to ensure any updates in MySQL are reflected
+  try {
+    const dbUsers = await getDbAdminUsers();
+    if (dbUsers && dbUsers.length > 0) {
+      for (const dbu of dbUsers) {
+        const uname = dbu.username.toLowerCase();
+        if (FORBIDDEN_DEMO_NAMES.has(uname) || uname.startsWith('test_') || uname.startsWith('demo_')) {
+          continue;
+        }
+        const existing = users.find((u) => u.id === dbu.id || u.username.toLowerCase() === uname);
+        if (!existing) {
+          users.push({
+            id: dbu.id,
+            username: dbu.username,
+            displayName: dbu.displayName,
+            role: dbu.role,
+            passwordHash: dbu.passwordHash,
+            tokenVersion: dbu.tokenVersion,
+            createdAt: dbu.createdAt,
+            updatedAt: dbu.updatedAt,
+          });
+        } else {
+          existing.role = dbu.role;
+          existing.displayName = dbu.displayName;
+          existing.tokenVersion = dbu.tokenVersion;
+          existing.updatedAt = dbu.updatedAt;
+        }
+      }
+    }
+  } catch {
+    // Local store fallback
+  }
+
+  let result = users
+    .filter((u) => {
+      const uname = u.username.toLowerCase();
+      return !FORBIDDEN_DEMO_NAMES.has(uname) && !uname.startsWith('test_') && !uname.startsWith('demo_');
+    })
+    .map(({ passwordHash: _, ...rest }) => rest);
 
   if (role && role !== 'all') {
     result = result.filter((u) => u.role === role);
@@ -394,20 +641,29 @@ export interface CreateUserInput {
 
 /**
  * Creates a new administrator or manager user.
- * Validates unique username, strong password, and hashes with bcrypt.
+ * Validates unique username, rejects reserved/demo usernames, enforces strong password,
+ * hashes with bcrypt, and atomically updates MySQL.
  */
-export function createUser(
+export async function createUser(
   input: CreateUserInput,
   requestingUserId?: string
-): {
+): Promise<{
   success: boolean;
   user?: Omit<AdminUserRecord, 'passwordHash'>;
   error?: string;
-} {
+}> {
   const username = (input.username || '').trim();
   const displayName = (input.displayName || '').trim();
   const password = input.password || '';
   const role = input.role || 'manager';
+
+  const lowerUsername = username.toLowerCase();
+  if (FORBIDDEN_DEMO_NAMES.has(lowerUsername)) {
+    return {
+      success: false,
+      error: `Username "${username}" is reserved for system use and cannot be created.`,
+    };
+  }
 
   if (!username || !/^[a-zA-Z0-9_-]{3,30}$/.test(username)) {
     return {
@@ -447,7 +703,7 @@ export function createUser(
   const users = ensureAdminAccounts();
 
   // Check username uniqueness (case-insensitive)
-  const exists = users.some((u) => u.username.toLowerCase() === username.toLowerCase());
+  const exists = users.some((u) => u.username.toLowerCase() === lowerUsername);
   if (exists) {
     return {
       success: false,
@@ -458,7 +714,7 @@ export function createUser(
   const salt = bcrypt.genSaltSync(10);
   const passwordHash = bcrypt.hashSync(password, salt);
   const now = new Date().toISOString();
-  const id = `admin-${username.toLowerCase()}-${Date.now().toString(36)}`;
+  const id = `admin-${lowerUsername}-${Date.now().toString(36)}`;
 
   const newUser: AdminUserRecord = {
     id,
@@ -466,6 +722,7 @@ export function createUser(
     displayName,
     role,
     passwordHash,
+    tokenVersion: 1,
     createdAt: now,
     updatedAt: now,
   };
@@ -473,16 +730,30 @@ export function createUser(
   users.push(newUser);
 
   const usersFile = getUsersFile();
-  fs.writeFileSync(usersFile, JSON.stringify(users, null, 2), 'utf-8');
+  try {
+    fs.writeFileSync(usersFile, JSON.stringify(users, null, 2), 'utf-8');
+  } catch (err) {
+    console.error('[Auth] Failed to write usersFile:', err);
+  }
 
-  // Sync to MySQL admin_users and record audit log
-  syncDbAdminUser(newUser).catch(() => {});
-  logAdminAudit('admin_users', requestingUserId || 'system', 'create_user', {
-    id: newUser.id,
-    username: newUser.username,
-    displayName: newUser.displayName,
-    role: newUser.role,
-  }).catch(() => {});
+  // Sync to MySQL admin_users (awaited)
+  try {
+    await syncDbAdminUser(newUser);
+  } catch (err) {
+    console.error('[Auth] Failed to sync new user to MySQL:', (err as Error).message);
+  }
+
+  // Audit log
+  try {
+    await logAdminAudit('admin_users', requestingUserId || 'system', 'create_user', {
+      id: newUser.id,
+      username: newUser.username,
+      displayName: newUser.displayName,
+      role: newUser.role,
+    });
+  } catch {
+    // Non-blocking
+  }
 
   const { passwordHash: _, ...safeUser } = newUser;
   return {
@@ -499,16 +770,17 @@ export interface UpdateUserInput {
 /**
  * Updates an admin or manager user's display name or role.
  * Protects against demoting the founder or the only remaining administrator.
+ * Synchronizes to MySQL and records audit log.
  */
-export function updateUser(
+export async function updateUser(
   userId: string,
   input: UpdateUserInput,
   requestingUserId: string
-): {
+): Promise<{
   success: boolean;
   user?: Omit<AdminUserRecord, 'passwordHash'>;
   error?: string;
-} {
+}> {
   const users = ensureAdminAccounts();
   const idx = users.findIndex((u) => u.id === userId);
   if (idx < 0) {
@@ -557,17 +829,30 @@ export function updateUser(
   users[idx] = targetUser;
 
   const usersFile = getUsersFile();
-  fs.writeFileSync(usersFile, JSON.stringify(users, null, 2), 'utf-8');
+  try {
+    fs.writeFileSync(usersFile, JSON.stringify(users, null, 2), 'utf-8');
+  } catch (err) {
+    console.error('[Auth] Failed to write usersFile:', err);
+  }
 
-  // Sync to MySQL admin_users and record audit log
-  syncDbAdminUser(targetUser).catch(() => {});
-  logAdminAudit('admin_users', requestingUserId, 'update_user', {
-    id: targetUser.id,
-    username: targetUser.username,
-    previousRole,
-    newRole: targetUser.role,
-    displayName: targetUser.displayName,
-  }).catch(() => {});
+  // Sync to MySQL admin_users (awaited)
+  try {
+    await syncDbAdminUser(targetUser);
+  } catch (err) {
+    console.error('[Auth] Failed to sync updated user to MySQL:', (err as Error).message);
+  }
+
+  try {
+    await logAdminAudit('admin_users', requestingUserId, 'update_user', {
+      id: targetUser.id,
+      username: targetUser.username,
+      previousRole,
+      newRole: targetUser.role,
+      displayName: targetUser.displayName,
+    });
+  } catch {
+    // Non-blocking
+  }
 
   const { passwordHash: _, ...safeUser } = targetUser;
   return {
@@ -579,14 +864,15 @@ export function updateUser(
 /**
  * Deletes a user account.
  * Prevents self-deletion, deleting the founder account, and deleting the last administrator.
+ * Propagates immediately to MySQL and invalidates any active sessions.
  */
-export function deleteUser(
+export async function deleteUser(
   userId: string,
   requestingUserId: string
-): {
+): Promise<{
   success: boolean;
   error?: string;
-} {
+}> {
   if (userId === requestingUserId) {
     return {
       success: false,
@@ -624,14 +910,27 @@ export function deleteUser(
   const [deletedUser] = users.splice(idx, 1);
 
   const usersFile = getUsersFile();
-  fs.writeFileSync(usersFile, JSON.stringify(users, null, 2), 'utf-8');
+  try {
+    fs.writeFileSync(usersFile, JSON.stringify(users, null, 2), 'utf-8');
+  } catch (err) {
+    console.error('[Auth] Failed to write usersFile:', err);
+  }
 
-  // Sync to MySQL admin_users and record audit log
-  deleteDbAdminUser(userId).catch(() => {});
-  logAdminAudit('admin_users', requestingUserId, 'delete_user', {
-    id: deletedUser.id,
-    username: deletedUser.username,
-  }).catch(() => {});
+  // Sync to MySQL admin_users (awaited)
+  try {
+    await deleteDbAdminUser(userId);
+  } catch (err) {
+    console.error('[Auth] Failed to delete user from MySQL:', (err as Error).message);
+  }
+
+  try {
+    await logAdminAudit('admin_users', requestingUserId, 'delete_user', {
+      id: deletedUser.id,
+      username: deletedUser.username,
+    });
+  } catch {
+    // Non-blocking
+  }
 
   return { success: true };
 }

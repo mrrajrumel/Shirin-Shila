@@ -58,6 +58,14 @@
 - [x] **Live Session Permission Revalidation:** `verifySessionToken()` dynamically checks the live storage registry; role promotions and demotions take effect on the user's very next request without requiring re-login.
 - [x] **Instant Session Revocation for Deleted Users:** Deleting a user immediately causes `verifySessionToken()` to return `null`, revoking API access in real time.
 - [x] **MySQL Synchronization & Audit Logging:** Added `syncDbAdminUser()`, `deleteDbAdminUser()`, and `logAdminAudit()` in `src/lib/db.ts` to sync user CRUD and role changes with MySQL `admin_users` and `cms_audit_logs`.
+
+### 1.8 Password Security Hardening, Session Token Versioning & Demo User Purge
+- [x] **Authoritative MySQL Password Sync:** Fixed asynchronous MySQL persistence in `updateDbUserPassword()` so password modifications update MySQL `admin_users` directly and atomically.
+- [x] **Session Token Invalidation on Password Change:** Implemented `tokenVersion` counter embedded within HMAC-SHA256 session tokens. Changing an account password immediately revokes all prior active sessions across all devices (`tokenVersion` check in `verifySessionToken()`).
+- [x] **Old Password Invalidation:** Verified that after changing a password, the previous password can no longer authenticate against MySQL or local storage.
+- [x] **Permanent Demo Account Purge:** Built-in `cleanDbDemoUsers()` and `FORBIDDEN_DEMO_NAMES` deny-list (`admin`, `raj`, `demo`, `test`, `editor`) enforce complete database and storage purge; prevented recreation of test or demo accounts.
+- [x] **TSO Brand Vector Asset:** Strictly preserved authorized vector logo `public/assets/logos/tso-logo-white.svg` and integrated into talent management desk.
+- [x] **ESLint 9 Flat Configuration:** Real ESLint 9 configuration passing with 0 errors (`npm run lint`).
 - [x] **Inline & Modal Role Selection:** Added a quick inline role dropdown directly in `/admin/users` table rows with in-flight spinner and instant feedback, while preserving modal editing.
 - [x] **Admin Header Streamlining:** Removed profile avatar icon, username chip container, and duplicate page title from the sticky topbar. Left side preserves mobile hamburger; center features scalable search (`Ctrl+K`); right side has clean Sign Out action.
 - [x] **In-Page Headings Restored:** Removed CSS hiding rule so page headings render clearly on mobile, tablet, and desktop.

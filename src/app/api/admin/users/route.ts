@@ -32,7 +32,7 @@ export async function GET(request: NextRequest) {
   const q = searchParams.get('q') || '';
   const role = searchParams.get('role') || '';
 
-  const users = getAllAdminUsers(q, role);
+  const users = await getAllAdminUsers(q, role);
   return NextResponse.json({
     users,
     currentUserId: auth.session.id,
@@ -47,7 +47,7 @@ export async function POST(request: NextRequest) {
 
   try {
     const body = await request.json();
-    const result = createUser(
+    const result = await createUser(
       {
         username: body.username,
         displayName: body.displayName,
@@ -81,7 +81,7 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json({ error: 'User ID is required' }, { status: 400 });
     }
 
-    const result = updateUser(id, { displayName, role }, auth.session.id);
+    const result = await updateUser(id, { displayName, role }, auth.session.id);
     if (!result.success) {
       return NextResponse.json({ error: result.error }, { status: 400 });
     }
@@ -132,7 +132,7 @@ export async function DELETE(request: NextRequest) {
       return NextResponse.json({ error: 'User ID is required' }, { status: 400 });
     }
 
-    const result = deleteUser(id, auth.session.id);
+    const result = await deleteUser(id, auth.session.id);
     if (!result.success) {
       return NextResponse.json({ error: result.error }, { status: 400 });
     }

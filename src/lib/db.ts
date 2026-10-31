@@ -164,10 +164,18 @@ export async function ensureDatabaseSchema(): Promise<void> {
         display_name VARCHAR(128) NOT NULL,
         password_hash VARCHAR(255) NOT NULL,
         role VARCHAR(32) NOT NULL DEFAULT 'admin',
+        token_version INT NOT NULL DEFAULT 1,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
       ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
     `);
+
+    // Backward-compatible schema migration if table already existed without token_version
+    try {
+      await db.query(`ALTER TABLE admin_users ADD COLUMN token_version INT NOT NULL DEFAULT 1`);
+    } catch (_) {
+      // Column already exists or error ignored
+    }
 
     await db.query(`
       CREATE TABLE IF NOT EXISTS page_revisions (
@@ -466,6 +474,7 @@ export async function syncDbAdminUser(user: {
   displayName: string;
   passwordHash: string;
   role: string;
+  tokenVersion?: number;
   createdAt: string;
   updatedAt: string;
 }): Promise<boolean> {
@@ -475,12 +484,13 @@ export async function syncDbAdminUser(user: {
   try {
     await ensureDatabaseSchema();
     await db.query(
-      `INSERT INTO admin_users (id, username, display_name, password_hash, role, created_at, updated_at)
-       VALUES (?, ?, ?, ?, ?, ?, ?)
+      `INSERT INTO admin_users (id, username, display_name, password_hash, role, token_version, created_at, updated_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?)
        ON DUPLICATE KEY UPDATE
          display_name = VALUES(display_name),
          password_hash = VALUES(password_hash),
          role = VALUES(role),
+         token_version = VALUES(token_version),
          updated_at = VALUES(updated_at)`,
       [
         user.id,
@@ -488,6 +498,7 @@ export async function syncDbAdminUser(user: {
         user.displayName,
         user.passwordHash,
         user.role,
+        user.tokenVersion || 1,
         new Date(user.createdAt),
         new Date(user.updatedAt),
       ]
@@ -496,6 +507,64 @@ export async function syncDbAdminUser(user: {
   } catch (err) {
     console.error(`[MySQL Admin User] Error syncing user ${user.username}:`, (err as Error).message);
     return false;
+  }
+}
+
+/**
+ * Updates a user's password directly in MySQL admin_users table.
+ * Atomically updates password_hash, increments token_version, and updates updated_at.
+ */
+export async function updateDbUserPassword(
+  userId: string,
+  passwordHash: string,
+  tokenVersion: number
+): Promise<boolean> {
+  const db = getDbPool();
+  if (!db) return false;
+
+  try {
+    await ensureDatabaseSchema();
+    await db.query(
+      `UPDATE admin_users
+       SET password_hash = ?, token_version = ?, updated_at = NOW()
+       WHERE id = ?`,
+      [passwordHash, tokenVersion, userId]
+    );
+    return true;
+  } catch (err) {
+    console.error(`[MySQL Admin User] Error updating password for user ${userId}:`, (err as Error).message);
+    return false;
+  }
+}
+
+/**
+ * Purges confirmed demo and test accounts from the MySQL admin_users table.
+ * Guarantees genuine accounts (Shirin and Rumel) remain untouched.
+ */
+export async function cleanDbDemoUsers(): Promise<{ deletedCount: number; remainingUsers: string[] }> {
+  const db = getDbPool();
+  if (!db) return { deletedCount: 0, remainingUsers: [] };
+
+  try {
+    await ensureDatabaseSchema();
+    // Known demo patterns and usernames
+    const [result] = await db.query<any>(
+      `DELETE FROM admin_users
+       WHERE (LOWER(username) NOT IN ('shirin', 'rumel') AND LOWER(id) NOT IN ('admin-shirin', 'admin-rumel'))
+          OR LOWER(username) IN ('demo', 'test', 'admin', 'raj', 'demo_admin', 'test_manager', 'editor', 'qa_test')
+          OR LOWER(username) LIKE 'qa_test_%'
+          OR LOWER(username) LIKE 'test_%'
+          OR LOWER(username) LIKE 'demo_%'`
+    );
+    const deletedCount = result?.affectedRows || 0;
+
+    const [rows] = await db.query<any[]>(`SELECT username FROM admin_users ORDER BY created_at ASC`);
+    const remainingUsers = rows.map((r) => r.username);
+
+    return { deletedCount, remainingUsers };
+  } catch (err) {
+    console.error('[MySQL Demo User Cleanup] Error cleaning demo users:', (err as Error).message);
+    return { deletedCount: 0, remainingUsers: [] };
   }
 }
 
@@ -525,6 +594,7 @@ export async function getDbAdminUsers(): Promise<Array<{
   displayName: string;
   passwordHash: string;
   role: 'admin' | 'manager';
+  tokenVersion: number;
   createdAt: string;
   updatedAt: string;
 }>> {
@@ -534,7 +604,7 @@ export async function getDbAdminUsers(): Promise<Array<{
   try {
     await ensureDatabaseSchema();
     const [rows] = await db.query(
-      `SELECT id, username, display_name, password_hash, role, created_at, updated_at
+      `SELECT id, username, display_name, password_hash, role, token_version, created_at, updated_at
        FROM admin_users
        ORDER BY created_at ASC`
     );
@@ -545,6 +615,7 @@ export async function getDbAdminUsers(): Promise<Array<{
       displayName: r.display_name,
       passwordHash: r.password_hash,
       role: r.role === 'admin' ? 'admin' : 'manager',
+      tokenVersion: typeof r.token_version === 'number' ? r.token_version : 1,
       createdAt: r.created_at ? new Date(r.created_at).toISOString() : new Date().toISOString(),
       updatedAt: r.updated_at ? new Date(r.updated_at).toISOString() : new Date().toISOString(),
     }));

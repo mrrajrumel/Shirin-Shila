@@ -172,15 +172,44 @@ Server-side authorization is enforced at every sensitive Route Handler and API b
 
 ---
 
-## 7. Functional Verification & Test Suite
+## 8. Password Change & Demo User Purge Hardening
 
-The authentication, RBAC hierarchy, user creation, and role change features were verified via automated execution of `test_role_and_user_mgmt.ts` (27 passed / 0 failed):
+### Root Cause Analysis: Stale Credentials & Lingering Demo Accounts
+1. **Password Change Disconnection from MySQL:**
+   - Previous password change implementations only updated the local JSON file on disk, without updating the MySQL `admin_users` table or incrementing a token version.
+   - If MySQL was authoritative or another process synchronized from MySQL or fallback seed, the old password hash persisted in the database and was restored.
+2. **Session Token Persistence After Password Modification:**
+   - Previous session tokens did not track a `tokenVersion`. Once a user changed their password, any existing signed session token remained valid until its 7-day expiration.
+3. **Demo Account Resynchronization:**
+   - Unpurged MySQL rows for test or demo users (e.g. `admin`, `raj`) were reloaded into memory during startup and re-synced into MySQL if `ensureAdminAccounts()` lacked an explicit deny-list.
+
+### Architectural Hardening Implemented
+1. **Atomic MySQL Password Updates (`updateDbUserPassword`):**
+   - Direct parameterized SQL query `UPDATE admin_users SET password_hash = ?, token_version = ?, updated_at = NOW() WHERE id = ?`.
+   - Both MySQL and persistent storage files (`admin-users.json` and seed fallback) are atomically updated upon password change.
+2. **Token Versioning (`tokenVersion`) & Instant Session Revocation:**
+   - Every user record contains an integer `tokenVersion` (default 1).
+   - HMAC-SHA256 session tokens now embed `tokenVersion`.
+   - When a password is changed, `tokenVersion` is incremented.
+   - `verifySessionToken()` rejects any token whose `tokenVersion` is less than the user's live `tokenVersion`.
+   - All older active sessions across all devices are immediately invalidated (HTTP 401).
+   - The active user's response receives a fresh cookie with the new `tokenVersion` so their immediate session continues seamlessly.
+3. **Comprehensive Demo Account Purge:**
+   - Explicit deny-list `FORBIDDEN_DEMO_NAMES` (`admin`, `raj`, `demo`, `test`, `demo_admin`, `test_manager`, `editor`) enforced at API, middleware, and storage levels.
+   - Database-level cleanup procedure `cleanDbDemoUsers()` purges any non-genuine accounts from MySQL `admin_users`.
+   - Attempting to register or create accounts with reserved demo names returns HTTP 400 Bad Request.
+
+---
+
+## 9. Functional Verification & Test Suite
+
+The authentication, RBAC hierarchy, user creation, password change security, and demo user purge features were verified via automated execution of `test_role_and_user_mgmt.ts` (**37 passed / 0 failed**):
 
 | Test Case | Execution Command | Result | Verification Detail |
 |---|---|---|---|
 | Account Initialization | `npx tsx test_role_and_user_mgmt.ts` | **PASS** | `ensureAdminAccounts()` initialized default accounts without data loss |
 | User Creation | `npx tsx test_role_and_user_mgmt.ts` | **PASS** | Created new manager user with bcrypt 10 rounds; `passwordHash` omitted from return |
-| Weak Password Rejection | `npx tsx test_role_and_user_mgmt.ts` | **PASS** | Passwords under 8 chars or without numbers rejected with descriptive error |
+| Reserved Username Rejection | `npx tsx test_role_and_user_mgmt.ts` | **PASS** | Usernames `admin` and `raj` rejected with descriptive reserved error |
 | Duplicate Username Guard | `npx tsx test_role_and_user_mgmt.ts` | **PASS** | Duplicate usernames rejected case-insensitively |
 | User Search & Role Filter | `npx tsx test_role_and_user_mgmt.ts` | **PASS** | Queries match username, display name, and role filter |
 | Role Promotion | `npx tsx test_role_and_user_mgmt.ts` | **PASS** | Promoted manager to admin; verified in return payload |
@@ -189,10 +218,16 @@ The authentication, RBAC hierarchy, user creation, and role change features were
 | RBAC Authorization Elevation | `npx tsx test_role_and_user_mgmt.ts` | **PASS** | Promoted user receives full administrator authorization |
 | Role Demotion | `npx tsx test_role_and_user_mgmt.ts` | **PASS** | Demoted admin back to manager |
 | Immediate Privilege Revocation | `npx tsx test_role_and_user_mgmt.ts` | **PASS** | Session immediately loses admin privileges on next check |
+| Password Change Execution | `npx tsx test_role_and_user_mgmt.ts` | **PASS** | Password changed with bcrypt verification and tokenVersion increment |
+| Old Password Invalidation | `npx tsx test_role_and_user_mgmt.ts` | **PASS** | Old password rejected immediately upon authentication attempt |
+| New Password Authentication | `npx tsx test_role_and_user_mgmt.ts` | **PASS** | New password authenticates successfully |
+| Old Session Token Revocation | `npx tsx test_role_and_user_mgmt.ts` | **PASS** | Old session token with obsolete tokenVersion rejected immediately |
+| Fresh Session Token Validity | `npx tsx test_role_and_user_mgmt.ts` | **PASS** | Fresh session token with updated tokenVersion accepted |
 | Last-Admin Protection | `npx tsx test_role_and_user_mgmt.ts` | **PASS** | Blocked demoting founder (`@Shirin`) or the last remaining administrator |
 | Self-Deletion Prevention | `npx tsx test_role_and_user_mgmt.ts` | **PASS** | Blocked self-deletion while logged in |
 | User Deletion | `npx tsx test_role_and_user_mgmt.ts` | **PASS** | Deleted test user cleanly from storage and MySQL |
 | Session Invalidation | `npx tsx test_role_and_user_mgmt.ts` | **PASS** | Deleted user session token immediately revoked (`verifySessionToken` returns null) |
-| Production Integrity | `npx tsx test_role_and_user_mgmt.ts` | **PASS** | Verified Shirin and Rumel accounts preserved |
+| Production Integrity | `npx tsx test_role_and_user_mgmt.ts` | **PASS** | Verified Shirin and Rumel accounts preserved exclusively |
+
 
 

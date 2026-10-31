@@ -50,7 +50,7 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json({ error: 'displayName is required' }, { status: 400 });
     }
 
-    const result = updateDisplayName(session.id, displayName);
+    const result = await updateDisplayName(session.id, displayName);
     if (!result.success) {
       return NextResponse.json({ error: result.error }, { status: 400 });
     }
