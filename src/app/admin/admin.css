@@ -470,6 +470,13 @@
   background: #e2e8f0;
 }
 
+.adm-topbar-search-spinner {
+  position: absolute;
+  right: 12px;
+  color: var(--tail-primary);
+  pointer-events: none;
+}
+
 .adm-search-dropdown {
   position: absolute;
   top: calc(100% + 8px);
@@ -480,21 +487,50 @@
   border-radius: 10px;
   box-shadow: 0 16px 36px -6px rgba(15, 23, 42, 0.18);
   z-index: 100;
-  max-height: 400px;
+  max-height: 420px;
   overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
   padding: 6px;
+}
+
+.adm-search-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 10px 4px 10px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #64748b;
+  border-bottom: 1px solid #f1f5f9;
+  margin-bottom: 4px;
+}
+
+.adm-search-section:not(:first-child) .adm-search-section-header {
+  margin-top: 8px;
+}
+
+.adm-search-section-count {
+  font-size: 9px;
+  font-weight: 700;
+  padding: 1px 6px;
+  background: #f1f5f9;
+  border-radius: 10px;
+  color: #475569;
 }
 
 .adm-search-item {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 10px 12px;
+  padding: 8px 10px;
   border-radius: 6px;
   text-decoration: none;
   color: #1c2434;
   transition: all 0.12s ease;
   cursor: pointer;
+  min-height: 44px;
 }
 
 .adm-search-item:hover,
@@ -502,9 +538,19 @@
   background: #eff2f7;
 }
 
+.adm-search-item-thumb {
+  width: 34px;
+  height: 34px;
+  border-radius: 6px;
+  object-fit: cover;
+  flex-shrink: 0;
+  background: #e2e8f0;
+  border: 1px solid #cbd5e1;
+}
+
 .adm-search-item-icon {
-  width: 32px;
-  height: 32px;
+  width: 34px;
+  height: 34px;
   border-radius: 6px;
   background: #f1f5f9;
   display: flex;
@@ -531,6 +577,13 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 8px;
+}
+
+.adm-search-item-title span:first-child {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .adm-search-item-desc {
@@ -552,6 +605,7 @@
   border-radius: 4px;
   background: #f8fafc;
   border: 1px solid #e2e8f0;
+  flex-shrink: 0;
 }
 
 /* TailAdmin Page Header Action Bar (Inside Pages) */
@@ -1162,9 +1216,9 @@
     box-shadow: none;
     padding: 0 0 14px 0;
     margin-bottom: 12px;
-    flex-direction: row;
-    align-items: center;
-    justify-content: space-between;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
   }
 
   .adm-header .adm-header-title {
@@ -1173,9 +1227,23 @@
 
   .adm-header-actions {
     width: 100%;
-    justify-content: flex-end;
+    justify-content: flex-start;
     flex-wrap: wrap;
     gap: 8px;
+  }
+
+  .adm-search-dropdown {
+    position: fixed;
+    top: 66px;
+    left: 12px;
+    right: 12px;
+    width: auto;
+    max-height: calc(100dvh - 84px);
+    z-index: 9999;
+    box-shadow: 0 20px 40px -4px rgba(15, 23, 42, 0.28);
+    -webkit-overflow-scrolling: touch;
+    overflow-y: auto;
+    border-radius: 12px;
   }
 
   .adm-content {
@@ -1198,6 +1266,13 @@
     max-width: none;
     margin: 0 8px;
     flex: 1;
+  }
+
+  .adm-search-dropdown {
+    top: 62px;
+    left: 10px;
+    right: 10px;
+    max-height: calc(100dvh - 76px);
   }
 
   .adm-topbar-search-input {
@@ -1265,5 +1340,56 @@
   .adm-btn {
     padding: 8px 14px;
     font-size: 12.5px;
+  }
+}
+
+@media (max-width: 480px) {
+  .adm-topbar {
+    padding: 0 10px;
+    height: 56px;
+  }
+
+  .adm-topbar-search {
+    margin: 0 6px;
+  }
+
+  .adm-topbar-search-input {
+    font-size: 13px;
+    height: 34px;
+    padding-left: 28px;
+  }
+
+  .adm-search-dropdown {
+    top: 58px;
+    left: 8px;
+    right: 8px;
+    max-height: calc(100dvh - 70px);
+    padding: 4px;
+  }
+
+  .adm-search-item {
+    padding: 8px 8px;
+    gap: 8px;
+  }
+
+  .adm-search-item-title {
+    font-size: 13px;
+  }
+
+  .adm-search-item-desc {
+    font-size: 11px;
+  }
+
+  .adm-header .adm-header-title {
+    font-size: 16px;
+  }
+
+  .adm-content {
+    padding: 10px 8px 36px;
+  }
+
+  .adm-table-wrap {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
   }
 }

@@ -29,6 +29,8 @@ import {
   PanelLeftOpen,
   Search,
   Command,
+  Loader2,
+  Database,
 } from "lucide-react";
 import "./admin.css";
 
@@ -40,6 +42,16 @@ interface SearchableModule {
   keywords: string[];
   icon: any;
   adminOnly?: boolean;
+}
+
+interface DbSearchResultItem {
+  id: string;
+  title: string;
+  subtitle: string;
+  category: string;
+  url: string;
+  image?: string;
+  type: 'record';
 }
 
 const ALL_SEARCHABLE_MODULES: SearchableModule[] = [
@@ -197,6 +209,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const [searchQuery, setSearchQuery] = useState("");
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [selectedSearchIndex, setSelectedSearchIndex] = useState(0);
+  const [dbResults, setDbResults] = useState<DbSearchResultItem[]>([]);
+  const [isSearchingDb, setIsSearchingDb] = useState(false);
   const searchContainerRef = useRef<HTMLDivElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
 
@@ -252,7 +266,36 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     setIsSidebarOpen(false);
     setIsSearchOpen(false);
     setSearchQuery("");
+    setDbResults([]);
+    setIsSearchingDb(false);
   }, [pathname]);
+
+  // Debounced live database search when query >= 2 characters
+  useEffect(() => {
+    const q = searchQuery.trim();
+    if (q.length < 2) {
+      setDbResults([]);
+      setIsSearchingDb(false);
+      return;
+    }
+
+    setIsSearchingDb(true);
+    const timer = setTimeout(async () => {
+      try {
+        const res = await fetch(`/api/admin/search?q=${encodeURIComponent(q)}`);
+        if (res.ok) {
+          const data = await res.json();
+          setDbResults(data.items || []);
+        }
+      } catch {
+        // Ignore network errors or aborted searches
+      } finally {
+        setIsSearchingDb(false);
+      }
+    }, 200);
+
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
 
   // Global hotkeys (Ctrl+K, Escape) and click-outside listener
   useEffect(() => {
@@ -378,9 +421,14 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     );
   });
 
-  const navigateToModule = (href: string) => {
+  const totalModules = filteredModules.length;
+  const totalDbResults = dbResults.length;
+  const totalItems = totalModules + totalDbResults;
+
+  const navigateToDestination = (href: string) => {
     setIsSearchOpen(false);
     setSearchQuery("");
+    setDbResults([]);
     router.push(href);
   };
 
@@ -388,17 +436,24 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     if (e.key === "ArrowDown") {
       e.preventDefault();
       setSelectedSearchIndex((prev) =>
-        prev < filteredModules.length - 1 ? prev + 1 : 0
+        prev < totalItems - 1 ? prev + 1 : 0
       );
     } else if (e.key === "ArrowUp") {
       e.preventDefault();
       setSelectedSearchIndex((prev) =>
-        prev > 0 ? prev - 1 : Math.max(0, filteredModules.length - 1)
+        prev > 0 ? prev - 1 : Math.max(0, totalItems - 1)
       );
     } else if (e.key === "Enter") {
       e.preventDefault();
-      if (filteredModules[selectedSearchIndex]) {
-        navigateToModule(filteredModules[selectedSearchIndex].href);
+      if (selectedSearchIndex < totalModules) {
+        if (filteredModules[selectedSearchIndex]) {
+          navigateToDestination(filteredModules[selectedSearchIndex].href);
+        }
+      } else {
+        const dbIdx = selectedSearchIndex - totalModules;
+        if (dbResults[dbIdx]) {
+          navigateToDestination(dbResults[dbIdx].url);
+        }
       }
     }
   };
@@ -560,7 +615,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 ref={searchInputRef}
                 type="text"
                 className="adm-topbar-search-input"
-                placeholder="Quick search modules (Ctrl+K)..."
+                placeholder="Search modules & records (Ctrl+K)..."
                 value={searchQuery}
                 onChange={(e) => {
                   setSearchQuery(e.target.value);
@@ -569,12 +624,17 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 }}
                 onFocus={() => setIsSearchOpen(true)}
                 onKeyDown={handleSearchKeyDown}
-                aria-label="Quick search admin modules"
+                aria-label="Quick search admin modules and database records"
               />
-              {searchQuery ? (
+              {isSearchingDb ? (
+                <Loader2 size={14} className="adm-topbar-search-spinner animate-spin" />
+              ) : searchQuery ? (
                 <button
                   type="button"
-                  onClick={() => setSearchQuery("")}
+                  onClick={() => {
+                    setSearchQuery("");
+                    setDbResults([]);
+                  }}
                   className="adm-topbar-search-clear"
                   aria-label="Clear search"
                 >
@@ -590,41 +650,122 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             {/* Quick Search Dropdown */}
             {isSearchOpen && (searchQuery.trim().length > 0 || isSearchOpen) && (
               <div className="adm-search-dropdown">
-                {filteredModules.length === 0 ? (
+                {totalItems === 0 ? (
                   <div
                     style={{
-                      padding: "16px 14px",
+                      padding: "18px 14px",
                       textAlign: "center",
                       color: "#64748b",
                       fontSize: 13,
                     }}
                   >
-                    No admin modules matched &quot;{searchQuery}&quot;
+                    {isSearchingDb ? (
+                      <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
+                        <Loader2 size={16} className="animate-spin text-primary" />
+                        <span>Searching database &amp; modules...</span>
+                      </div>
+                    ) : (
+                      <>No admin modules or database records matched &quot;{searchQuery}&quot;</>
+                    )}
                   </div>
                 ) : (
-                  filteredModules.map((mod, index) => {
-                    const ModIcon = mod.icon;
-                    const isSelected = index === selectedSearchIndex;
-                    return (
-                      <div
-                        key={mod.href}
-                        className={`adm-search-item ${isSelected ? "is-selected" : ""}`}
-                        onClick={() => navigateToModule(mod.href)}
-                        onMouseEnter={() => setSelectedSearchIndex(index)}
-                      >
-                        <div className="adm-search-item-icon">
-                          <ModIcon size={16} />
+                  <>
+                    {/* Navigation Modules Section */}
+                    {totalModules > 0 && (
+                      <div className="adm-search-section">
+                        <div className="adm-search-section-header">
+                          <span>Navigation Modules</span>
+                          <span className="adm-search-section-count">{totalModules}</span>
                         </div>
-                        <div className="adm-search-item-info">
-                          <div className="adm-search-item-title">
-                            <span>{mod.label}</span>
-                            <span className="adm-search-item-group">{mod.group}</span>
-                          </div>
-                          <div className="adm-search-item-desc">{mod.description}</div>
-                        </div>
+                        {filteredModules.map((mod, index) => {
+                          const ModIcon = mod.icon;
+                          const isSelected = index === selectedSearchIndex;
+                          return (
+                            <div
+                              key={mod.href}
+                              className={`adm-search-item ${isSelected ? "is-selected" : ""}`}
+                              onClick={() => navigateToDestination(mod.href)}
+                              onMouseEnter={() => setSelectedSearchIndex(index)}
+                            >
+                              <div className="adm-search-item-icon">
+                                <ModIcon size={16} />
+                              </div>
+                              <div className="adm-search-item-info">
+                                <div className="adm-search-item-title">
+                                  <span>{mod.label}</span>
+                                  <span className="adm-search-item-group">{mod.group}</span>
+                                </div>
+                                <div className="adm-search-item-desc">{mod.description}</div>
+                              </div>
+                            </div>
+                          );
+                        })}
                       </div>
-                    );
-                  })
+                    )}
+
+                    {/* Database & Content Records Section */}
+                    {totalDbResults > 0 && (
+                      <div className="adm-search-section">
+                        <div className="adm-search-section-header">
+                          <span>Database &amp; Content Records</span>
+                          <span className="adm-search-section-count">{totalDbResults}</span>
+                        </div>
+                        {dbResults.map((rec, index) => {
+                          const itemIndex = totalModules + index;
+                          const isSelected = itemIndex === selectedSearchIndex;
+                          return (
+                            <div
+                              key={rec.id}
+                              className={`adm-search-item ${isSelected ? "is-selected" : ""}`}
+                              onClick={() => navigateToDestination(rec.url)}
+                              onMouseEnter={() => setSelectedSearchIndex(itemIndex)}
+                            >
+                              {rec.image ? (
+                                <img
+                                  src={rec.image}
+                                  alt=""
+                                  className="adm-search-item-thumb"
+                                  onError={(e) => {
+                                    (e.currentTarget as HTMLElement).style.display = 'none';
+                                  }}
+                                />
+                              ) : (
+                                <div className="adm-search-item-icon">
+                                  <Database size={15} />
+                                </div>
+                              )}
+                              <div className="adm-search-item-info">
+                                <div className="adm-search-item-title">
+                                  <span style={{ fontWeight: 600, color: "#0f172a" }}>{rec.title}</span>
+                                  <span className="adm-search-item-group">{rec.category}</span>
+                                </div>
+                                <div className="adm-search-item-desc">{rec.subtitle}</div>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
+
+                    {/* Live searching status hint if background DB search is still querying */}
+                    {isSearchingDb && (
+                      <div
+                        style={{
+                          padding: "8px 12px",
+                          borderTop: "1px solid #f1f5f9",
+                          fontSize: 11,
+                          color: "#64748b",
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 6,
+                          justifyContent: "center",
+                        }}
+                      >
+                        <Loader2 size={12} className="animate-spin text-primary" />
+                        <span>Updating live database records...</span>
+                      </div>
+                    )}
+                  </>
                 )}
               </div>
             )}

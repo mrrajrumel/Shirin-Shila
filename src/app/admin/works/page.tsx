@@ -27,6 +27,15 @@ export default function AdminWorksPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(true);
 
+  // Auto-populate search from query param (?q=...)
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      const q = params.get('q');
+      if (q) setSearchQuery(q);
+    }
+  }, []);
+
   // Modal / Form state
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<ProjectItem | null>(null);
@@ -287,7 +296,7 @@ export default function AdminWorksPage() {
       <main className="adm-content">
         {/* Filter bar & Search */}
         <div style={{ display: 'flex', gap: '12px', alignItems: 'center', marginBottom: '20px', flexWrap: 'wrap' }}>
-          <div style={{ display: 'flex', gap: '6px', overflowX: 'auto', flex: 1 }}>
+          <div style={{ display: 'flex', gap: '6px', overflowX: 'auto', WebkitOverflowScrolling: 'touch', paddingBottom: '4px', flex: '1 1 280px' }}>
             {filmographyCategories.map((cat) => (
               <button
                 key={cat}
@@ -300,7 +309,7 @@ export default function AdminWorksPage() {
             ))}
           </div>
 
-          <div style={{ width: '260px', position: 'relative' }}>
+          <div style={{ width: '100%', maxWidth: '320px', minWidth: '180px', position: 'relative', flex: '1 1 200px' }}>
             <input
               type="text"
               className="adm-input"

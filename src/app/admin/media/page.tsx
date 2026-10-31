@@ -31,6 +31,15 @@ export default function AdminMediaPage() {
   const [selectedFolder, setSelectedFolder] = useState<string>("all");
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
+
+  // Auto-populate search from query param (?q=...)
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      const q = params.get("q");
+      if (q) setSearch(q);
+    }
+  }, []);
   const [refreshing, setRefreshing] = useState(false);
   const [copiedUrl, setCopiedUrl] = useState<string | null>(null);
 

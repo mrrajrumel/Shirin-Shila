@@ -38,6 +38,15 @@ export default function AdminTimelinePage() {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
 
+  // Auto-populate search from query param (?q=...)
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      const q = params.get('q');
+      if (q) setSearchQuery(q);
+    }
+  }, []);
+
   // Modal / Form state
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<JourneyItem | null>(null);
@@ -238,7 +247,7 @@ export default function AdminTimelinePage() {
             flexWrap: 'wrap',
           }}
         >
-          <div style={{ position: 'relative', width: '320px' }}>
+          <div style={{ position: 'relative', width: '100%', maxWidth: '320px', minWidth: '180px', flex: '1 1 220px' }}>
             <input
               type="text"
               className="adm-input"
@@ -259,7 +268,7 @@ export default function AdminTimelinePage() {
             />
           </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
             <span
               className="adm-badge adm-badge-green"
               style={{ padding: '6px 12px', fontSize: '12px' }}

@@ -23,6 +23,15 @@ export default function AdminInquiriesPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(true);
 
+  // Auto-populate search from query param (?q=...)
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      const q = params.get('q');
+      if (q) setSearchQuery(q);
+    }
+  }, []);
+
   // Detail / Notes modal
   const [selectedInquiry, setSelectedInquiry] = useState<InquiryItem | null>(null);
   const [notesInput, setNotesInput] = useState('');
@@ -138,7 +147,7 @@ export default function AdminInquiriesPage() {
       <main className="adm-content">
         {/* Status filters and Search Bar */}
         <div style={{ display: 'flex', gap: '12px', alignItems: 'center', marginBottom: '20px', flexWrap: 'wrap' }}>
-          <div style={{ display: 'flex', gap: '6px' }}>
+          <div style={{ display: 'flex', gap: '6px', overflowX: 'auto', WebkitOverflowScrolling: 'touch', paddingBottom: '2px', flexWrap: 'wrap' }}>
             {['All', 'New', 'Read', 'Replied'].map((st) => (
               <button
                 key={st}
@@ -154,7 +163,7 @@ export default function AdminInquiriesPage() {
             ))}
           </div>
 
-          <div style={{ width: '280px', position: 'relative', marginLeft: 'auto' }}>
+          <div style={{ width: '100%', maxWidth: '320px', minWidth: '180px', position: 'relative', marginLeft: 'auto', flex: '1 1 200px' }}>
             <input
               type="text"
               className="adm-input"

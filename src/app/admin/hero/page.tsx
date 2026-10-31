@@ -187,6 +187,7 @@ export default function AdminHeroPage() {
                     style={{
                       position: 'relative',
                       width: '220px',
+                      maxWidth: '100%',
                       height: '280px',
                       margin: '0 auto 16px',
                       borderRadius: '12px',

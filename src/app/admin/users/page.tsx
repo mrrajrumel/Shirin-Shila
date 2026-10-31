@@ -38,6 +38,15 @@ export default function AdminUsersPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [roleFilter, setRoleFilter] = useState<string>("all");
 
+  // Auto-populate search from query param (?q=...)
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      const q = params.get("q");
+      if (q) setSearchQuery(q);
+    }
+  }, []);
+
   // Create User Modal state
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [newUsername, setNewUsername] = useState("");
@@ -336,7 +345,7 @@ export default function AdminUsersPage() {
           }}
         >
           {/* Search Field */}
-          <div style={{ position: "relative", minWidth: 260, flex: "1 1 300px" }}>
+          <div style={{ position: "relative", width: "100%", maxWidth: 360, minWidth: 160, flex: "1 1 200px" }}>
             <Search
               size={16}
               style={{
