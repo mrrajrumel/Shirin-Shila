@@ -406,25 +406,32 @@
   position: relative;
   display: flex;
   align-items: center;
+  width: 100%;
 }
 
 .adm-topbar-search-input {
   width: 100%;
-  background: #f1f5f9;
+  background: #ffffff;
   border: 1px solid #cbd5e1;
-  border-radius: 8px;
+  border-radius: 10px;
   padding: 8px 38px 8px 36px;
-  font-size: 13px;
-  color: #1c2434;
+  font-size: 14px;
+  font-weight: 500;
+  color: #0f172a;
   outline: none;
   transition: all 0.18s ease;
-  height: 38px;
+  height: 40px;
+}
+
+.adm-topbar-search-input::placeholder {
+  color: #94a3b8;
+  font-size: 13.5px;
 }
 
 .adm-topbar-search-input:focus {
   background: #ffffff;
   border-color: var(--tail-primary);
-  box-shadow: 0 0 0 3px rgba(60, 80, 224, 0.12);
+  box-shadow: 0 0 0 3px rgba(60, 80, 224, 0.14);
 }
 
 .adm-topbar-search-icon {
@@ -1195,19 +1202,52 @@
     z-index: 999;
   }
 
+  .adm-header-left {
+    flex-shrink: 0;
+  }
+
   .adm-hamburger-btn {
     display: flex;
+    width: 40px;
+    height: 40px;
+    min-width: 40px;
+    padding: 0;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
   }
 
   .adm-topbar {
     padding: 0 16px;
     height: 64px;
+    gap: 12px;
   }
 
   .adm-topbar-search {
-    max-width: 280px;
-    margin: 0 8px;
+    max-width: none;
+    margin: 0;
     flex: 1;
+    min-width: 0;
+  }
+
+  .adm-topbar-search-input {
+    height: 42px;
+    font-size: 15px;
+    font-weight: 500;
+    padding: 8px 38px 8px 38px;
+    background: #ffffff;
+    border: 1.5px solid #cbd5e1;
+    border-radius: 10px;
+    color: #0f172a;
+  }
+
+  .adm-topbar-actions {
+    width: auto !important;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0 !important;
   }
 
   .adm-header {
@@ -1258,37 +1298,79 @@
 
 @media (max-width: 640px) {
   .adm-topbar {
-    padding: 0 14px;
-    height: 60px;
+    padding: 0 12px;
+    height: 62px;
+    gap: 10px;
   }
 
   .adm-topbar-search {
     max-width: none;
-    margin: 0 8px;
+    margin: 0;
     flex: 1;
+    min-width: 0;
+  }
+
+  .adm-topbar-search-input-wrap {
+    width: 100%;
   }
 
   .adm-search-dropdown {
-    top: 62px;
+    top: 64px;
     left: 10px;
     right: 10px;
     max-height: calc(100dvh - 76px);
   }
 
   .adm-topbar-search-input {
-    padding: 6px 10px 6px 30px;
-    font-size: 12px;
-    height: 34px;
+    padding: 8px 36px 8px 36px;
+    font-size: 15px;
+    font-weight: 500;
+    height: 42px;
+    background: #ffffff;
+    border: 1.5px solid #cbd5e1;
+    border-radius: 10px;
+    color: #0f172a;
+    -webkit-appearance: none;
+  }
+
+  .adm-topbar-search-input::placeholder {
+    color: #94a3b8;
+    font-size: 13.5px;
   }
 
   .adm-topbar-search-icon {
-    left: 8px;
-    width: 14px;
-    height: 14px;
+    left: 11px;
+    width: 16px;
+    height: 16px;
+    color: #64748b;
   }
 
   .adm-topbar-search-kbd {
     display: none !important;
+  }
+
+  .adm-topbar-search-clear {
+    right: 8px;
+    width: 26px;
+    height: 26px;
+    color: #64748b;
+  }
+
+  .adm-topbar-actions {
+    width: auto !important;
+    flex-shrink: 0;
+    margin: 0;
+  }
+
+  .adm-topbar-actions .adm-btn {
+    width: 40px;
+    height: 40px;
+    min-width: 40px;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
   }
 
   .adm-header-title {
@@ -1346,38 +1428,81 @@
 @media (max-width: 480px) {
   .adm-topbar {
     padding: 0 10px;
-    height: 56px;
-  }
-
-  .adm-topbar-search {
-    margin: 0 6px;
-  }
-
-  .adm-topbar-search-input {
-    font-size: 13px;
-    height: 34px;
-    padding-left: 28px;
-  }
-
-  .adm-search-dropdown {
-    top: 58px;
-    left: 8px;
-    right: 8px;
-    max-height: calc(100dvh - 70px);
-    padding: 4px;
-  }
-
-  .adm-search-item {
-    padding: 8px 8px;
+    height: 60px;
     gap: 8px;
   }
 
-  .adm-search-item-title {
+  .adm-hamburger-btn {
+    width: 38px;
+    height: 38px;
+    min-width: 38px;
+    padding: 0;
+  }
+
+  .adm-topbar-search {
+    margin: 0;
+    flex: 1;
+    min-width: 0;
+  }
+
+  .adm-topbar-search-input {
+    font-size: 15px;
+    font-weight: 500;
+    height: 42px;
+    padding: 8px 32px 8px 34px;
+    background: #ffffff;
+    border: 1.5px solid #cbd5e1;
+    border-radius: 10px;
+    color: #0f172a;
+    -webkit-appearance: none;
+  }
+
+  .adm-topbar-search-input::placeholder {
+    color: #94a3b8;
     font-size: 13px;
   }
 
+  .adm-topbar-search-icon {
+    left: 10px;
+    width: 15px;
+    height: 15px;
+    color: #64748b;
+  }
+
+  .adm-topbar-search-clear {
+    right: 6px;
+    width: 26px;
+    height: 26px;
+  }
+
+  .adm-topbar-actions .adm-btn {
+    width: 38px;
+    height: 38px;
+    min-width: 38px;
+    padding: 0;
+  }
+
+  .adm-search-dropdown {
+    top: 62px;
+    left: 8px;
+    right: 8px;
+    max-height: calc(100dvh - 72px);
+    padding: 6px;
+    border-radius: 12px;
+  }
+
+  .adm-search-item {
+    padding: 9px 10px;
+    gap: 10px;
+    min-height: 46px;
+  }
+
+  .adm-search-item-title {
+    font-size: 13.5px;
+  }
+
   .adm-search-item-desc {
-    font-size: 11px;
+    font-size: 11.5px;
   }
 
   .adm-header .adm-header-title {

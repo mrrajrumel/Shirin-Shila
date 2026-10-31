@@ -616,7 +616,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 ref={searchInputRef}
                 type="text"
                 className="adm-topbar-search-input"
-                placeholder="Search modules & records (Ctrl+K)..."
+                placeholder="Search admin..."
                 value={searchQuery}
                 onChange={(e) => {
                   setSearchQuery(e.target.value);
@@ -774,7 +774,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           </div>
 
           {/* Header Right Actions */}
-          <div className="adm-header-actions">
+          <div className="adm-header-actions adm-topbar-actions">
             <button
               type="button"
               onClick={handleLogout}
