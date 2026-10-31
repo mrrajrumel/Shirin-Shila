@@ -131,3 +131,4 @@ A controlled test procedure was performed to verify that deletions are permanent
 | `src/app/api/timeline/route.ts` | Implemented permanent `deletedIds` tracking on `DELETE`, cleaned `milestones`, returned `deletedIds` on `GET`, updated `POST` to un-track |
 | `src/app/page.tsx` | Added `timelineLoadedFromStore` guard; prevented false fallback to seed defaults on empty arrays |
 | `src/components/career-journey-timeline.tsx` | Honored `loaded: true` and `deletedIds` from server API; prevented optimistic fallback to initial props |
+

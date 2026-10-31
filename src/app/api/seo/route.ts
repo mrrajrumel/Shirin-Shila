@@ -15,13 +15,26 @@ function checkAuth(request: NextRequest): boolean {
 export async function GET() {
   try {
     const seo = await readStore<SiteSeoData>('seo');
+    const rawLinks =
+      seo?.footerLinks && Array.isArray(seo.footerLinks) && seo.footerLinks.length > 0
+        ? seo.footerLinks
+        : defaultFooterLinks;
+
+    // Filter out obsolete About and Contact links from footer
+    const cleanFooterLinks = rawLinks.filter(
+      (l: any) =>
+        l.id !== 'about' &&
+        l.id !== 'contact' &&
+        l.href !== '/about' &&
+        l.href !== '/contact' &&
+        l.href !== '/#about' &&
+        l.href !== '/#contact'
+    );
+
     const merged: SiteSeoData = {
       ...defaultSeoData,
       ...(seo || {}),
-      footerLinks:
-        seo?.footerLinks && Array.isArray(seo.footerLinks) && seo.footerLinks.length > 0
-          ? seo.footerLinks
-          : defaultFooterLinks,
+      footerLinks: cleanFooterLinks,
     };
 
     return NextResponse.json(
@@ -47,6 +60,15 @@ export async function POST(request: NextRequest) {
     if (body.footerLinks && Array.isArray(body.footerLinks)) {
       updatedFooterLinks = body.footerLinks
         .filter((link: any) => link && typeof link.label === 'string' && typeof link.href === 'string')
+        .filter(
+          (l: any) =>
+            l.id !== 'about' &&
+            l.id !== 'contact' &&
+            l.href !== '/about' &&
+            l.href !== '/contact' &&
+            l.href !== '/#about' &&
+            l.href !== '/#contact'
+        )
         .map((link: any, index: number) => ({
           id: String(link.id || `link-${index}`),
           label: String(link.label).trim(),

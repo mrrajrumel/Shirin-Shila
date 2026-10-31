@@ -81,3 +81,4 @@ The interface adheres to a consistent, high-contrast dark palette designed for e
    * All form fields possess explicit `<label>` tags.
    * Input placeholders provide contextual guidance without replacing labels.
    * Focus states are clearly visible for keyboard navigation.
+

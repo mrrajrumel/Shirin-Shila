@@ -120,3 +120,7 @@ For each admin-managed feature, data flows along a secure, transactional path:
 | **Terms Email Statement** | Hardcoded `Questions regarding representation terms? Contact booking@shirinshila.com` | Completely removed from `src/app/terms/page.tsx`, `src/data/pages.ts`, and `src/data/store/pages.json` | **PASS** |
 | **User Profile & Password Management** | No self-service console existed for authenticated users | Created `/admin/profile`, `/api/auth/profile`, and `/api/auth/change-password` with bcrypt verification | **PASS** |
 | **Role-Based Access Control (RBAC)** | All accounts possessed equal, unsegmented admin privileges | Introduced `admin` vs. `manager` roles, added server-side `hasMinimumRole()` guard, protected backups & user registry | **PASS** |
+| **Critical Footer Cleanup** | Footer previously displayed obsolete links to About and Contact | Completely removed `About` and `Contact and Book` from `src/data/footer.ts`, `src/data/seo.ts`, `src/data/store/seo.json`, and `src/components/footer.tsx`; footer exclusively renders `Privacy Policy` and `Terms of Representation` | **PASS** |
+| **Media Picker & TV Logos** | Previous TV logos workflow required manual path entry | Implemented automatic media library fetching on modal open, multi-image upload, and one-click asset selection without manual URL typing | **PASS** |
+| **.htaccess Evaluation** | Hostinger server architecture question | Evaluated native Node.js process behind OpenLiteSpeed reverse proxy; verified `.htaccess` is unnecessary and omitted to prevent rewrite conflicts | **PASS** |
+

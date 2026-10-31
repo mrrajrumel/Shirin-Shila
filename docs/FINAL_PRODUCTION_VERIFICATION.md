@@ -14,10 +14,12 @@
 ### 1.1 Page Removal & URL Architecture
 - [x] **Standalone `/about` page removed:** `src/app/about` route deleted; 308 permanent redirect configured to `/#about`.
 - [x] **Standalone `/contact` page removed:** `src/app/contact` route deleted; 308 permanent redirect configured to `/#contact`.
+- [x] **Critical Footer Fix (About & Contact removed from footer):** `About` and `Contact and Book` completely removed from all footer sources (`src/data/footer.ts`, `src/data/seo.ts`, `src/data/store/seo.json`, `src/components/footer.tsx`). The footer exclusively renders `Privacy Policy` and `Terms of Representation`.
 - [x] **Admin controls removed for obsolete pages:** `PAGE_KEYS` in `/admin/pages` updated to exclude `about` and `contact`; obsolete portrait uploader and turnaround forms purged.
 - [x] **Homepage About section verified:** `#about` anchor active on homepage; renders bio story, film counters, and prestige milestones.
 - [x] **Homepage Contact section verified:** `#contact` anchor active on homepage; renders talent management desk, telephone/email portals, and functional inquiry form.
-- [x] **Navigation and internal links updated:** No broken links; `src/data/footer.ts`, `src/data/seo.ts`, `src/app/sitemap.ts`, `src/app/layout.tsx`, and `src/app/llms-full.txt/route.ts` updated to anchor links.
+- [x] **Navigation and internal links updated:** No broken links; sitemap, layout, and machine manifests updated to anchor links.
+- [x] **.htaccess Architectural Evaluation:** Evaluated Hostinger Node.js architecture; omitted redundant `.htaccess` because reverse proxy and Next.js natively handle all routing, headers, and HTTPS.
 
 ### 1.2 Legal Content Cleanup
 - [x] **Privacy Policy email statement removed:** `Data inquiries: privacy@shirinshila.com` purged from `src/app/privacy/page.tsx`, `src/data/pages.ts`, and `src/data/store/pages.json`.
@@ -77,3 +79,4 @@
 2. **Codebase Rollback:**
    * Safe rollback commit point established in Git history.
    * `git revert` or redeploy of previous release hash on Hostinger dashboard.
+

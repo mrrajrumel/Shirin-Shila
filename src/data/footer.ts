@@ -14,8 +14,6 @@ export interface FooterData {
 }
 
 export const defaultFooterLinks: FooterLink[] = [
-  { label: "About Us", href: "/#about" },
-  { label: "Contact and Book", href: "/#contact" },
   { label: "Privacy Policy", href: "/privacy" },
   { label: "Terms of Representation", href: "/terms" },
 ];

@@ -50,7 +50,7 @@ app.prepare().then(() => {
 
       // Explicit robots.txt handler with Content-Signal & Sitemap directives
       if (pathname === '/robots.txt') {
-        const canonicalUrl = (process.env.SITE_URL || process.env.APP_URL || 'https://cornflowerblue-wildcat-675604.hostingersite.com').replace(/\/+$/, '');
+        const canonicalUrl = (process.env.SITE_URL || process.env.APP_URL || 'https://shirinshila.com').replace(/\/+$/, '');
         const robotsContent = `# Robots.txt for Shirin Shila Portfolio
 User-agent: *
 Allow: /

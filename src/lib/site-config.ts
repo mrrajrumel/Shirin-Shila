@@ -6,7 +6,9 @@ import { SiteSeoData, defaultSeoData, defaultFooterLinks, FooterLinkItem } from 
  * When permanent domain (e.g. shirinshila.com) is attached or configured,
  * it is overridden automatically via environment variable or Admin Panel setting.
  */
-export const DEFAULT_FALLBACK_SITE_URL = 'https://cornflowerblue-wildcat-675604.hostingersite.com';
+export const PRIMARY_PRODUCTION_SITE_URL = 'https://shirinshila.com';
+export const DEFAULT_FALLBACK_SITE_URL = 'https://shirinshila.com';
+export const HOSTINGER_STAGING_PREVIEW_URL = 'https://cornflowerblue-wildcat-675604.hostingersite.com';
 export const DEFAULT_CONTENT_SIGNAL = 'search=yes, ai-train=no';
 
 /**
@@ -125,12 +127,9 @@ export async function getContentSignal(): Promise<string> {
 
 /**
  * Resolves the active footer links configured in Admin Panel.
- * Falls back to default approved 5 links:
- * - About Actor (/about)
- * - Contact and Book (/contact)
+ * Falls back to default approved legal links:
  * - Privacy Policy (/privacy)
  * - Terms of Representation (/terms)
- * - llms.txt (/llms.txt)
  */
 export async function getEffectiveFooterLinks(): Promise<FooterLinkItem[]> {
   try {
@@ -138,6 +137,7 @@ export async function getEffectiveFooterLinks(): Promise<FooterLinkItem[]> {
     if (seo?.footerLinks && Array.isArray(seo.footerLinks) && seo.footerLinks.length > 0) {
       return seo.footerLinks
         .filter((l) => l.isVisible !== false)
+        .filter((l) => l.id !== 'about' && l.id !== 'contact' && l.href !== '/about' && l.href !== '/contact' && l.href !== '/#about' && l.href !== '/#contact')
         .sort((a, b) => (a.order || 0) - (b.order || 0));
     }
   } catch {}

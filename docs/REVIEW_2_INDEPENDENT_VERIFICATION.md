@@ -22,7 +22,7 @@ Following the full system repair and page retirement in Review 1, a second indep
 | **3** | Homepage About section functional | `AboutSection` (`src/components/one-page-about.tsx`) loaded in `src/app/page.tsx` with ID `about`. Displays biography story, prestige highlights, and verified stats. | **PASS** |
 | **4** | Homepage Contact section functional | `ContactSection` (`src/components/one-page-contact.tsx`) loaded with ID `contact`. Full talent booking desk, interactive inquiry form, and telephone/email links operational. | **PASS** |
 | **5** | Admin Page Management controls cleaned | `PAGE_KEYS` in `src/app/admin/pages/page.tsx` reduced to `privacy`, `terms`, and `llms`. Obsolete about portrait uploader and contact forms removed from Page Management. | **PASS** |
-| **6** | No broken internal links to removed pages | Grepped entire `src/` tree. Updated `src/data/footer.ts`, `src/data/seo.ts`, `src/app/sitemap.ts`, `src/app/layout.tsx`, and `src/app/llms-full.txt/route.ts` to use `/#about` and `/#contact`. | **PASS** |
+| **6** | Footer links cleaned (About & Contact removed) | Completely removed `About` and `Contact and Book` from `src/data/footer.ts`, `src/data/seo.ts`, `src/data/store/seo.json`, and `src/components/footer.tsx`. Footer exclusively displays `Privacy Policy` and `Terms of Representation`. Homepage sections remain accessible via header anchor links `/#about` and `/#contact`. | **PASS** |
 | **7** | Privacy Policy email statement removed | `Data inquiries: privacy@shirinshila.com` removed from `src/app/privacy/page.tsx` footer, `src/data/pages.ts`, and `src/data/store/pages.json`. | **PASS** |
 | **8** | Terms email statement removed | `Questions regarding representation terms? Contact booking@shirinshila.com` removed from `src/app/terms/page.tsx` footer, `src/data/pages.ts`, and `src/data/store/pages.json`. | **PASS** |
 | **9** | Removed content does not return | Inspected store fallback values, seed files, and API route handlers. No residual cache or fallback re-injects the removed statements upon subsequent requests. | **PASS** |
@@ -67,3 +67,4 @@ Following the full system repair and page retirement in Review 1, a second indep
 ## 4. Conclusion
 
 Both Review 1 (Implementation Audit) and Review 2 (Independent Verification) confirm that all functional requirements, security boundaries, page removals, and content cleanup directives are satisfied with zero regressions.
+

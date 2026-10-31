@@ -132,3 +132,4 @@ Server-side authorization is enforced at every sensitive Route Handler and API b
 ### Users & Roles Directory (`/admin/users`)
 * Exclusive to Administrators (`role: 'admin'`).
 * Lists all registered administrative accounts with visual avatar badges, display names, usernames, and role permission descriptions.
+

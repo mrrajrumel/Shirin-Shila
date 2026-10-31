@@ -22,11 +22,17 @@ export function Footer() {
               if (item.href === "/llms.txt" || item.id === "llms") {
                 return false;
               }
+              // Completely exclude About and Contact from footer
+              const isAbout = item.id === "about" || item.href === "/about" || item.href === "/#about" || /about/i.test(item.label || "");
+              const isContact = item.id === "contact" || item.href === "/contact" || item.href === "/#contact" || /contact/i.test(item.label || "");
+              if (isAbout || isContact) {
+                return false;
+              }
               return true;
             })
             .sort((a: any, b: any) => (a.order || 0) - (b.order || 0))
             .map((item: any) => ({
-              label: item.label === "About Actor" ? "About Us" : item.label,
+              label: item.label,
               href: item.href,
             }));
 
@@ -36,7 +42,7 @@ export function Footer() {
           }
         }
 
-        // Default to the 4 approved public pages
+        // Default to approved legal footer links (Privacy Policy, Terms of Representation)
         setLinks(defaultFooterLinks);
       } catch {
         setLinks(defaultFooterLinks);
