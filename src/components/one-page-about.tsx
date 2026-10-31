@@ -74,7 +74,7 @@ export function OnePageAbout({ id = "about", initialData }: AboutSectionProps) {
       window.removeEventListener("shirin_shila_about_updated", handleUpdate);
       window.removeEventListener("shirin_shila_reset", handleUpdate);
     };
-  }, []);
+  }, [initialData]);
 
   return (
     <section id={id} className="section about-section-simple">
@@ -145,6 +145,7 @@ export function OnePageAbout({ id = "about", initialData }: AboutSectionProps) {
           <div className="about-dossier-card">
             {/* Cinematic Portrait Frame */}
             <div className="about-dossier-portrait-wrap">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={aboutMeta.portraitSrc}
                 alt={aboutMeta.portraitAlt}

@@ -477,6 +477,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         <div className="adm-sidebar-brand">
           <div className="adm-brand-left">
             <div className="adm-brand-logo-icon" style={{ background: "transparent", padding: 0 }}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src="/assets/logos/tso-logo-white.svg"
                 alt="Tune Soul Ocean"
@@ -721,6 +722,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                               onMouseEnter={() => setSelectedSearchIndex(itemIndex)}
                             >
                               {rec.image ? (
+                                /* eslint-disable-next-line @next/next/no-img-element */
                                 <img
                                   src={rec.image}
                                   alt=""

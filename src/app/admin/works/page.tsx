@@ -365,6 +365,7 @@ export default function AdminWorksPage() {
                           border: '1px solid var(--adm-border)',
                         }}
                       >
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img
                           src={item.image}
                           alt={item.title}
@@ -547,6 +548,7 @@ export default function AdminWorksPage() {
                         position: 'relative',
                       }}
                     >
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img
                         src={formData.image || '/images/poster-begum-jaan.jpg'}
                         alt="Poster Preview"

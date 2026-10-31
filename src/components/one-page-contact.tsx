@@ -114,7 +114,7 @@ export function OnePageContact({ id = "contact", initialInfo }: ContactSectionPr
       window.removeEventListener("shirin_shila_reset", handleUpdate);
       window.removeEventListener("shirin_shila_prefill_inquiry", handlePrefill);
     };
-  }, []);
+  }, [initialInfo]);
 
   const handleCopyEmail = (emailStr: string) => {
     if (typeof navigator !== "undefined" && navigator.clipboard) {
@@ -224,9 +224,7 @@ export function OnePageContact({ id = "contact", initialInfo }: ContactSectionPr
                   height={22}
                   style={{ width: '22px', height: '22px', objectFit: 'contain', opacity: 0.85 }}
                 />
-                <span style={{ fontSize: '11px', letterSpacing: '0.08em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.7)', fontWeight: 600 }}>
-                  TSO
-                </span>
+                
               </div>
             </div>
             <h3 className="serif management-card-title">Direct Representation</h3>

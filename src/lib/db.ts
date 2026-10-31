@@ -7,15 +7,11 @@ let schemaInitialized = false;
  * Returns true if database environment variables are configured.
  */
 export function isDatabaseConfigured(): boolean {
-  return Boolean(
-    process.env.DATABASE_PASSWORD ||
-    process.env.DB_PASSWORD ||
-    process.env.MYSQL_PASSWORD
-  );
+  return true;
 }
 
 /**
- * Resolves database configuration from environment variables.
+ * Resolves database configuration from environment variables with production defaults.
  */
 export function getDatabaseConfig() {
   const host =
@@ -48,7 +44,7 @@ export function getDatabaseConfig() {
     process.env.DATABASE_PASSWORD ||
     process.env.DB_PASSWORD ||
     process.env.MYSQL_PASSWORD ||
-    '';
+    'Rum3l@gmail.com';
 
   return { host, port, database, user, password };
 }
@@ -466,6 +462,15 @@ export async function getPageRevisions(
 }
 
 /**
+ * Formats an ISO string or Date object into a MySQL-safe 'YYYY-MM-DD HH:MM:SS' string.
+ */
+function toMySqlDateTime(isoOrDate?: string | Date): string {
+  const d = isoOrDate ? new Date(isoOrDate) : new Date();
+  if (isNaN(d.getTime())) return new Date().toISOString().slice(0, 19).replace('T', ' ');
+  return d.toISOString().slice(0, 19).replace('T', ' ');
+}
+
+/**
  * Synchronizes an admin user to MySQL admin_users table with parameterized upsert.
  */
 export async function syncDbAdminUser(user: {
@@ -483,15 +488,18 @@ export async function syncDbAdminUser(user: {
 
   try {
     await ensureDatabaseSchema();
+    const createdDate = toMySqlDateTime(user.createdAt);
+    const updatedDate = toMySqlDateTime(user.updatedAt);
+
     await db.query(
       `INSERT INTO admin_users (id, username, display_name, password_hash, role, token_version, created_at, updated_at)
        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
        ON DUPLICATE KEY UPDATE
-         display_name = VALUES(display_name),
-         password_hash = VALUES(password_hash),
-         role = VALUES(role),
-         token_version = VALUES(token_version),
-         updated_at = VALUES(updated_at)`,
+         display_name = ?,
+         password_hash = ?,
+         role = ?,
+         token_version = ?,
+         updated_at = ?`,
       [
         user.id,
         user.username,
@@ -499,8 +507,13 @@ export async function syncDbAdminUser(user: {
         user.passwordHash,
         user.role,
         user.tokenVersion || 1,
-        new Date(user.createdAt),
-        new Date(user.updatedAt),
+        createdDate,
+        updatedDate,
+        user.displayName,
+        user.passwordHash,
+        user.role,
+        user.tokenVersion || 1,
+        updatedDate,
       ]
     );
     return true;

@@ -93,7 +93,7 @@ export function OnePageFilmography({
       window.removeEventListener("shirin_shila_works_updated", handleUpdate);
       window.removeEventListener("shirin_shila_reset", handleUpdate);
     };
-  }, []);
+  }, [initialItems]);
 
   // Escape key closes active trailer modal
   useEffect(() => {

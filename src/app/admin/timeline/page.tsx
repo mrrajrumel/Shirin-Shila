@@ -326,6 +326,7 @@ export default function AdminTimelinePage() {
                           border: '1px solid var(--adm-border)',
                         }}
                       >
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img
                           src={item.image || '/images/award-trophy-gala.jpg'}
                           alt={item.title || item.year}
@@ -463,6 +464,7 @@ export default function AdminTimelinePage() {
                         flexShrink: 0,
                       }}
                     >
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img
                         src={formData.image || '/images/award-trophy-gala.jpg'}
                         alt="Preview"

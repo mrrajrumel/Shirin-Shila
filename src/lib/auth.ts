@@ -609,7 +609,7 @@ export async function getAllAdminUsers(
 ): Promise<Omit<AdminUserRecord, 'passwordHash'>[]> {
   const users = ensureAdminAccounts();
 
-  // If MySQL is online, fetch records to ensure any updates in MySQL are reflected
+  // If MySQL is online, fetch records and ensure two-way synchronization
   try {
     const dbUsers = await getDbAdminUsers();
     if (dbUsers && dbUsers.length > 0) {
@@ -637,9 +637,22 @@ export async function getAllAdminUsers(
           existing.updatedAt = dbu.updatedAt;
         }
       }
+
+      // Sync any local users missing from MySQL back to MySQL
+      for (const u of users) {
+        const inDb = dbUsers.some((dbu) => dbu.id === u.id || dbu.username.toLowerCase() === u.username.toLowerCase());
+        if (!inDb) {
+          await syncDbAdminUser(u);
+        }
+      }
+    } else {
+      // MySQL table is empty, populate all authorized users into MySQL
+      for (const u of users) {
+        await syncDbAdminUser(u);
+      }
     }
-  } catch {
-    // Local store fallback
+  } catch (err) {
+    console.error('[Auth] MySQL user sync error:', (err as Error).message);
   }
 
   let result = users

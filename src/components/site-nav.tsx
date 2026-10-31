@@ -166,10 +166,11 @@ export default function SiteNav() {
       });
     }, containerRef);
 
+    const container = containerRef.current;
     return () => {
       ctx.revert();
-      if (containerRef.current) {
-        const items = containerRef.current.querySelectorAll("[data-shape]");
+      if (container) {
+        const items = container.querySelectorAll("[data-shape]");
         items.forEach((item: any) => item._cleanup && item._cleanup());
       }
     };
