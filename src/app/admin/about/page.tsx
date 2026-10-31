@@ -15,7 +15,6 @@ export default function AdminAboutPage() {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const loadAbout = async () => {
-    setLoading(true);
     try {
       const res = await fetch('/api/about', { cache: 'no-store' });
       const data = await res.json();

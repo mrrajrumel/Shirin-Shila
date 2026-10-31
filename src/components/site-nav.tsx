@@ -75,9 +75,6 @@ export default function SiteNav() {
     if (pathname === "/") {
       e.preventDefault();
       closeMenu();
-      if (typeof document !== "undefined") {
-        document.body.style.overflow = "";
-      }
       setTimeout(() => {
         const el =
           document.getElementById(targetId) ||

@@ -599,7 +599,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                       fontSize: 13,
                     }}
                   >
-                    No admin modules matched "{searchQuery}"
+                    No admin modules matched &quot;{searchQuery}&quot;
                   </div>
                 ) : (
                   filteredModules.map((mod, index) => {

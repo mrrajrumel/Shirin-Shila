@@ -8,6 +8,10 @@ import React from 'react';
 export function CustomHeadInjector({ html }: { html?: string }) {
   if (!html || !html.trim()) return null;
 
+  let metaAttrs: Record<string, string | boolean>[] = [];
+  let linkAttrs: Record<string, string | boolean>[] = [];
+  let scriptData: { attrs: Record<string, string | boolean>; inlineContent?: string }[] = [];
+
   try {
     const getAllMatches = (regex: RegExp, str: string) => {
       const matches: RegExpExecArray[] = [];
@@ -39,41 +43,38 @@ export function CustomHeadInjector({ html }: { html?: string }) {
       return attrs;
     };
 
-    const parsedMetas = metaMatches.map((m, idx) => {
-      const attrs = parseAttrs(m[1]);
-      return <meta key={`custom-meta-${idx}`} {...(attrs as any)} />;
-    });
-
-    const parsedLinks = linkMatches.map((m, idx) => {
-      const attrs = parseAttrs(m[1]);
-      return <link key={`custom-link-${idx}`} {...(attrs as any)} />;
-    });
-
-    const parsedScripts = scriptMatches.map((m, idx) => {
-      const attrs = parseAttrs(m[1]);
-      const inlineContent = m[2];
-      if (inlineContent && inlineContent.trim()) {
-        return (
-          <script
-            key={`custom-script-${idx}`}
-            {...(attrs as any)}
-            dangerouslySetInnerHTML={{ __html: inlineContent }}
-          />
-        );
-      }
-      return <script key={`custom-script-${idx}`} {...(attrs as any)} />;
-    });
-
-    return (
-      <>
-        {parsedMetas}
-        {parsedLinks}
-        {parsedScripts}
-      </>
-    );
+    metaAttrs = metaMatches.map((m) => parseAttrs(m[1]));
+    linkAttrs = linkMatches.map((m) => parseAttrs(m[1]));
+    scriptData = scriptMatches.map((m) => ({
+      attrs: parseAttrs(m[1]),
+      inlineContent: m[2],
+    }));
   } catch (err) {
     console.error('Error injecting custom head HTML:', err);
     return null;
   }
+
+  return (
+    <>
+      {metaAttrs.map((attrs, idx) => (
+        <meta key={`custom-meta-${idx}`} {...(attrs as any)} />
+      ))}
+      {linkAttrs.map((attrs, idx) => (
+        <link key={`custom-link-${idx}`} {...(attrs as any)} />
+      ))}
+      {scriptData.map(({ attrs, inlineContent }, idx) => {
+        if (inlineContent && inlineContent.trim()) {
+          return (
+            <script
+              key={`custom-script-${idx}`}
+              {...(attrs as any)}
+              dangerouslySetInnerHTML={{ __html: inlineContent }}
+            />
+          );
+        }
+        return <script key={`custom-script-${idx}`} {...(attrs as any)} />;
+      })}
+    </>
+  );
 }
 

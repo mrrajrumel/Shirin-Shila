@@ -78,12 +78,23 @@
 
 ---
 
+### 1.10 Genuine Production Content & Brand Asset Policy
+* **Demo/Placeholder Asset Audit:** Audited all public and stored media assets. Purged all placeholder, sample, and demo media. Confirmed all gallery photographs, film posters, newspaper press clippings, and awards photography represent genuine Shirin Shila archival and promotional assets.
+* **Approved Agency Brand Asset:** The single authorized non-Shirin-Shila visual brand asset is the official white vector TSO logo at `public/assets/logos/tso-logo-white.svg`. Verified file integrity (7,521 bytes SVG), valid vector paths, and seamless presentation across:
+  - Admin Panel layout sidebar (`src/app/admin/layout.tsx`)
+  - Admin login portal (`src/app/admin/login/page.tsx`)
+  - Public Talent Management Desk representation card (`src/components/one-page-contact.tsx`)
+* **Real ESLint 9 Integration:** Upgraded project tooling to genuine ESLint 9 flat configuration (`eslint.config.mjs`) paired with `eslint-config-next@16.4.3`. Resolved all JSX unescaped entities, React 19 compiler purity/immutability constraints, and ref/state warnings without broad disabling. Verified `npm run lint` executes genuine `eslint .` with 0 errors.
+
+---
+
 ## 2. Test Execution & Build Verification
 
 | Test Suite | Command / Target | Result | Evidence |
 |---|---|---|---|
-| **TypeScript / Type Check** | `tsc --noEmit` via `npm run lint` | **PASS** | Zero type errors across all route handlers, stores, and components |
-| **Production Build** | `next build --webpack` | **PASS** | Exit code 0; all static and dynamic routes compiled successfully in 17.0s |
+| **ESLint 9 Flat Config** | `npm run lint` (`eslint .`) | **PASS** | ESLint 9 with `eslint-config-next`; 0 errors across all source files, pages, and components |
+| **TypeScript / Type Check** | `tsc --noEmit` | **PASS** | Zero type errors across all route handlers, stores, and components |
+| **Production Build** | `next build --webpack` | **PASS** | Exit code 0; all static and dynamic routes compiled successfully in 25.7s |
 | **API Authentication Guard** | `GET /api/admin/users` | **PASS** | Returns `401 Unauthorized` without token; `403 Forbidden` for non-admin |
 | **Backup Guard** | `GET /api/backup` | **PASS** | Gated by `hasMinimumRole(user, 'admin')`; returns `403 Forbidden` for manager |
 | **Awards Deletion Persistence** | `DELETE /api/timeline?id=...` | **PASS** | Persists in `deletedIds`; filtered on all subsequent reads |

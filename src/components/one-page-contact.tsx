@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import Image from "next/image";
 import { motion } from "framer-motion";
 import {
   Mail,
@@ -211,8 +212,22 @@ export function OnePageContact({ id = "contact", initialInfo }: ContactSectionPr
           transition={{ duration: 0.7, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
         >
           <div className="management-card">
-            <div className="section-kicker" style={{ marginBottom: 8 }}>
-              Talent Management Desk
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+              <div className="section-kicker" style={{ marginBottom: 0 }}>
+                Talent Management Desk
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <Image
+                  src="/assets/logos/tso-logo-white.svg"
+                  alt="Tune Soul Ocean Logo"
+                  width={22}
+                  height={22}
+                  style={{ width: '22px', height: '22px', objectFit: 'contain', opacity: 0.85 }}
+                />
+                <span style={{ fontSize: '11px', letterSpacing: '0.08em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.7)', fontWeight: 600 }}>
+                  TSO
+                </span>
+              </div>
             </div>
             <h3 className="serif management-card-title">Direct Representation</h3>
             <p className="muted management-card-desc">
@@ -372,7 +387,7 @@ export function OnePageContact({ id = "contact", initialInfo }: ContactSectionPr
           <div className="booking-form-box">
             <h3 className="serif form-box-title">Send a Booking Inquiry</h3>
             <p className="muted form-box-subtitle">
-              Please provide details about your project, tentative shooting timeline, and organization. Submissions route directly to Shirin Shila's management desk.
+              Please provide details about your project, tentative shooting timeline, and organization. Submissions route directly to Shirin Shila&apos;s management desk.
             </p>
 
             {isSubmitted ? (

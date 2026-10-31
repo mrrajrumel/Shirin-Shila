@@ -26,15 +26,19 @@ export const revalidate = 0;
 
 export default async function Home() {
   // Track whether timeline was loaded from persistent storage or failed
+  let timeline: TimelineStoreData;
   let timelineLoadedFromStore = false;
-  const timeline = await readStore<TimelineStoreData>("timeline")
-    .then((data) => { timelineLoadedFromStore = true; return data; })
-    .catch(() => ({
+  try {
+    timeline = await readStore<TimelineStoreData>("timeline");
+    timelineLoadedFromStore = true;
+  } catch {
+    timeline = {
       top: defaultTopJourneyData,
       bottom: defaultBottomJourneyData,
       milestones: careerTimeline,
       deletedIds: [] as string[],
-    }));
+    };
+  }
 
   const [
     hero,

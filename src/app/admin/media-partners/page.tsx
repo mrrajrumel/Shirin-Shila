@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import {
   Tv,
   Upload,
@@ -50,12 +50,12 @@ export default function AdminMediaPartnersPage() {
     loadPartners();
   }, []);
 
-  const notifyChange = () => {
+  const notifyChange = useCallback(() => {
     if (typeof window !== 'undefined') {
       window.dispatchEvent(new CustomEvent('shirin_shila_partners_updated'));
       localStorage.setItem('shirin_shila_sync_partners', Date.now().toString());
     }
-  };
+  }, []);
 
   // Direct file upload handler (supports single & multiple files)
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {

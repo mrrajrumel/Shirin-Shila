@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useId, useRef, useState, type CSSProperties, type PointerEvent } from "react";
+import { useEffect, useId, useRef, useState, useCallback, type CSSProperties, type PointerEvent } from "react";
 import {
   ArrowLeft,
   ArrowRight,
@@ -194,9 +194,11 @@ export default function GlassyCarousel({
     setDrag(0);
   };
 
-  const open = (item: GlassyCarouselItem) => {
-    if (performance.now() > suppressClickUntil.current) setPreview(item);
-  };
+  const open = useCallback((item: GlassyCarouselItem) => {
+    if (typeof performance !== "undefined" && performance.now() > suppressClickUntil.current) {
+      setPreview(item);
+    }
+  }, []);
 
   const pointerDown = (event: PointerEvent<HTMLDivElement>) => {
     if (!event.isPrimary || (event.pointerType === "mouse" && event.button !== 0)) return;

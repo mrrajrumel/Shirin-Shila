@@ -435,7 +435,7 @@ export default function AdminWorksPage() {
                 {filteredWorks.length === 0 && !loading && (
                   <tr>
                     <td colSpan={8} style={{ textAlign: 'center', padding: '30px', color: 'var(--adm-text-muted)' }}>
-                      No works found. Click "Add Notable Work" above.
+                      No works found. Click &quot;Add Notable Work&quot; above.
                     </td>
                   </tr>
                 )}
