@@ -90,7 +90,7 @@ export const defaultLlmsContent = `# Shirin Shila — Dhallywood Film Actress & 
 - **National Star Excellence Crest (2025)**: Honored for artistic excellence across cinema and television.
 
 ## Talent Desk Contact
-- **Email**: booking@shirinshila.com
+- **Email**: support@trytso.com
 - **Website**: {siteUrl}
 - **Representation Base**: Dhaka, Bangladesh (Available for Worldwide Productions)`;
 
@@ -131,7 +131,7 @@ export const defaultPagesRegistry: PagesRegistry = {
     seoTitle: 'Contact and Book | Shirin Shila Official Talent Management Desk',
     seoDescription: 'Official representation, casting inquiries, brand endorsement, and talent booking desk for Bangladeshi film actress Shirin Shila.',
     meta: {
-      managementEmail: 'booking@shirinshila.com',
+      managementEmail: 'support@trytso.com',
       pressEmail: 'press@shirinshila.com',
       phone: '+880 1711-000000',
       representationBase: 'Dhaka, Bangladesh (Available for Worldwide Shoots)',

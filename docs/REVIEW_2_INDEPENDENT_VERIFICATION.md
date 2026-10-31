@@ -37,6 +37,9 @@ Following the full system repair and page retirement in Review 1, a second indep
 | **18** | Production build passes | `npm run build` compiles with zero TypeScript errors and webpack packaging passes cleanly. | **PASS** |
 | **19** | Public routes operational | Tested `/`, `/terms`, `/privacy`, `/llms.txt`, `/llms-full.txt`, `/.well-known/mcp/server-card.json`, `/api/markdown`, `/sitemap.xml`, `/robots.txt`. | **PASS** |
 | **20** | Custom domain & SSL | `SITE_URL` dynamically resolves to authoritative custom domain `https://shirinshila.com/` with Hostinger preview staging fallback. | **PASS** |
+| **21** | Collapsible desktop sidebar | Dual-mode desktop sidebar (compact 76px rail with native hover tooltips vs 280px expanded) with `localStorage` persistence and smooth transitions. | **PASS** |
+| **22** | Global admin quick search (Ctrl+K) | Sticky topbar search bar with `Ctrl+K` hotkey, real-time filtering, arrow/enter navigation across all 17 admin modules, and role-based filtering. | **PASS** |
+| **23** | Complete User & Role Management | User creation with bcrypt 10 rounds, uniqueness check, update display name, change role with last-admin protection, deletion with self-deletion/founder protection, and user search/role filtering. | **PASS** |
 
 ---
 

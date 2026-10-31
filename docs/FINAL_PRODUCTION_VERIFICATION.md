@@ -37,6 +37,9 @@
 ### 1.4 Admin UI/UX & Media
 - [x] **Clutter & AI artifacts removed:** Zero decorative AI emojis, fake analytics, or dummy metrics; genuine live status indicators.
 - [x] **Standardized styling:** TailAdmin dark-navy theme (`#0f141f`) consistent across all 17 admin views.
+- [x] **Collapsible Desktop Sidebar:** Dual-mode desktop sidebar (compact 76px rail with native hover tooltips vs 280px expanded) with `localStorage` state persistence and smooth CSS transitions.
+- [x] **Global Admin Quick Search (Ctrl+K):** Sticky topbar command palette with `Ctrl+K` hotkey, real-time search across all 17 modules, arrow/enter keyboard navigation, and role-based filtering.
+- [x] **Complete User & Role Management:** Full CRUD workflow (`/admin/users`) with search, role filters, modal interfaces, strong password generator, bcrypt hashing (10 rounds), and last-admin protection.
 - [x] **Media Asset Management:** `/admin/media` uploads and validates images; media library picker functional.
 - [x] **Favicon & Icons:** `/icon.svg` and dynamic favicon redirection operating correctly.
 
@@ -54,6 +57,7 @@
 | **Sitemap Generation** | `GET /sitemap.xml` | **PASS** | Lists `/`, `/terms`, `/privacy`, `/llms.txt`; excludes removed standalone pages |
 | **Robots & Content-Signals** | `GET /robots.txt` | **PASS** | Directs to `/sitemap.xml`; declares AI crawler policies |
 | **Machine Manifests** | `GET /llms.txt` & `GET /llms-full.txt` | **PASS** | 200 OK; accurate factual context and clean anchor links |
+| **RBAC & User Management Suite** | `npx tsx test_auth_rbac.ts` | **PASS** | All 12 test assertions passed: validation, password hashing, last-admin guard, self-deletion guard, and session tokens |
 
 ---
 

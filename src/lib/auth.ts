@@ -127,11 +127,10 @@ export function ensureAdminAccounts(): AdminUserRecord[] {
     modified = true;
   }
 
-  // Ensure ONLY these two accounts exist (remove legacy or unauthorized accounts)
-  const allowed = ['shirin', 'rumel'];
-  const filteredUsers = users.filter((u) => allowed.includes(u.username.toLowerCase()));
-  if (filteredUsers.length !== users.length) {
-    users = filteredUsers;
+  // Ensure at least one account has admin role (fallback protection)
+  const hasAdmin = users.some((u) => u.role === 'admin');
+  if (!hasAdmin && shirinUser) {
+    shirinUser.role = 'admin';
     modified = true;
   }
 
@@ -347,11 +346,239 @@ export function getUserByUsername(username: string): AdminUserRecord | undefined
 }
 
 /**
- * Returns all admin user records (without passwordHash).
+ * Returns admin user records (without passwordHash), with optional query and role filtering.
  */
-export function getAllAdminUsers(): Omit<AdminUserRecord, 'passwordHash'>[] {
+export function getAllAdminUsers(query?: string, role?: string): Omit<AdminUserRecord, 'passwordHash'>[] {
   const users = ensureAdminAccounts();
-  return users.map(({ passwordHash: _, ...rest }) => rest);
+  let result = users.map(({ passwordHash: _, ...rest }) => rest);
+
+  if (role && role !== 'all') {
+    result = result.filter((u) => u.role === role);
+  }
+
+  if (query && query.trim()) {
+    const q = query.trim().toLowerCase();
+    result = result.filter(
+      (u) =>
+        u.username.toLowerCase().includes(q) ||
+        u.displayName.toLowerCase().includes(q) ||
+        u.role.toLowerCase().includes(q)
+    );
+  }
+
+  return result;
+}
+
+export interface CreateUserInput {
+  username: string;
+  displayName: string;
+  password: string;
+  role: 'admin' | 'manager';
+}
+
+/**
+ * Creates a new administrator or manager user.
+ * Validates unique username, strong password, and hashes with bcrypt.
+ */
+export function createUser(input: CreateUserInput): {
+  success: boolean;
+  user?: Omit<AdminUserRecord, 'passwordHash'>;
+  error?: string;
+} {
+  const username = (input.username || '').trim();
+  const displayName = (input.displayName || '').trim();
+  const password = input.password || '';
+  const role = input.role;
+
+  if (!username || !/^[a-zA-Z0-9_-]{3,30}$/.test(username)) {
+    return {
+      success: false,
+      error: 'Username must be 3–30 characters and contain only letters, numbers, hyphens, or underscores.',
+    };
+  }
+
+  if (!displayName || displayName.length < 2 || displayName.length > 64) {
+    return {
+      success: false,
+      error: 'Display name must be between 2 and 64 characters.',
+    };
+  }
+
+  if (!password || password.length < 8) {
+    return {
+      success: false,
+      error: 'Password must be at least 8 characters.',
+    };
+  }
+
+  if (!/[a-zA-Z]/.test(password) || !/[0-9]/.test(password)) {
+    return {
+      success: false,
+      error: 'Password must contain at least one letter and one number.',
+    };
+  }
+
+  if (role !== 'admin' && role !== 'manager') {
+    return {
+      success: false,
+      error: 'Role must be either "admin" or "manager".',
+    };
+  }
+
+  const users = ensureAdminAccounts();
+
+  // Check username uniqueness (case-insensitive)
+  const exists = users.some((u) => u.username.toLowerCase() === username.toLowerCase());
+  if (exists) {
+    return {
+      success: false,
+      error: `Username "${username}" is already taken. Please choose another username.`,
+    };
+  }
+
+  const salt = bcrypt.genSaltSync(10);
+  const passwordHash = bcrypt.hashSync(password, salt);
+  const now = new Date().toISOString();
+  const id = `admin-${username.toLowerCase()}-${Date.now().toString(36)}`;
+
+  const newUser: AdminUserRecord = {
+    id,
+    username,
+    displayName,
+    role,
+    passwordHash,
+    createdAt: now,
+    updatedAt: now,
+  };
+
+  users.push(newUser);
+
+  const usersFile = getUsersFile();
+  fs.writeFileSync(usersFile, JSON.stringify(users, null, 2), 'utf-8');
+
+  const { passwordHash: _, ...safeUser } = newUser;
+  return {
+    success: true,
+    user: safeUser,
+  };
+}
+
+export interface UpdateUserInput {
+  displayName?: string;
+  role?: 'admin' | 'manager';
+}
+
+/**
+ * Updates an admin or manager user's display name or role.
+ * Protects against demoting the only remaining administrator.
+ */
+export function updateUser(
+  userId: string,
+  input: UpdateUserInput,
+  requestingUserId: string
+): {
+  success: boolean;
+  user?: Omit<AdminUserRecord, 'passwordHash'>;
+  error?: string;
+} {
+  const users = ensureAdminAccounts();
+  const idx = users.findIndex((u) => u.id === userId);
+  if (idx < 0) {
+    return { success: false, error: 'User not found.' };
+  }
+
+  const targetUser = users[idx];
+
+  // Role modification validation
+  if (input.role && input.role !== targetUser.role) {
+    if (input.role !== 'admin' && input.role !== 'manager') {
+      return { success: false, error: 'Invalid role specified.' };
+    }
+
+    if (targetUser.role === 'admin' && input.role === 'manager') {
+      const otherAdmins = users.filter((u) => u.id !== userId && u.role === 'admin');
+      if (otherAdmins.length === 0) {
+        return {
+          success: false,
+          error: 'Cannot demote the only remaining Administrator. Assign another Administrator first.',
+        };
+      }
+    }
+    targetUser.role = input.role;
+  }
+
+  if (input.displayName !== undefined) {
+    const trimmed = input.displayName.trim();
+    if (!trimmed || trimmed.length < 2 || trimmed.length > 64) {
+      return { success: false, error: 'Display name must be between 2 and 64 characters.' };
+    }
+    targetUser.displayName = trimmed;
+  }
+
+  targetUser.updatedAt = new Date().toISOString();
+  users[idx] = targetUser;
+
+  const usersFile = getUsersFile();
+  fs.writeFileSync(usersFile, JSON.stringify(users, null, 2), 'utf-8');
+
+  const { passwordHash: _, ...safeUser } = targetUser;
+  return {
+    success: true,
+    user: safeUser,
+  };
+}
+
+/**
+ * Deletes a user account.
+ * Prevents self-deletion, deleting the founder account, and deleting the last administrator.
+ */
+export function deleteUser(
+  userId: string,
+  requestingUserId: string
+): {
+  success: boolean;
+  error?: string;
+} {
+  if (userId === requestingUserId) {
+    return {
+      success: false,
+      error: 'You cannot delete your own account while signed in.',
+    };
+  }
+
+  const users = ensureAdminAccounts();
+  const idx = users.findIndex((u) => u.id === userId);
+  if (idx < 0) {
+    return { success: false, error: 'User not found.' };
+  }
+
+  const targetUser = users[idx];
+
+  // Primary founder account protection
+  if (targetUser.username.toLowerCase() === 'shirin') {
+    return {
+      success: false,
+      error: 'The primary founder account (@Shirin) cannot be deleted.',
+    };
+  }
+
+  // Last administrator check
+  if (targetUser.role === 'admin') {
+    const otherAdmins = users.filter((u) => u.id !== userId && u.role === 'admin');
+    if (otherAdmins.length === 0) {
+      return {
+        success: false,
+        error: 'Cannot delete the only remaining Administrator.',
+      };
+    }
+  }
+
+  users.splice(idx, 1);
+
+  const usersFile = getUsersFile();
+  fs.writeFileSync(usersFile, JSON.stringify(users, null, 2), 'utf-8');
+
+  return { success: true };
 }
 
 /**

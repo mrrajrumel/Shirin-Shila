@@ -104,7 +104,7 @@ export default async function RootLayout({
     resolveCanonicalSiteUrl(),
   ]);
 
-  const managementEmail = contact.email || 'booking@shirinshila.com';
+  const managementEmail = contact.managementEmail || contact.email || 'support@trytso.com';
   const managementPhone = contact.phone || '';
 
   // Truthful, accurate Schema.org JSON-LD describing Shirin Shila's official actor portfolio

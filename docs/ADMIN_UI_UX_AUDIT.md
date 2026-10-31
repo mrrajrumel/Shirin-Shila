@@ -72,13 +72,39 @@ The interface adheres to a consistent, high-contrast dark palette designed for e
 
 ---
 
-## 5. Accessibility & Responsiveness
+## 5. Collapsible Desktop Sidebar & Global Command Palette
+
+### 5.1 Desktop Collapsible Sidebar
+* **Rail Mode (76px width):** Desktop users can toggle between expanded (`280px`) and compact icon-only (`76px`) sidebar modes using the `PanelLeftClose` / `PanelLeftOpen` header toggle button.
+* **Persistent Preference:** State is persisted in browser `localStorage` under `adm_sidebar_collapsed`. Upon page reload or route transition, the preferred mode is automatically restored.
+* **Icon-Only Rail Details:**
+  - Full title and subtitle collapse into the compact brand logo icon.
+  - Section headers collapse into subtle divider lines.
+  - Navigation icons remain perfectly centered with native hover tooltips (`title` attribute) and badge indicators.
+  - Footer action buttons transition into compact icon-only controls.
+* **Smooth CSS Transitions:** Width and content flex adjustments animate cleanly via cubic-bezier easing without content jumps.
+
+### 5.2 Global Quick Search & Command Palette (Ctrl+K)
+* **Search Input in Sticky Topbar:** Centered in the top bar with instant search-as-you-type capability and clear button.
+* **Keyboard Shortcuts:**
+  - `Ctrl+K` or `Cmd+K` immediately focuses the quick search bar from anywhere in the admin dashboard.
+  - `Escape` dismisses the dropdown and clears search input.
+  - `ArrowDown` / `ArrowUp` navigates through matching admin modules.
+  - `Enter` immediately opens the selected route.
+* **Full Module Index:** All 17 administrative modules are indexed with titles, descriptions, categories, and keywords (e.g. searching "inbox" finds Inquiries CRM; searching "mysql" finds Data & Persistence).
+* **Role-Aware Filtering:** Privileged modules (`/admin/backup` and `/admin/users`) are automatically excluded from search results for users with `manager` roles.
+
+---
+
+## 6. Accessibility & Responsiveness
 
 1. **Mobile Drawer Navigation:**
    * The sidebar collapses on screens smaller than 1024px.
    * A hamburger menu button in the sticky topbar toggles the drawer with an accessible backdrop overlay.
-2. **Form Accessibility:**
-   * All form fields possess explicit `<label>` tags.
-   * Input placeholders provide contextual guidance without replacing labels.
-   * Focus states are clearly visible for keyboard navigation.
+   * Dismissible by clicking the backdrop, navigating to a new route, or pressing the `Escape` key.
+2. **Form Accessibility & UI Standardization:**
+   * All form fields possess explicit `<label>` tags with descriptive help text.
+   * Inputs standardized to 38px height with clean focus ring tokens (`var(--tail-primary)`).
+   * Modals feature sticky headers, scrollable bodies with touch-scrolling momentum, and backdrop blur.
+   * Destructive actions require explicit modal confirmation.
 

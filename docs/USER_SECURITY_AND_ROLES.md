@@ -129,7 +129,45 @@ Server-side authorization is enforced at every sensitive Route Handler and API b
    * Real-time client-side policy validation indicators (Length, Alphabet, Number).
    * Safe status banners indicating success or failure.
 
-### Users & Roles Directory (`/admin/users`)
-* Exclusive to Administrators (`role: 'admin'`).
-* Lists all registered administrative accounts with visual avatar badges, display names, usernames, and role permission descriptions.
+### Users & Roles Management Console (`/admin/users` & `/api/admin/users`)
+* **Access Scope:** Exclusive to Administrators (`role: 'admin'`). Manager attempts return HTTP 403 Forbidden.
+* **Full CRUD Operations:**
+  1. **User Creation (`POST /api/admin/users`):**
+     - Inputs: Username (validated 3–30 alphanumeric/dashes), Display Name (2–64 chars), Password (8+ chars with letter + digit), Role (`admin` | `manager`).
+     - Includes integrated strong password generator in modal UI.
+     - Hashes password with salted bcrypt (10 rounds).
+     - Returns sanitized user record without `passwordHash`.
+  2. **User Updating (`PUT /api/admin/users`):**
+     - Modifies Display Name and/or Role.
+     - **Last-Admin Demotion Guard:** Rejects demoting an administrator to manager if no other administrator account exists.
+  3. **User Deletion (`DELETE /api/admin/users`):**
+     - **Self-Deletion Guard:** Users cannot delete their own active session account.
+     - **Founder Protection:** The primary founder account (`@Shirin`) is permanently protected from deletion.
+     - **Last-Admin Protection:** Cannot delete the last remaining administrator account.
+  4. **Search & Role Filtering (`GET /api/admin/users?q=...&role=...`):**
+     - Instant filter by username, display name, or role.
+     - Role filter dropdown (All, Administrators, Managers).
+     - Result counter badge and one-click "Clear Filters" action.
+
+---
+
+## 6. Functional Verification & Test Suite
+
+The authentication, RBAC hierarchy, and user management features were verified via automated execution of `test_auth_rbac.ts`:
+
+| Test Case | Execution Command | Result | Verification Detail |
+|---|---|---|---|
+| Account Initialization | `npx tsx test_auth_rbac.ts` | **PASS** | `ensureAdminAccounts()` initialized default accounts without data loss |
+| Weak Password Rejection | `npx tsx test_auth_rbac.ts` | **PASS** | Passwords under 8 chars rejected with descriptive validation error |
+| Number Missing Rejection | `npx tsx test_auth_rbac.ts` | **PASS** | Passwords without numbers rejected |
+| Invalid Username Format | `npx tsx test_auth_rbac.ts` | **PASS** | Spaces and disallowed symbols rejected |
+| Safe User Creation | `npx tsx test_auth_rbac.ts` | **PASS** | User created; `passwordHash` omitted from response |
+| Duplicate Username Guard | `npx tsx test_auth_rbac.ts` | **PASS** | Duplicate usernames rejected case-insensitively |
+| User Search & Role Filter | `npx tsx test_auth_rbac.ts` | **PASS** | Queries match username, display name, and role filter |
+| User Profile Update | `npx tsx test_auth_rbac.ts` | **PASS** | Display name updated and timestamp recorded |
+| Self Deletion Prevention | `npx tsx test_auth_rbac.ts` | **PASS** | Blocked self-deletion while logged in |
+| Founder Deletion Prevention | `npx tsx test_auth_rbac.ts` | **PASS** | Blocked deleting `@Shirin` founder account |
+| Last Admin Protection | `npx tsx test_auth_rbac.ts` | **PASS** | Blocked demoting/deleting sole remaining administrator |
+| Session Token Verification | `npx tsx test_auth_rbac.ts` | **PASS** | Token HMAC signing, verification, and role hierarchy verified |
+
 
