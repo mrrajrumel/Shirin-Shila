@@ -4,14 +4,10 @@ import fs from 'fs';
 import path from 'path';
 import { SESSION_COOKIE_NAME, verifySessionToken, hasMinimumRole } from '@/lib/auth';
 import { getPersistentStoreDir, getPersistentBackupsDir } from '@/lib/persistent-paths';
+import { readStore, writeStore, StoreKey } from '@/lib/server-storage';
+import { getMediaManifest, saveMediaManifest, MediaAsset } from '@/lib/media-service';
 
 export const dynamic = 'force-dynamic';
-
-function checkAuth(request: NextRequest): boolean {
-  const token = request.cookies.get(SESSION_COOKIE_NAME)?.value;
-  const user = verifySessionToken(token);
-  return Boolean(user && hasMinimumRole(user, 'admin'));
-}
 
 const KNOWN_STORE_FILES = [
   'hero.json',
@@ -32,39 +28,33 @@ const KNOWN_STORE_FILES = [
  * GET: Export full data backup
  */
 export async function GET(request: NextRequest) {
-  if (!checkAuth(request)) {
+  const token = request.cookies.get(SESSION_COOKIE_NAME)?.value;
+  const user = verifySessionToken(token);
+  if (!user) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+  if (!hasMinimumRole(user, 'admin')) {
+    return NextResponse.json(
+      { error: 'Forbidden. Admin role required for backup export.' },
+      { status: 403 }
+    );
   }
 
   try {
-    const storeDir = getPersistentStoreDir();
     const backupBundle: Record<string, any> = {};
 
     for (const filename of KNOWN_STORE_FILES) {
-      const filePath = path.join(storeDir, filename);
-      let content = null;
-
-      if (fs.existsSync(filePath)) {
-        try {
-          content = JSON.parse(await fs.promises.readFile(filePath, 'utf-8'));
-        } catch (e) {
-          console.error(`[Backup] Failed to parse ${filename}:`, e);
-        }
-      }
-
-      // If missing in persistent store, check seed in repo
-      if (!content) {
-        const seedPath = path.join(process.cwd(), 'src', 'data', 'store', filename);
-        if (fs.existsSync(seedPath)) {
-          try {
-            content = JSON.parse(await fs.promises.readFile(seedPath, 'utf-8'));
-          } catch (e) {
-            console.error(`[Backup] Failed to parse seed ${filename}:`, e);
-          }
-        }
-      }
-
       const key = filename.replace(/\.json$/, '');
+      let content = null;
+      try {
+        if (key === 'media-manifest') {
+          content = await getMediaManifest();
+        } else {
+          content = await readStore(key as StoreKey);
+        }
+      } catch (readErr) {
+        console.error(`[Backup Export] Error reading ${key}:`, readErr);
+      }
       backupBundle[key] = content;
     }
 
@@ -98,7 +88,7 @@ export async function GET(request: NextRequest) {
     });
   } catch (err: any) {
     console.error('[Backup] Export failed:', err);
-    return NextResponse.json({ error: err.message || 'Backup export failed' }, { status: 500 });
+    return NextResponse.json({ error: err.message }, { status: 500 });
   }
 }
 
@@ -106,8 +96,16 @@ export async function GET(request: NextRequest) {
  * POST: Create manual snapshot or restore from backup JSON
  */
 export async function POST(request: NextRequest) {
-  if (!checkAuth(request)) {
+  const token = request.cookies.get(SESSION_COOKIE_NAME)?.value;
+  const user = verifySessionToken(token);
+  if (!user) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+  if (!hasMinimumRole(user, 'admin')) {
+    return NextResponse.json(
+      { error: 'Forbidden. Admin role required for backup operations.' },
+      { status: 403 }
+    );
   }
 
   try {
@@ -167,12 +165,16 @@ export async function POST(request: NextRequest) {
         if (!allowedKeys.has(key)) continue;
         if (!value || typeof value !== 'object') continue;
 
-        const targetFile = path.join(storeDir, `${key}.json`);
-        const tempFile = `${targetFile}.tmp-${Date.now()}`;
-
-        await fs.promises.writeFile(tempFile, JSON.stringify(value, null, 2), 'utf-8');
-        await fs.promises.rename(tempFile, targetFile);
-        restoredKeys.push(key);
+        try {
+          if (key === 'media-manifest' && Array.isArray(value)) {
+            await saveMediaManifest(value as MediaAsset[]);
+          } else {
+            await writeStore(key as StoreKey, value, true);
+          }
+          restoredKeys.push(key);
+        } catch (restoreErr) {
+          console.error(`[Backup Restore] Error restoring section ${key}:`, restoreErr);
+        }
       }
 
       try {
@@ -193,4 +195,3 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: err.message || 'Operation failed' }, { status: 500 });
   }
 }
-

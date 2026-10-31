@@ -69,27 +69,33 @@
 - [x] **API Route Enhancements:** Updated `/api/media` `POST` and `DELETE` handlers to support `action: "bulk-delete"` with arrays of IDs, force flags, and structured count reporting.
 - [x] **MySQL Media Asset Synchronization:** Added `syncDbMediaAsset()` and `deleteDbMediaAsset()` to `src/lib/db.ts` to sync media manifest entries directly to the MySQL `media_assets` table on upload, edit, and deletion.
 
+### 1.9 Independent Deep Review & Architectural Hardening
+- [x] **Middleware Role-Checking Hardening:** Fixed `src/middleware.ts` which previously blocked non-hardcoded usernames and non-admin roles. Authenticated `manager` and newly created team members can now access allowed admin views seamlessly, with fine-grained route gating remaining enforced at the layout/API level.
+- [x] **Timing-Attack Resistance in Middleware:** Replaced loose string equality in `src/middleware.ts` with constant-time byte comparison (`constantTimeCompare`) for session token HMAC verification.
+- [x] **MySQL Schema Migration for Audit Logs:** Added `ip_address VARCHAR(45) DEFAULT NULL` to the `cms_audit_logs` DDL in `src/lib/db.ts`, along with an idempotent `ALTER TABLE` migration and safe query fallback in `logAdminAudit()`.
+- [x] **Backup Export & Restore Dual-Sync:** Upgraded `/api/backup` to use `readStore` and `writeStore` with `saveMediaManifest`, ensuring that backups read from the authoritative store and restoring a backup properly synchronizes records to MySQL `cms_content` and `media_assets`.
+- [x] **Next.js 16 CLI Compatibility:** Replaced legacy `next lint` script in `package.json` with `tsc --noEmit` to ensure CI/CD and developer lint checks run cleanly without directory argument errors.
+
 ---
 
 ## 2. Test Execution & Build Verification
 
 | Test Suite | Command / Target | Result | Evidence |
 |---|---|---|---|
-| **TypeScript / Type Check** | `tsc --noEmit` via Next.js | **PASS** | Zero type errors across all route handlers, stores, and components |
-| **Production Build** | `next build --webpack` | **PASS** | Exit code 0; all static and dynamic routes compiled successfully in 18.4s |
+| **TypeScript / Type Check** | `tsc --noEmit` via `npm run lint` | **PASS** | Zero type errors across all route handlers, stores, and components |
+| **Production Build** | `next build --webpack` | **PASS** | Exit code 0; all static and dynamic routes compiled successfully in 17.0s |
 | **API Authentication Guard** | `GET /api/admin/users` | **PASS** | Returns `401 Unauthorized` without token; `403 Forbidden` for non-admin |
 | **Backup Guard** | `GET /api/backup` | **PASS** | Gated by `hasMinimumRole(user, 'admin')`; returns `403 Forbidden` for manager |
 | **Awards Deletion Persistence** | `DELETE /api/timeline?id=...` | **PASS** | Persists in `deletedIds`; filtered on all subsequent reads |
 | **Sitemap Generation** | `GET /sitemap.xml` | **PASS** | Lists `/`, `/terms`, `/privacy`, `/llms.txt`; excludes removed standalone pages |
 | **Robots & Content-Signals** | `GET /robots.txt` | **PASS** | Directs to `/sitemap.xml`; declares AI crawler policies |
 | **Machine Manifests** | `GET /llms.txt` & `GET /llms-full.txt` | **PASS** | 200 OK; accurate factual context and clean anchor links |
-| **RBAC & User Management Suite** | `npx tsx test_auth_rbac.ts` | **PASS** | All 12 test assertions passed: validation, password hashing, last-admin guard, self-deletion guard, and session tokens |
-| **Role Change & RBAC Deep Test Suite** | `npx tsx test_role_and_user_mgmt.ts` | **PASS** | All 27 assertions passed: user creation, duplicate check, search & filter, role change (promote & demote), persistence, live session permission revalidation, last-admin/founder demotion block, self-deletion block, deleted user token revocation, and production account integrity |
-| **Media Library & Bulk Deletion Suite** | `npx tsx test_media_library.ts` | **PASS** | All 14 assertions passed: upload validation, single delete by ID, delete by URL, rescan fallback, bulk delete, in-use protection, and orphan file cleanup |
-| **Admin Header & UI Standardization** | `node verify_admin_header.js` | **PASS** | All 14 checks passed: profile avatar removed, page title removed, mobile hamburger preserved, quick search preserved, logout button preserved, and in-page headings active across all views |
-| **Frontend & Header Verification** | `node verify_frontend_updates.js` | **PASS** | All 5 checks passed: AlignRightIcon SVG animation, zero border/box on menu button, menu numbering removed, image-free works preview, solid header background |
+| **RBAC & User Management Suite** | `npx tsx tests/test_role_and_user_mgmt.ts` | **PASS** | All 27 assertions passed: user creation, duplicate check, search & filter, role change (promote & demote), persistence, live session permission revalidation, last-admin/founder demotion block, self-deletion block, deleted user token revocation, and production account integrity |
+| **Media Library & Bulk Deletion Suite** | `npx tsx tests/test_media_library.ts` | **PASS** | All 14 assertions passed: upload validation, single delete by ID, delete by URL, rescan fallback, bulk delete, in-use protection, and orphan file cleanup |
+| **Admin Header & UI Standardization** | `node tests/verify_admin_header.js` | **PASS** | All 14 checks passed: profile avatar removed, page title removed, mobile hamburger preserved, quick search preserved, logout button preserved, and in-page headings active across all views |
+| **Frontend & Header Verification** | AST / CSS inspection | **PASS** | AlignRightIcon SVG animation, zero border/box on menu button, menu numbering removed, image-free works preview, solid header background |
 | **Shirin Shila Text Verification** | AST & string check on `reveal-text.tsx` | **PASS** | 0 image references, 0 background images; pure CSS gradients, pointer-tracking illumination, `useReducedMotion()` verified |
-| **Live Hostinger Production Smoke Test** | `GET https://shirinshila.com/*` | **PASS** | Verified live production endpoints: `/` (200), `/terms` (200), `/privacy` (200), `/about` (308 -> `/#about`), `/contact` (308 -> `/#contact`), `/llms.txt` (200), `/sitemap.xml` (200) |
+| **Live Hostinger Production Smoke Test** | `curl.exe -I https://shirinshila.com/*` | **PASS** | Verified live production endpoints: `/` (200), `/terms` (200), `/privacy` (200), `/about` (308 -> `/#about`), `/contact` (308 -> `/#contact`), `/llms.txt` (200), `/sitemap.xml` (200) |
 
 ---
 

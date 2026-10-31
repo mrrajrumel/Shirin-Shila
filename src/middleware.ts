@@ -16,6 +16,15 @@ function decodeBase64Url(str: string): string {
   }
 }
 
+function constantTimeCompare(a: string, b: string): boolean {
+  if (a.length !== b.length) return false;
+  let result = 0;
+  for (let i = 0; i < a.length; i++) {
+    result |= a.charCodeAt(i) ^ b.charCodeAt(i);
+  }
+  return result === 0;
+}
+
 async function verifyHmacSignature(encodedPayload: string, signature: string): Promise<boolean> {
   try {
     const encoder = new TextEncoder();
@@ -37,7 +46,7 @@ async function verifyHmacSignature(encodedPayload: string, signature: string): P
       .replace(/\//g, '_')
       .replace(/=+$/, '');
 
-    return expectedSignature === signature;
+    return constantTimeCompare(expectedSignature, signature);
   } catch {
     return false;
   }
@@ -85,9 +94,8 @@ export async function middleware(request: NextRequest) {
                   payload &&
                   payload.exp &&
                   Date.now() < payload.exp &&
-                  payload.role === 'admin' &&
-                  (payload.username?.toLowerCase() === 'shirin' ||
-                    payload.username?.toLowerCase() === 'rumel')
+                  (payload.role === 'admin' || payload.role === 'manager') &&
+                  Boolean(payload.sub || payload.username)
                 ) {
                   isAuthenticated = true;
                 }

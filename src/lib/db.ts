@@ -114,11 +114,19 @@ export async function ensureDatabaseSchema(): Promise<void> {
         changed_by VARCHAR(64) NOT NULL DEFAULT 'admin',
         action VARCHAR(32) NOT NULL DEFAULT 'update',
         content_data LONGTEXT NOT NULL,
+        ip_address VARCHAR(45) DEFAULT NULL,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         INDEX idx_content_key (content_key),
         INDEX idx_created_at (created_at)
       ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
     `);
+
+    // Backward-compatible schema migration if table already existed without ip_address
+    try {
+      await db.query(`ALTER TABLE cms_audit_logs ADD COLUMN ip_address VARCHAR(45) DEFAULT NULL`);
+    } catch (_) {
+      // Column already exists or error ignored
+    }
 
     await db.query(`
       CREATE TABLE IF NOT EXISTS inquiries (
@@ -562,12 +570,22 @@ export async function logAdminAudit(
   try {
     await ensureDatabaseSchema();
     const serialized = typeof details === 'string' ? details : JSON.stringify(details || {});
-    await db.query(
-      `INSERT INTO cms_audit_logs (content_key, changed_by, action, content_data, ip_address)
-       VALUES (?, ?, ?, ?, ?)`,
-      [contentKey, changedBy, action, serialized, ipAddress || null]
-    );
-    return true;
+    try {
+      await db.query(
+        `INSERT INTO cms_audit_logs (content_key, changed_by, action, content_data, ip_address)
+         VALUES (?, ?, ?, ?, ?)`,
+        [contentKey, changedBy, action, serialized, ipAddress || null]
+      );
+      return true;
+    } catch {
+      // Fallback if ip_address column is not available in legacy schema
+      await db.query(
+        `INSERT INTO cms_audit_logs (content_key, changed_by, action, content_data)
+         VALUES (?, ?, ?, ?)`,
+        [contentKey, changedBy, action, serialized]
+      );
+      return true;
+    }
   } catch (err) {
     console.error('[MySQL Audit] Error recording audit log:', (err as Error).message);
     return false;
