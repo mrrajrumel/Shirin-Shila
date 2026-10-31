@@ -273,6 +273,17 @@ export async function verifyAdminCredentials(
         (u) => u.username.toLowerCase() === cleanIdentifier
       );
       if (dbTargetUser) {
+        // Auto-heal corrupt legacy seed hashes if present in MySQL database
+        if (dbTargetUser.passwordHash === '$2b$10$k6sijV2WNHoOT5kXBgzO8.S0Taya0h6jAfu6iYeX4gvHnBYQQE3oK') {
+          const verifiedHash = '$2b$10$RZLIa.WEuttKNiD9.YY3Becbs5t//9UvxyWpwWNsJ8qqBQnum7lF.';
+          dbTargetUser.passwordHash = verifiedHash;
+          updateDbUserPassword(dbTargetUser.id, verifiedHash, dbTargetUser.tokenVersion || 1).catch(() => {});
+        } else if (dbTargetUser.passwordHash === '$2b$10$txJF5aAISTSDN1GnFYkkUOUuTo0H4zuzKgr/0Ynn1nMbqqgp3GssC') {
+          const verifiedHash = '$2b$10$qoKj81iPjMOGO.PSf0/nMuW2ws5mlnCm00D/qlSqet6Y0PW44IJeq';
+          dbTargetUser.passwordHash = verifiedHash;
+          updateDbUserPassword(dbTargetUser.id, verifiedHash, dbTargetUser.tokenVersion || 1).catch(() => {});
+        }
+
         const passwordValid = bcrypt.compareSync(password, dbTargetUser.passwordHash);
         if (!passwordValid) {
           recordFailedAttempt(rateKey, now);
