@@ -12,6 +12,7 @@ if (typeof window !== "undefined") {
 }
 
 import { navigationItems, navigationMeta } from "@/data/navigation";
+import AlignRightIcon from "@/components/ui/align-right-icon";
 
 export default function SiteNav() {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -353,7 +354,6 @@ export default function SiteNav() {
                       onClick={(e) => handleNavClick(e, item.targetId, item.href)}
                       className={`desktop-nav-item ${isActive ? "active" : ""}`}
                     >
-                      <span className="desktop-nav-num">{item.num}</span>
                       <div className="desktop-nav-track">
                         <span className="desktop-nav-text normal">{item.label}</span>
                         <span className="desktop-nav-text kinetic" aria-hidden="true">
@@ -369,46 +369,33 @@ export default function SiteNav() {
 
               {/* Right Controls - Strictly Mobile Only */}
               <div className="nav-row__right mobile-only">
-                {/* Mobile Kinetic Hamburger / Cancel Icon Button (No Text, No Border) */}
+                {/* Mobile Animated AlignRight / Close Icon Button (No Border, No Background Box) */}
                 <button
                   type="button"
-                  aria-label={isMenuOpen ? "Close menu" : "Open menu"}
+                  aria-label={isMenuOpen ? "Close navigation menu" : "Open navigation menu"}
                   aria-expanded={isMenuOpen}
                   className={`nav-close-btn ${isMenuOpen ? "is-open" : ""}`}
                   onClick={toggleMenu}
                   style={{ pointerEvents: "auto" }}
                 >
-                  <div className="hamburger-box">
+                  {isMenuOpen ? (
                     <svg
-                      xmlns="http://www.w3.org/2000/svg"
+                      width={24}
+                      height={24}
                       viewBox="0 0 24 24"
                       fill="none"
-                      className="hamburger-svg"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
                       aria-hidden="true"
                     >
-                      <path
-                        className="hamburger-path line-top"
-                        d="M3 6h18"
-                        stroke="currentColor"
-                        strokeWidth="2.2"
-                        strokeLinecap="round"
-                      />
-                      <path
-                        className="hamburger-path line-middle"
-                        d="M3 12h18"
-                        stroke="currentColor"
-                        strokeWidth="2.2"
-                        strokeLinecap="round"
-                      />
-                      <path
-                        className="hamburger-path line-bottom"
-                        d="M3 18h18"
-                        stroke="currentColor"
-                        strokeWidth="2.2"
-                        strokeLinecap="round"
-                      />
+                      <line x1="18" y1="6" x2="6" y2="18" />
+                      <line x1="6" y1="6" x2="18" y2="18" />
                     </svg>
-                  </div>
+                  ) : (
+                    <AlignRightIcon size={24} aria-hidden="true" />
+                  )}
                 </button>
               </div>
             </nav>
@@ -666,7 +653,6 @@ export default function SiteNav() {
                         className={`drawer-nav-link ${isActive ? "active" : ""}`}
                         onClick={(e) => handleNavClick(e, item.targetId, item.href)}
                       >
-                        <span className="drawer-nav-num">{item.num}</span>
                         <p className="drawer-nav-text">{item.label}</p>
                         <div className="drawer-nav-hover-bg"></div>
                       </a>

@@ -40,6 +40,10 @@ Following the full system repair and page retirement in Review 1, a second indep
 | **21** | Collapsible desktop sidebar | Dual-mode desktop sidebar (compact 76px rail with native hover tooltips vs 280px expanded) with `localStorage` persistence and smooth transitions. | **PASS** |
 | **22** | Global admin quick search (Ctrl+K) | Sticky topbar search bar with `Ctrl+K` hotkey, real-time filtering, arrow/enter navigation across all 17 admin modules, and role-based filtering. | **PASS** |
 | **23** | Complete User & Role Management | User creation with bcrypt 10 rounds, uniqueness check, update display name, change role with last-admin protection, deletion with self-deletion/founder protection, and user search/role filtering. | **PASS** |
+| **24** | Header Transparency Solidification | Reinforced header background opacity to solid 0.95 (0.98 on scroll) for crisp legibility over all hero backgrounds without excessive blur. | **PASS** |
+| **25** | Animated Hamburger SVG (`AlignRightIcon`) | Implemented exact sequential dash-offset animated SVG; verified zero border box, zero background container, and accessible 44px touch target. | **PASS** |
+| **26** | Menu Numbering Removal | Completely purged numbering (`01`, `02`, `03`...) from visible desktop navigation links and mobile drawer. | **PASS** |
+| **27** | Notable Works Image-Free Preview | Converted public Notable Works presentation into an editorial, typography-led responsive catalog with category tabs and trailer modals without images or broken placeholders. | **PASS** |
 
 ---
 

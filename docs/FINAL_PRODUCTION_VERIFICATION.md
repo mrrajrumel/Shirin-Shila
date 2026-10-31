@@ -43,6 +43,12 @@
 - [x] **Media Asset Management:** `/admin/media` uploads and validates images; media library picker functional.
 - [x] **Favicon & Icons:** `/icon.svg` and dynamic favicon redirection operating correctly.
 
+### 1.5 Frontend Header, Navigation & Notable Works Refinements
+- [x] **Header Transparency Reduced:** Header background opacity reinforced to a solid, refined dark obsidian (`rgba(10, 8, 12, 0.95)` resting / `rgba(8, 6, 10, 0.98)` scrolled) for high readability across all hero backgrounds.
+- [x] **Animated Hamburger SVG (`AlignRightIcon`):** Integrated exact SVG implementation with sequential dash-offset keyframe animations; strictly styled with no background box, no button border, and accessible touch targets.
+- [x] **Menu Numbering Removed:** Completely purged numbering (`01`, `02`, `03`...) from both desktop navigation links and mobile drawer items.
+- [x] **Notable Works Image-Free Preview:** Converted public Notable Works presentation into an editorial, text-first cinematic catalog with rich metadata, category tabs, and interactive trailer modals with zero image tags or empty placeholder boxes.
+
 ---
 
 ## 2. Test Execution & Build Verification
@@ -58,6 +64,7 @@
 | **Robots & Content-Signals** | `GET /robots.txt` | **PASS** | Directs to `/sitemap.xml`; declares AI crawler policies |
 | **Machine Manifests** | `GET /llms.txt` & `GET /llms-full.txt` | **PASS** | 200 OK; accurate factual context and clean anchor links |
 | **RBAC & User Management Suite** | `npx tsx test_auth_rbac.ts` | **PASS** | All 12 test assertions passed: validation, password hashing, last-admin guard, self-deletion guard, and session tokens |
+| **Frontend & Header Verification** | `node verify_frontend_updates.js` | **PASS** | All 5 checks passed: AlignRightIcon SVG animation, zero border/box on menu button, menu numbering removed, image-free works preview, solid header background |
 
 ---
 

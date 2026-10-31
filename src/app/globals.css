@@ -140,20 +140,20 @@ a {
   align-items: center;
   justify-content: space-between;
   padding: 18px clamp(24px, 4.5vw, 80px);
-  border-bottom: 1px solid var(--border-subtle);
-  background: rgba(11, 8, 12, 0.9);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(10, 8, 12, 0.95);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   box-sizing: border-box;
-  transition: background 0.35s ease, border-color 0.35s ease, box-shadow 0.35s ease;
+  transition: background 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
 .header.is-scrolled .nav-row {
-  background: rgba(13, 8, 14, 0.96);
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
+  background: rgba(8, 6, 10, 0.98);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
   border-bottom-color: rgba(255, 63, 121, 0.28);
-  box-shadow: 0 10px 32px rgba(0, 0, 0, 0.55);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.7);
 }
 
 .nav-logo-row {
@@ -190,15 +190,6 @@ a {
 
 .desktop-nav-item:hover {
   background: rgba(255, 63, 121, 0.08);
-}
-
-.desktop-nav-num {
-  font-family: var(--font-mono, monospace);
-  font-size: 11px;
-  font-weight: 700;
-  color: var(--pink);
-  letter-spacing: 0.1em;
-  opacity: 0.85;
 }
 
 .desktop-nav-track {
@@ -344,93 +335,41 @@ a {
   width: 44px;
   height: 44px;
   padding: 0;
-  background: rgba(255, 255, 255, 0.07) !important;
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.14) !important;
-  border-radius: 12px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.15) !important;
-  color: #f8f1f5;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  border-radius: 0;
+  color: #ffffff;
   cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: color 0.2s ease, transform 0.2s ease;
   outline: none;
   pointer-events: auto;
   position: relative;
-  overflow: hidden;
 }
 
-.nav-close-btn::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  background: linear-gradient(135deg, rgba(255, 63, 121, 0.2), transparent 70%);
-  opacity: 0;
-  transition: opacity 0.3s ease;
-  pointer-events: none;
+.nav-close-btn:focus-visible {
+  outline: 2px solid var(--pink);
+  outline-offset: 3px;
+  border-radius: 4px;
 }
 
 .nav-close-btn:hover {
-  background: rgba(255, 63, 121, 0.15) !important;
-  border-color: rgba(255, 63, 121, 0.55) !important;
-  box-shadow: 0 0 20px rgba(255, 63, 121, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.25) !important;
-  transform: translateY(-1px) scale(1.04);
-}
-
-.nav-close-btn:hover::before {
-  opacity: 1;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  color: var(--pink) !important;
+  transform: scale(1.06);
 }
 
 .nav-close-btn.is-open {
-  background: rgba(255, 63, 121, 0.22) !important;
-  border-color: var(--pink) !important;
-  box-shadow: 0 0 25px rgba(255, 63, 121, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.3) !important;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  color: #ffffff !important;
 }
 
-.hamburger-box {
-  width: 22px;
-  height: 22px;
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.hamburger-svg {
-  width: 22px;
-  height: 22px;
-  display: block;
-  overflow: visible;
-}
-
-.hamburger-path {
-  stroke: #ffffff;
-  stroke-width: 2.2px;
-  stroke-linecap: round;
-  transform-origin: 12px 12px;
-  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1),
-              stroke 0.25s ease,
-              opacity 0.25s ease;
-}
-
-.nav-close-btn:hover .hamburger-path {
-  stroke: #ff7ca0;
-}
-
-/* Morph Hamburger to Cancel (X) when menu is open */
-.nav-close-btn.is-open .line-top {
-  transform: translateY(6px) rotate(45deg);
-  stroke: #ffffff;
-}
-
-.nav-close-btn.is-open .line-middle {
-  opacity: 0;
-  transform: scaleX(0);
-}
-
-.nav-close-btn.is-open .line-bottom {
-  transform: translateY(-6px) rotate(-45deg);
-  stroke: #ffffff;
+.nav-close-btn.is-open:hover {
+  color: var(--pink) !important;
 }
 
 /* Visibility rules: Strictly differentiate PC and Mobile */
@@ -718,7 +657,6 @@ a {
   transform: translateX(8px);
 }
 
-.drawer-nav-num,
 .nav-link-num {
   font-size: 13px;
   letter-spacing: 0.12em;
