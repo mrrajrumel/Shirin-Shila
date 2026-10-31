@@ -13,7 +13,7 @@ export interface AdminUserRecord {
   id: string;
   username: string;
   displayName: string;
-  role: 'admin';
+  role: 'admin' | 'manager';
   passwordHash: string;
   createdAt: string;
   updatedAt: string;
@@ -23,7 +23,7 @@ export interface SessionUser {
   id: string;
   username: string;
   displayName: string;
-  role: 'admin';
+  role: 'admin' | 'manager';
 }
 
 function getUsersFile(): string {
@@ -97,6 +97,10 @@ export function ensureAdminAccounts(): AdminUserRecord[] {
     };
     users.push(shirinUser);
     modified = true;
+  } else if (shirinUser.role !== 'admin') {
+    shirinUser.role = 'admin';
+    shirinUser.updatedAt = new Date().toISOString();
+    modified = true;
   }
 
   // Account 2: Rumel
@@ -110,12 +114,16 @@ export function ensureAdminAccounts(): AdminUserRecord[] {
       id: 'admin-rumel',
       username: 'Rumel',
       displayName: 'Rumel Ahmed',
-      role: 'admin',
+      role: 'manager',
       passwordHash: hash,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     };
     users.push(rumelUser);
+    modified = true;
+  } else if (rumelUser.role !== 'manager') {
+    rumelUser.role = 'manager';
+    rumelUser.updatedAt = new Date().toISOString();
     modified = true;
   }
 
@@ -318,7 +326,7 @@ export function verifySessionToken(token?: string | null): SessionUser | null {
     if (!payload.exp || Date.now() > payload.exp) {
       return null;
     }
-    if (payload.role !== 'admin') {
+    if (payload.role !== 'admin' && payload.role !== 'manager') {
       return null;
     }
 
@@ -326,9 +334,33 @@ export function verifySessionToken(token?: string | null): SessionUser | null {
       id: payload.sub,
       username: payload.username,
       displayName: payload.displayName || payload.username,
-      role: 'admin',
+      role: payload.role as 'admin' | 'manager',
     };
   } catch {
     return null;
   }
+}
+
+export function getUserByUsername(username: string): AdminUserRecord | undefined {
+  const users = ensureAdminAccounts();
+  return users.find(u => u.username.toLowerCase() === username.toLowerCase());
+}
+
+/**
+ * Returns all admin user records (without passwordHash).
+ */
+export function getAllAdminUsers(): Omit<AdminUserRecord, 'passwordHash'>[] {
+  const users = ensureAdminAccounts();
+  return users.map(({ passwordHash: _, ...rest }) => rest);
+}
+
+/**
+ * Returns true if the user has at least the required role level.
+ * Role hierarchy: admin > manager
+ */
+export function hasMinimumRole(user: SessionUser | null, required: 'admin' | 'manager'): boolean {
+  if (!user) return false;
+  if (required === 'manager') return user.role === 'admin' || user.role === 'manager';
+  if (required === 'admin') return user.role === 'admin';
+  return false;
 }

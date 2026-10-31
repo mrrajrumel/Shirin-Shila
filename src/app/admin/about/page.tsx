@@ -271,7 +271,7 @@ export default function AdminAboutPage() {
                   placeholder="e.g. Silver-Screen Dhallywood Actress, Television Reality Judge & Cultural Fashion Icon"
                 />
                 <span style={{ fontSize: '11px', color: 'var(--adm-text-muted)', marginTop: '4px', display: 'block' }}>
-                  Displays directly beneath the main title on the public /about page.
+                  Displays directly beneath the section title in the homepage About section.
                 </span>
               </div>
 

@@ -151,7 +151,7 @@ export default async function RootLayout({
             "contactType": "Talent Booking & Management Desk",
             "email": managementEmail,
             ...(managementPhone ? { "telephone": managementPhone } : {}),
-            "url": `${siteUrl}/contact`,
+            "url": `${siteUrl}/#contact`,
             "availableLanguage": ["English", "Bengali"]
           }
         ],
@@ -243,7 +243,7 @@ export default async function RootLayout({
         "contactType": "Talent Booking & Management Desk",
         "email": managementEmail,
         ...(managementPhone ? { "telephone": managementPhone } : {}),
-        "url": `${siteUrl}/contact`,
+        "url": `${siteUrl}/#contact`,
         "availableLanguage": ["English", "Bengali"]
       },
       {

@@ -2,14 +2,15 @@ import { NextRequest, NextResponse } from 'next/server';
 import { revalidatePath } from 'next/cache';
 import fs from 'fs';
 import path from 'path';
-import { SESSION_COOKIE_NAME, verifySessionToken } from '@/lib/auth';
+import { SESSION_COOKIE_NAME, verifySessionToken, hasMinimumRole } from '@/lib/auth';
 import { getPersistentStoreDir, getPersistentBackupsDir } from '@/lib/persistent-paths';
 
 export const dynamic = 'force-dynamic';
 
 function checkAuth(request: NextRequest): boolean {
   const token = request.cookies.get(SESSION_COOKIE_NAME)?.value;
-  return Boolean(verifySessionToken(token));
+  const user = verifySessionToken(token);
+  return Boolean(user && hasMinimumRole(user, 'admin'));
 }
 
 const KNOWN_STORE_FILES = [

@@ -54,8 +54,8 @@ ${filmLines}
 
 ## Key Site Links
 - Homepage: ${siteUrl}/
-- About Us: ${siteUrl}/about
-- Contact & Booking Desk: ${siteUrl}/contact
+- About Us: ${siteUrl}/#about
+- Contact & Booking Desk: ${siteUrl}/#contact
 - Terms of Representation: ${siteUrl}/terms
 - Privacy Policy: ${siteUrl}/privacy
 - llms.txt Summary: ${siteUrl}/llms.txt

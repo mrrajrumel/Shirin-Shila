@@ -53,10 +53,7 @@ export default async function PrivacyPage() {
 
         <MarkdownRenderer content={pageConfig.content} />
 
-        <footer style={{ marginTop: '48px', paddingTop: '24px', borderTop: '1px solid #27272a', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px' }}>
-          <div style={{ fontSize: '13px', color: '#a1a1aa' }}>
-            Data inquiries: <a href="mailto:privacy@shirinshila.com" style={{ color: '#ec4899', textDecoration: 'none' }}>privacy@shirinshila.com</a>
-          </div>
+        <footer style={{ marginTop: '48px', paddingTop: '24px', borderTop: '1px solid #27272a', display: 'flex', justifyContent: 'flex-end', alignItems: 'center', flexWrap: 'wrap', gap: '16px' }}>
           <Link href="/terms" style={{ fontSize: '13px', color: '#ec4899', textDecoration: 'underline' }}>
             View Terms of Representation
           </Link>

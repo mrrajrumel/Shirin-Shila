@@ -87,8 +87,6 @@ export async function POST(request: NextRequest) {
 
     // Revalidate paths affected by SEO and metadata updates
     revalidatePath('/');
-    revalidatePath('/about');
-    revalidatePath('/contact');
     revalidatePath('/terms');
     revalidatePath('/privacy');
     revalidatePath('/sitemap.xml');

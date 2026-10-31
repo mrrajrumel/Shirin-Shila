@@ -17,8 +17,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // Distinct, genuine, crawlable public routes
   const paths: Array<{ path: string; priority: number; freq: 'daily' | 'weekly' | 'monthly' | 'yearly' }> = [
     { path: '', priority: 1.0, freq: 'daily' },
-    { path: '/about', priority: 0.9, freq: 'monthly' },
-    { path: '/contact', priority: 0.9, freq: 'monthly' },
     { path: '/terms', priority: 0.7, freq: 'yearly' },
     { path: '/privacy', priority: 0.7, freq: 'yearly' },
   ];

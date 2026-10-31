@@ -27,8 +27,8 @@ export async function GET(request: NextRequest) {
 
 ## Quick Links
 - **Homepage**: ${baseUrl}/
-- **About Us**: ${baseUrl}/about
-- **Contact and Book**: ${baseUrl}/contact
+- **About Us**: ${baseUrl}/#about
+- **Contact and Book**: ${baseUrl}/#contact
 - **Terms of Representation**: ${baseUrl}/terms
 - **Privacy Policy**: ${baseUrl}/privacy
 - **LLM Summary**: ${baseUrl}/llms.txt
@@ -83,7 +83,7 @@ ${(mediaPartners || defaultMediaPartners)
 - **Management Email**: ${contact?.email || 'booking@shirinshila.com'}
 - **Phone / WhatsApp**: ${contact?.phone || '+880 1711-000000'}
 - **Office**: Dhaka, Bangladesh (Global Shoot Availability)
-- **Inquiry Portal**: ${baseUrl}/contact
+- **Inquiry Portal**: ${baseUrl}/#contact
 `;
 
   return new NextResponse(md, {

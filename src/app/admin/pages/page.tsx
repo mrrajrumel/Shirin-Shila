@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   FileText,
   Save,
@@ -12,25 +12,17 @@ import {
   History,
   RotateCcw,
   ShieldCheck,
-  User,
-  Share2,
   Lock,
   Scale,
   Bot,
   Plus,
   Trash2,
-  Upload,
-  FolderKanban,
-  ImageIcon,
 } from 'lucide-react';
 import { PagesRegistry, defaultPagesRegistry, ManagedPageData } from '@/data/pages';
-import { MediaPickerModal } from '@/components/admin/media-picker-modal';
 
-type PageKey = keyof PagesRegistry;
+type PageKey = 'privacy' | 'terms' | 'llms';
 
 const PAGE_KEYS: { key: PageKey; label: string; icon: any }[] = [
-  { key: 'about', label: 'About Us', icon: User },
-  { key: 'contact', label: 'Contact & Book', icon: Share2 },
   { key: 'privacy', label: 'Privacy Policy', icon: Lock },
   { key: 'terms', label: 'Terms of Representation', icon: Scale },
   { key: 'llms', label: 'llms.txt Manifest', icon: Bot },
@@ -38,16 +30,13 @@ const PAGE_KEYS: { key: PageKey; label: string; icon: any }[] = [
 
 export default function AdminPagesManagement() {
   const [pages, setPages] = useState<PagesRegistry>(defaultPagesRegistry);
-  const [activeTab, setActiveTab] = useState<PageKey>('about');
+  const [activeTab, setActiveTab] = useState<PageKey>('privacy');
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [savedSuccess, setSavedSuccess] = useState(false);
   const [revisions, setRevisions] = useState<any[]>([]);
   const [loadingRevisions, setLoadingRevisions] = useState(false);
   const [rollingBackId, setRollingBackId] = useState<number | null>(null);
-  const [isUploadingPortrait, setIsUploadingPortrait] = useState(false);
-  const [portraitPickerOpen, setPortraitPickerOpen] = useState(false);
-  const portraitFileInputRef = useRef<HTMLInputElement>(null);
 
   const loadPages = async () => {
     setLoading(true);
@@ -239,32 +228,6 @@ export default function AdminPagesManagement() {
     }
   };
 
-  const handlePortraitUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    setIsUploadingPortrait(true);
-    const body = new FormData();
-    body.append('file', file);
-    body.append('folder', 'about');
-
-    try {
-      const res = await fetch('/api/upload', {
-        method: 'POST',
-        body,
-      });
-
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Upload failed');
-
-      handleMetaChange('portraitImage', data.url);
-    } catch (err: any) {
-      alert(`Image upload error: ${err.message}`);
-    } finally {
-      setIsUploadingPortrait(false);
-    }
-  };
-
   const activePage = pages[activeTab] || defaultPagesRegistry[activeTab];
 
   if (loading) {
@@ -408,27 +371,14 @@ export default function AdminPagesManagement() {
                   </div>
 
                   <div className="adm-form-group">
-                    <label className="adm-label">
-                      {activeTab === 'about'
-                        ? 'Page Subheading / Tagline Banner'
-                        : 'Subheading / Kicker'}
-                    </label>
+                    <label className="adm-label">Subheading / Kicker</label>
                     <input
                       type="text"
                       className="adm-input"
                       value={activePage.subheading || ''}
                       onChange={(e) => handleFieldChange('subheading', e.target.value)}
-                      placeholder={
-                        activeTab === 'about'
-                          ? 'Silver-Screen Dhallywood Actress, Television Reality Judge & Cultural Fashion Icon'
-                          : 'Page subtitle or status kicker...'
-                      }
+                      placeholder="Page subtitle or status kicker..."
                     />
-                    {activeTab === 'about' && (
-                      <span style={{ fontSize: '11px', color: 'var(--adm-text-muted)', marginTop: '4px', display: 'block' }}>
-                        Controls the prominent tagline: "Silver-Screen Dhallywood Actress, Television Reality Judge & Cultural Fashion Icon" on /about.
-                      </span>
-                    )}
                   </div>
 
                   {/* Main Content Area */}
@@ -437,9 +387,7 @@ export default function AdminPagesManagement() {
                       <label className="adm-label" style={{ margin: 0 }}>
                         {activeTab === 'llms'
                           ? 'Plaintext Manifest Body (Markdown Format)'
-                          : activeTab === 'privacy' || activeTab === 'terms'
-                          ? 'Legal & Policy Terms (Markdown Formatted)'
-                          : 'Main Story & Overview Body'}
+                          : 'Legal & Policy Terms (Markdown Formatted)'}
                       </label>
                       <span style={{ fontSize: '11px', color: 'var(--adm-text-muted)' }}>
                         {(activePage.content || '').length} characters • {(activePage.content || '').split(/\s+/).filter(Boolean).length} words
@@ -447,7 +395,7 @@ export default function AdminPagesManagement() {
                     </div>
                     <textarea
                       className="adm-textarea"
-                      rows={activeTab === 'llms' || activeTab === 'privacy' || activeTab === 'terms' ? 14 : 5}
+                      rows={14}
                       value={activePage.content || ''}
                       onChange={(e) => handleFieldChange('content', e.target.value)}
                       placeholder="Enter verified page content..."
@@ -458,230 +406,6 @@ export default function AdminPagesManagement() {
                       }}
                     />
                   </div>
-
-                  {/* Tab-Specific Rich Customization Sections */}
-                  {activeTab === 'about' && (
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', paddingTop: '10px', borderTop: '1px solid var(--adm-border)' }}>
-                      {/* Portrait Image Manager */}
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                        <span style={{ fontSize: '13px', fontWeight: 600, color: 'var(--tail-primary)' }}>
-                          About Page Featured Portrait Image
-                        </span>
-                        <div style={{ display: 'grid', gridTemplateColumns: '140px 1fr', gap: '16px', alignItems: 'center' }}>
-                          <div
-                            style={{
-                              width: '140px',
-                              height: '170px',
-                              borderRadius: '10px',
-                              overflow: 'hidden',
-                              border: '1px solid var(--adm-border)',
-                              background: 'var(--adm-bg-page)',
-                              position: 'relative',
-                            }}
-                          >
-                            <img
-                              src={activePage.meta?.portraitImage || '/images/hero.jpg'}
-                              alt="About Portrait Preview"
-                              style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                            />
-                          </div>
-                          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                            <input
-                              type="file"
-                              ref={portraitFileInputRef}
-                              onChange={handlePortraitUpload}
-                              accept="image/*"
-                              style={{ display: 'none' }}
-                            />
-                            <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
-                              <button
-                                type="button"
-                                onClick={() => portraitFileInputRef.current?.click()}
-                                disabled={isUploadingPortrait}
-                                className="adm-btn adm-btn-secondary adm-btn-sm"
-                              >
-                                <Upload size={13} />
-                                <span>{isUploadingPortrait ? 'Uploading...' : 'Upload Image'}</span>
-                              </button>
-                              <button
-                                type="button"
-                                onClick={() => setPortraitPickerOpen(true)}
-                                className="adm-btn adm-btn-secondary adm-btn-sm"
-                              >
-                                <FolderKanban size={13} />
-                                <span>Media Library</span>
-                              </button>
-                            </div>
-                            <div>
-                              <label className="adm-label">Image URL / Path</label>
-                              <input
-                                type="text"
-                                className="adm-input"
-                                value={activePage.meta?.portraitImage || ''}
-                                onChange={(e) => handleMetaChange('portraitImage', e.target.value)}
-                                placeholder="/images/hero.jpg or /uploads/about/..."
-                              />
-                              <span style={{ fontSize: '11px', color: 'var(--adm-text-muted)', marginTop: '4px', display: 'block' }}>
-                                Displays prominently as the main biographical portrait on /about.
-                              </span>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-
-                      <span style={{ fontSize: '13px', fontWeight: 600, color: 'var(--tail-primary)', marginTop: '6px' }}>
-                        Career Statistics (Highlights Grid)
-                      </span>
-                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px' }}>
-                        <div>
-                          <label className="adm-label">Feature Films</label>
-                          <input
-                            type="text"
-                            className="adm-input"
-                            value={activePage.meta?.featureFilms || '10+'}
-                            onChange={(e) => handleMetaChange('featureFilms', e.target.value)}
-                            placeholder="10+"
-                          />
-                        </div>
-                        <div>
-                          <label className="adm-label">Babisas Award Year</label>
-                          <input
-                            type="text"
-                            className="adm-input"
-                            value={activePage.meta?.babisasYear || '2019'}
-                            onChange={(e) => handleMetaChange('babisasYear', e.target.value)}
-                            placeholder="2019"
-                          />
-                        </div>
-                        <div>
-                          <label className="adm-label">DIFF Trophy Year</label>
-                          <input
-                            type="text"
-                            className="adm-input"
-                            value={activePage.meta?.diffYear || '2024'}
-                            onChange={(e) => handleMetaChange('diffYear', e.target.value)}
-                            placeholder="2024"
-                          />
-                        </div>
-                      </div>
-
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '6px', flexWrap: 'wrap', gap: '8px' }}>
-                        <div>
-                          <span style={{ fontSize: '13px', fontWeight: 600, color: 'var(--tail-primary)', display: 'block' }}>
-                            Notable Accolades &amp; Honors
-                          </span>
-                          <span style={{ fontSize: '11px', color: 'var(--adm-text-muted)' }}>
-                            Automatically synchronizes with your awards from Admin &gt; Awards &amp; Milestones (Timeline).
-                          </span>
-                        </div>
-                        <div style={{ display: 'flex', gap: '8px' }}>
-                          <button
-                            type="button"
-                            onClick={handleSyncFromTimeline}
-                            className="adm-btn adm-btn-secondary adm-btn-sm"
-                            title="Load latest awards from Timeline"
-                          >
-                            <RefreshCw size={12} />
-                            <span>Sync from Awards</span>
-                          </button>
-                          <button
-                            type="button"
-                            onClick={handleAddAccolade}
-                            className="adm-btn adm-btn-secondary adm-btn-sm"
-                          >
-                            <Plus size={12} />
-                            <span>Add Custom</span>
-                          </button>
-                        </div>
-                      </div>
-
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                        {(activePage.meta?.accolades || []).map((accolade: string, idx: number) => (
-                          <div key={idx} style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                            <input
-                              type="text"
-                              className="adm-input"
-                              value={accolade}
-                              onChange={(e) => handleUpdateAccolade(idx, e.target.value)}
-                            />
-                            <button
-                              type="button"
-                              onClick={() => handleRemoveAccolade(idx)}
-                              style={{
-                                background: 'transparent',
-                                border: 'none',
-                                color: '#ef4444',
-                                cursor: 'pointer',
-                                padding: '6px',
-                              }}
-                              title="Delete honor"
-                            >
-                              <Trash2 size={14} />
-                            </button>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {activeTab === 'contact' && (
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', paddingTop: '10px', borderTop: '1px solid var(--adm-border)' }}>
-                      <span style={{ fontSize: '13px', fontWeight: 600, color: 'var(--tail-primary)' }}>
-                        Management Office &amp; Booking Contacts
-                      </span>
-                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-                        <div>
-                          <label className="adm-label">Booking &amp; Casting Email</label>
-                          <input
-                            type="email"
-                            className="adm-input"
-                            value={activePage.meta?.managementEmail || 'booking@shirinshila.com'}
-                            onChange={(e) => handleMetaChange('managementEmail', e.target.value)}
-                          />
-                        </div>
-                        <div>
-                          <label className="adm-label">Press &amp; Media Email</label>
-                          <input
-                            type="email"
-                            className="adm-input"
-                            value={activePage.meta?.pressEmail || 'press@shirinshila.com'}
-                            onChange={(e) => handleMetaChange('pressEmail', e.target.value)}
-                          />
-                        </div>
-                      </div>
-
-                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-                        <div>
-                          <label className="adm-label">Telephone / WhatsApp</label>
-                          <input
-                            type="text"
-                            className="adm-input"
-                            value={activePage.meta?.phone || '+880 1711-000000'}
-                            onChange={(e) => handleMetaChange('phone', e.target.value)}
-                          />
-                        </div>
-                        <div>
-                          <label className="adm-label">Representation Base</label>
-                          <input
-                            type="text"
-                            className="adm-input"
-                            value={activePage.meta?.representationBase || 'Dhaka, Bangladesh (Available for Worldwide Shoots)'}
-                            onChange={(e) => handleMetaChange('representationBase', e.target.value)}
-                          />
-                        </div>
-                      </div>
-
-                      <div className="adm-form-group">
-                        <label className="adm-label">Turnaround Guarantee</label>
-                        <input
-                          type="text"
-                          className="adm-input"
-                          value={activePage.meta?.turnaroundTime || 'All verified casting inquiries answered within 24-48 business hours'}
-                          onChange={(e) => handleMetaChange('turnaroundTime', e.target.value)}
-                        />
-                      </div>
-                    </div>
-                  )}
 
                   {/* SEO Meta Tags */}
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', paddingTop: '10px', borderTop: '1px solid var(--adm-border)' }}>
@@ -862,16 +586,6 @@ export default function AdminPagesManagement() {
           </div>
         </form>
       </main>
-
-      <MediaPickerModal
-        isOpen={portraitPickerOpen}
-        onClose={() => setPortraitPickerOpen(false)}
-        onSelect={(url) => {
-          handleMetaChange('portraitImage', url);
-          setPortraitPickerOpen(false);
-        }}
-        targetFolder="about"
-      />
     </>
   );
 }

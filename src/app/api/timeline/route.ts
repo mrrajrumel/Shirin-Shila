@@ -151,7 +151,6 @@ export async function POST(request: NextRequest) {
 
     await writeStore('timeline', store);
     revalidatePath('/');
-    revalidatePath('/about');
     revalidatePath('/admin/timeline');
     revalidatePath('/admin/pages');
 
@@ -226,7 +225,6 @@ export async function PUT(request: NextRequest) {
 
     await writeStore('timeline', store);
     revalidatePath('/');
-    revalidatePath('/about');
     revalidatePath('/admin/timeline');
     revalidatePath('/admin/pages');
 
@@ -302,7 +300,6 @@ export async function DELETE(request: NextRequest) {
 
     await writeStore('timeline', store);
     revalidatePath('/');
-    revalidatePath('/about');
     revalidatePath('/admin/timeline');
     revalidatePath('/admin/pages');
 

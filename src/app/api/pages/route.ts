@@ -185,8 +185,6 @@ function revalidateAllPages(singlePageId?: string) {
     revalidatePath('/sitemap.xml');
     revalidatePath('/robots.txt');
 
-    if (!singlePageId || singlePageId === 'about') revalidatePath('/about');
-    if (!singlePageId || singlePageId === 'contact') revalidatePath('/contact');
     if (!singlePageId || singlePageId === 'privacy') revalidatePath('/privacy');
     if (!singlePageId || singlePageId === 'terms') revalidatePath('/terms');
     if (!singlePageId || singlePageId === 'llms') revalidatePath('/llms.txt');

@@ -24,6 +24,7 @@ import {
   ShieldCheck,
   FileText,
   UserCircle,
+  Users2,
 } from "lucide-react";
 import "./admin.css";
 
@@ -33,7 +34,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const [newInquiriesCount, setNewInquiriesCount] = useState(0);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [currentUser, setCurrentUser] = useState<{ username: string; displayName: string } | null>(null);
+  const [currentUser, setCurrentUser] = useState<{ username: string; displayName: string; role?: string } | null>(null);
 
   // If on login page, render plain without sidebar shell
   const isLoginPage = pathname === "/admin/login";
@@ -132,7 +133,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       group: "SEO & SYSTEM SETTINGS",
       items: [
         { href: "/admin/seo", label: "SEO & Meta Data", icon: Globe },
-        { href: "/admin/backup", label: "Data & Persistence", icon: ShieldCheck },
+        ...(currentUser?.role === 'admin' ? [{ href: "/admin/backup", label: "Data & Persistence", icon: ShieldCheck }] : []),
+        ...(currentUser?.role === 'admin' ? [{ href: "/admin/users", label: "Users & Roles", icon: Users2 }] : []),
         { href: "/admin/profile", label: "Profile & Security", icon: UserCircle },
       ],
     },

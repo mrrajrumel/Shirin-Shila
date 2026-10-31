@@ -53,10 +53,7 @@ export default async function TermsPage() {
 
         <MarkdownRenderer content={pageConfig.content} />
 
-        <footer style={{ marginTop: '48px', paddingTop: '24px', borderTop: '1px solid #27272a', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px' }}>
-          <div style={{ fontSize: '13px', color: '#a1a1aa' }}>
-            Questions regarding representation terms? Contact <a href="mailto:booking@shirinshila.com" style={{ color: '#ec4899', textDecoration: 'none' }}>booking@shirinshila.com</a>
-          </div>
+        <footer style={{ marginTop: '48px', paddingTop: '24px', borderTop: '1px solid #27272a', display: 'flex', justifyContent: 'flex-end', alignItems: 'center', flexWrap: 'wrap', gap: '16px' }}>
           <Link href="/privacy" style={{ fontSize: '13px', color: '#ec4899', textDecoration: 'underline' }}>
             View Privacy Policy
           </Link>

@@ -7,8 +7,8 @@ export interface FooterLinkItem {
 }
 
 export const defaultFooterLinks: FooterLinkItem[] = [
-  { id: 'about', label: 'About Us', href: '/about', isVisible: true, order: 1 },
-  { id: 'contact', label: 'Contact and Book', href: '/contact', isVisible: true, order: 2 },
+  { id: 'about', label: 'About Us', href: '/#about', isVisible: true, order: 1 },
+  { id: 'contact', label: 'Contact and Book', href: '/#contact', isVisible: true, order: 2 },
   { id: 'privacy', label: 'Privacy Policy', href: '/privacy', isVisible: true, order: 3 },
   { id: 'terms', label: 'Terms of Representation', href: '/terms', isVisible: true, order: 4 },
   { id: 'llms', label: 'llms.txt', href: '/llms.txt', isVisible: false, order: 5 },

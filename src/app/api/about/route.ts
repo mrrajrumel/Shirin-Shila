@@ -64,7 +64,6 @@ export async function POST(request: NextRequest) {
 
     await writeStore('about', updated);
     revalidatePath('/');
-    revalidatePath('/about');
 
     return NextResponse.json({ success: true, about: updated });
   } catch (err: any) {

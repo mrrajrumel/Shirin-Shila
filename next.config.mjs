@@ -42,6 +42,8 @@ const nextConfig = {
   },
   async redirects() {
     return [
+      { source: '/about', destination: '/#about', permanent: true },
+      { source: '/contact', destination: '/#contact', permanent: true },
       { source: '/filmography', destination: '/#filmography', permanent: true },
       { source: '/works', destination: '/#filmography', permanent: true },
       { source: '/projects', destination: '/#filmography', permanent: true },

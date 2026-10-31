@@ -64,7 +64,7 @@ export async function GET() {
     ],
     contact: {
       email: 'booking@shirinshila.com',
-      url: `${siteUrl}/contact`,
+      url: `${siteUrl}/#contact`,
     },
   };
 
