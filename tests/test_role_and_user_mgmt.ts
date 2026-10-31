@@ -37,6 +37,13 @@ async function runTests() {
   assert(!!shirin && shirin.role === 'admin', 'Initial check: Shirin exists with admin role');
   assert(!!rumel && (rumel.role === 'manager' || rumel.role === 'admin'), 'Initial check: Rumel exists');
 
+  // 1b. Verify production accounts authenticate with authorized passwords
+  const shirinLogin = await verifyAdminCredentials('Shirin', 'Shirin@tso');
+  assert(shirinLogin.success && shirinLogin.user?.username === 'Shirin', 'Initial credentials check: Shirin authenticates with Shirin@tso');
+
+  const rumelLogin = await verifyAdminCredentials('Rumel', 'Rumel@tso');
+  assert(rumelLogin.success && rumelLogin.user?.username === 'Rumel', 'Initial credentials check: Rumel authenticates with Rumel@tso');
+
   // 2. User Creation Test
   const testUsername = `qa_test_${Date.now().toString(36)}`;
   const initialPassword = 'SecureTestPass123!';

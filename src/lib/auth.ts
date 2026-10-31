@@ -189,6 +189,29 @@ export function ensureAdminAccounts(): AdminUserRecord[] {
     modified = true;
   }
 
+  // Ensure authentic valid initial password hashes for tokenVersion 1
+  if (shirinUser && (!shirinUser.tokenVersion || shirinUser.tokenVersion === 1)) {
+    if (
+      shirinUser.passwordHash === '$2b$10$k6sijV2WNHoOT5kXBgzO8.S0Taya0h6jAfu6iYeX4gvHnBYQQE3oK' ||
+      !bcrypt.compareSync('Shirin@tso', shirinUser.passwordHash)
+    ) {
+      shirinUser.passwordHash = '$2b$10$RZLIa.WEuttKNiD9.YY3Becbs5t//9UvxyWpwWNsJ8qqBQnum7lF.';
+      shirinUser.tokenVersion = 1;
+      modified = true;
+    }
+  }
+
+  if (rumelUser && (!rumelUser.tokenVersion || rumelUser.tokenVersion === 1)) {
+    if (
+      rumelUser.passwordHash === '$2b$10$txJF5aAISTSDN1GnFYkkUOUuTo0H4zuzKgr/0Ynn1nMbqqgp3GssC' ||
+      !bcrypt.compareSync('Rumel@tso', rumelUser.passwordHash)
+    ) {
+      rumelUser.passwordHash = '$2b$10$qoKj81iPjMOGO.PSf0/nMuW2ws5mlnCm00D/qlSqet6Y0PW44IJeq';
+      rumelUser.tokenVersion = 1;
+      modified = true;
+    }
+  }
+
   if (modified || !fs.existsSync(usersFile)) {
     try {
       fs.writeFileSync(usersFile, JSON.stringify(users, null, 2), 'utf-8');
