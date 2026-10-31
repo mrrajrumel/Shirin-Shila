@@ -63,7 +63,7 @@ export async function GET() {
       },
     ],
     contact: {
-      email: 'booking@shirinshila.com',
+      email: 'support@trytso.com',
       url: `${siteUrl}/#contact`,
     },
   };

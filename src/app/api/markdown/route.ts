@@ -80,7 +80,7 @@ ${(mediaPartners || defaultMediaPartners)
 ---
 
 ## 5. Talent Representation & Booking Inquiries
-- **Management Email**: ${contact?.email || 'booking@shirinshila.com'}
+- **Management Email**: ${contact?.managementEmail || contact?.email || 'support@trytso.com'}
 - **Phone / WhatsApp**: ${contact?.phone || '+880 1711-000000'}
 - **Office**: Dhaka, Bangladesh (Global Shoot Availability)
 - **Inquiry Portal**: ${baseUrl}/#contact

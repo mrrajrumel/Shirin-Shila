@@ -44,6 +44,9 @@ Following the full system repair and page retirement in Review 1, a second indep
 | **25** | Animated Hamburger SVG (`AlignRightIcon`) | Implemented exact sequential dash-offset animated SVG; verified zero border box, zero background container, and accessible 44px touch target. | **PASS** |
 | **26** | Menu Numbering Removal | Completely purged numbering (`01`, `02`, `03`...) from visible desktop navigation links and mobile drawer. | **PASS** |
 | **27** | Notable Works Image-Free Preview | Converted public Notable Works presentation into an editorial, typography-led responsive catalog with category tabs and trailer modals without images or broken placeholders. | **PASS** |
+| **28** | Shirin Shila Text Interaction Overhaul | Replaced legacy multi-image hover effect with refined chromatic gradient color system. Pure CSS linear gradients, pointer-tracking illumination (`--pointer-x`, `--pointer-y`), rose-gold/magenta sheen, drop-shadow glow, and `useReducedMotion()` fallback. Zero `.jpg`/`.png` image references. | **PASS** |
+| **29** | Deprecated Email Removal | Completely purged `booking@shirinshila.com` and `privacy@shirinshila.com` from `src/app/.well-known/mcp/server-card.json/route.ts`, `src/app/api/markdown/route.ts`, `src/app/llms-full.txt/route.ts`, and all pages. Canonical contact defaults to `support@trytso.com`. | **PASS** |
+| **30** | Live Hostinger Production Reachability | Live smoke test of authoritative domain `https://shirinshila.com/`: Homepage (200 OK), `/terms` (200 OK), `/privacy` (200 OK), `/about` (308 -> `/#about`), `/contact` (308 -> `/#contact`), `/llms.txt` (200 OK), `/robots.txt` (200 OK), `/sitemap.xml` (200 OK). Staging preview `cornflowerblue-wildcat-675604.hostingersite.com` returns ECONNRESET (disabled/superseded by live custom domain). | **PASS** |
 
 ---
 

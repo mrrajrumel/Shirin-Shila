@@ -49,6 +49,10 @@
 - [x] **Menu Numbering Removed:** Completely purged numbering (`01`, `02`, `03`...) from both desktop navigation links and mobile drawer items.
 - [x] **Notable Works Image-Free Preview:** Converted public Notable Works presentation into an editorial, text-first cinematic catalog with rich metadata, category tabs, and interactive trailer modals with zero image tags or empty placeholder boxes.
 
+### 1.6 Shirin Shila Text Interaction & Email Consistency
+- [x] **Interactive Chromatic Text Effect:** Completely removed previous multi-image hover effect (`letterImages` array with 11 image backgrounds) in `src/components/ui/reveal-text.tsx`. Implemented dynamic pointer-tracking illumination (`--pointer-x`, `--pointer-y`), rose-gold/magenta sheen gradients, soft drop-shadow glow, and `prefers-reduced-motion` compliance. Zero `.jpg`/`.png` image references.
+- [x] **Deprecated Email Removal:** Purged `booking@shirinshila.com` and `privacy@shirinshila.com` from `src/app/.well-known/mcp/server-card.json/route.ts`, `src/app/api/markdown/route.ts`, and `src/app/llms-full.txt/route.ts`. Contact emails standardized to authoritative `support@trytso.com`. Confirmed 0 occurrences in `src/`.
+
 ---
 
 ## 2. Test Execution & Build Verification
@@ -65,6 +69,8 @@
 | **Machine Manifests** | `GET /llms.txt` & `GET /llms-full.txt` | **PASS** | 200 OK; accurate factual context and clean anchor links |
 | **RBAC & User Management Suite** | `npx tsx test_auth_rbac.ts` | **PASS** | All 12 test assertions passed: validation, password hashing, last-admin guard, self-deletion guard, and session tokens |
 | **Frontend & Header Verification** | `node verify_frontend_updates.js` | **PASS** | All 5 checks passed: AlignRightIcon SVG animation, zero border/box on menu button, menu numbering removed, image-free works preview, solid header background |
+| **Shirin Shila Text Verification** | AST & string check on `reveal-text.tsx` | **PASS** | 0 image references, 0 background images; pure CSS gradients, pointer-tracking illumination, `useReducedMotion()` verified |
+| **Live Hostinger Production Smoke Test** | `GET https://shirinshila.com/*` | **PASS** | Verified live production endpoints: `/` (200), `/terms` (200), `/privacy` (200), `/about` (308 -> `/#about`), `/contact` (308 -> `/#contact`), `/llms.txt` (200), `/sitemap.xml` (200) |
 
 ---
 

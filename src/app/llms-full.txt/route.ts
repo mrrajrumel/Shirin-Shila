@@ -67,7 +67,7 @@ ${filmLines}
 - Commercial synthetic replicas (deepfakes, voice clones) are strictly prohibited without written consent.
 
 ## Talent Management Contact
-- Email: ${contact?.email || 'booking@shirinshila.com'}
+- Email: ${contact?.managementEmail || contact?.email || 'support@trytso.com'}
 - Phone: ${contact?.phone || '+880 1711-000000'}
 - Base: Dhaka, Bangladesh
 `;
