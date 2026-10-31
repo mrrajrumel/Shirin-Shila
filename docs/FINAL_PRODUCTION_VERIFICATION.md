@@ -62,6 +62,13 @@
 - [x] **Admin Header Streamlining:** Removed profile avatar icon, username chip container, and duplicate page title from the sticky topbar. Left side preserves mobile hamburger; center features scalable search (`Ctrl+K`); right side has clean Sign Out action.
 - [x] **In-Page Headings Restored:** Removed CSS hiding rule so page headings render clearly on mobile, tablet, and desktop.
 
+### 1.8 Media Library Robustness, Multi-Select, Bulk Deletion & MySQL Synchronization
+- [x] **"Asset not found in media manifest" Root Cause Fixed:** `deleteMediaAsset()` enhanced to match by asset ID, asset URL (`/uploads/...`), or raw filename. Added automated disk rescan fallback (`scanAndIndexExistingMedia()`) when not in memory manifest, plus physical unlink fallback for unindexed orphan files.
+- [x] **Multi-Select & Bulk Deletion:** Added batch selection controls (`Select All` / `Deselect All` toolbar button, per-card selection checkbox, item counter badge) and a sticky bottom Bulk Action Bar in `/admin/media`.
+- [x] **Bulk Delete Protection & Modal:** Bulk delete modal warns if any selected items are in active portfolio use and provides safe deletion (skips in-use assets) or explicit force deletion.
+- [x] **API Route Enhancements:** Updated `/api/media` `POST` and `DELETE` handlers to support `action: "bulk-delete"` with arrays of IDs, force flags, and structured count reporting.
+- [x] **MySQL Media Asset Synchronization:** Added `syncDbMediaAsset()` and `deleteDbMediaAsset()` to `src/lib/db.ts` to sync media manifest entries directly to the MySQL `media_assets` table on upload, edit, and deletion.
+
 ---
 
 ## 2. Test Execution & Build Verification
@@ -69,7 +76,7 @@
 | Test Suite | Command / Target | Result | Evidence |
 |---|---|---|---|
 | **TypeScript / Type Check** | `tsc --noEmit` via Next.js | **PASS** | Zero type errors across all route handlers, stores, and components |
-| **Production Build** | `next build --webpack` | **PASS** | Exit code 0; all static and dynamic routes compiled successfully |
+| **Production Build** | `next build --webpack` | **PASS** | Exit code 0; all static and dynamic routes compiled successfully in 18.4s |
 | **API Authentication Guard** | `GET /api/admin/users` | **PASS** | Returns `401 Unauthorized` without token; `403 Forbidden` for non-admin |
 | **Backup Guard** | `GET /api/backup` | **PASS** | Gated by `hasMinimumRole(user, 'admin')`; returns `403 Forbidden` for manager |
 | **Awards Deletion Persistence** | `DELETE /api/timeline?id=...` | **PASS** | Persists in `deletedIds`; filtered on all subsequent reads |
@@ -78,6 +85,7 @@
 | **Machine Manifests** | `GET /llms.txt` & `GET /llms-full.txt` | **PASS** | 200 OK; accurate factual context and clean anchor links |
 | **RBAC & User Management Suite** | `npx tsx test_auth_rbac.ts` | **PASS** | All 12 test assertions passed: validation, password hashing, last-admin guard, self-deletion guard, and session tokens |
 | **Role Change & RBAC Deep Test Suite** | `npx tsx test_role_and_user_mgmt.ts` | **PASS** | All 27 assertions passed: user creation, duplicate check, search & filter, role change (promote & demote), persistence, live session permission revalidation, last-admin/founder demotion block, self-deletion block, deleted user token revocation, and production account integrity |
+| **Media Library & Bulk Deletion Suite** | `npx tsx test_media_library.ts` | **PASS** | All 14 assertions passed: upload validation, single delete by ID, delete by URL, rescan fallback, bulk delete, in-use protection, and orphan file cleanup |
 | **Admin Header & UI Standardization** | `node verify_admin_header.js` | **PASS** | All 14 checks passed: profile avatar removed, page title removed, mobile hamburger preserved, quick search preserved, logout button preserved, and in-page headings active across all views |
 | **Frontend & Header Verification** | `node verify_frontend_updates.js` | **PASS** | All 5 checks passed: AlignRightIcon SVG animation, zero border/box on menu button, menu numbering removed, image-free works preview, solid header background |
 | **Shirin Shila Text Verification** | AST & string check on `reveal-text.tsx` | **PASS** | 0 image references, 0 background images; pure CSS gradients, pointer-tracking illumination, `useReducedMotion()` verified |

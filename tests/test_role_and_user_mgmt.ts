@@ -7,7 +7,7 @@ import {
   createSessionToken,
   verifySessionToken,
   hasMinimumRole,
-} from './src/lib/auth';
+} from '../src/lib/auth';
 
 async function runTests() {
   console.log('================================================================');
@@ -184,3 +184,4 @@ runTests().catch((err) => {
   console.error('Fatal test error:', err);
   process.exit(1);
 });
+

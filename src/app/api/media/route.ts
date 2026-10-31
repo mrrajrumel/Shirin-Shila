@@ -5,6 +5,7 @@ import {
   uploadMediaAsset,
   checkMediaUsage,
   deleteMediaAsset,
+  bulkDeleteMediaAssets,
   scanAndIndexExistingMedia,
 } from '@/lib/media-service';
 
@@ -108,7 +109,11 @@ export async function POST(request: NextRequest) {
     }
 
     if (action === 'delete') {
-      const { id, force } = body;
+      const { id, ids, force } = body;
+      if (Array.isArray(ids) && ids.length > 0) {
+        const result = await bulkDeleteMediaAssets(ids, Boolean(force));
+        return NextResponse.json(result);
+      }
       if (!id) {
         return NextResponse.json({ error: 'Missing media asset ID' }, { status: 400 });
       }
@@ -119,12 +124,63 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(result);
     }
 
+    if (action === 'bulk-delete') {
+      const { ids, force } = body;
+      if (!Array.isArray(ids) || ids.length === 0) {
+        return NextResponse.json({ error: 'Missing or empty ids array' }, { status: 400 });
+      }
+      const result = await bulkDeleteMediaAssets(ids, Boolean(force));
+      return NextResponse.json(result);
+    }
+
     if (action === 'reindex') {
       const assets = await scanAndIndexExistingMedia();
       return NextResponse.json({ success: true, count: assets.length });
     }
 
     return NextResponse.json({ error: 'Unsupported action' }, { status: 400 });
+  } catch (err: any) {
+    return NextResponse.json({ error: err.message }, { status: 500 });
+  }
+}
+
+export async function DELETE(request: NextRequest) {
+  if (!checkAuth(request)) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
+  try {
+    const { searchParams } = new URL(request.url);
+    const id = searchParams.get('id');
+    const force = searchParams.get('force') === 'true';
+
+    if (id) {
+      const result = await deleteMediaAsset(id, force);
+      if (!result.success) {
+        return NextResponse.json(result, { status: 409 });
+      }
+      return NextResponse.json(result);
+    }
+
+    // Check if JSON payload was provided with ids
+    try {
+      const body = await request.json();
+      if (Array.isArray(body?.ids) && body.ids.length > 0) {
+        const result = await bulkDeleteMediaAssets(body.ids, Boolean(body.force));
+        return NextResponse.json(result);
+      }
+      if (body?.id) {
+        const result = await deleteMediaAsset(body.id, Boolean(body.force));
+        if (!result.success) {
+          return NextResponse.json(result, { status: 409 });
+        }
+        return NextResponse.json(result);
+      }
+    } catch {
+      // No JSON body
+    }
+
+    return NextResponse.json({ error: 'Missing asset id or ids array' }, { status: 400 });
   } catch (err: any) {
     return NextResponse.json({ error: err.message }, { status: 500 });
   }

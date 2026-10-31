@@ -60,3 +60,4 @@ console.log(`HEADER & UI AUDIT: ${passed} PASSED, ${failed} FAILED`);
 console.log('================================================================\n');
 
 if (failed > 0) process.exit(1);
+

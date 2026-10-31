@@ -8,6 +8,7 @@
     "build": "next build --webpack",
     "start": "next start",
     "start:hostinger": "node server.js",
+    "test": "npx tsx tests/test_role_and_user_mgmt.ts && npx tsx tests/test_media_library.ts && node tests/verify_admin_header.js",
     "lint": "next lint"
   },
   "dependencies": {

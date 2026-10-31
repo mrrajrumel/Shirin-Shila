@@ -13,6 +13,8 @@ import {
   ExternalLink,
   ShieldCheck,
   X,
+  CheckSquare,
+  Square,
 } from "lucide-react";
 import { MediaPickerModal, MediaAsset } from "@/components/admin/media-picker-modal";
 
@@ -42,6 +44,11 @@ export default function AdminMediaPage() {
   const [deleteCandidateRefs, setDeleteCandidateRefs] = useState<MediaUsageRef[]>([]);
   const [deleting, setDeleting] = useState(false);
   const [feedback, setFeedback] = useState<{ type: "success" | "error"; message: string } | null>(null);
+
+  // Multi-select and bulk operations state
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [bulkDeleteModalOpen, setBulkDeleteModalOpen] = useState(false);
+  const [bulkDeleting, setBulkDeleting] = useState(false);
 
   const fetchAssets = async () => {
     try {
@@ -167,6 +174,66 @@ export default function AdminMediaPage() {
     }
   };
 
+  const toggleSelect = (id: string) => {
+    setSelectedIds((prev) =>
+      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
+    );
+  };
+
+  const handleSelectAll = (filteredList: MediaAsset[]) => {
+    const filteredIds = filteredList.map((a) => a.id);
+    const allSelected = filteredIds.every((id) => selectedIds.includes(id));
+    if (allSelected) {
+      setSelectedIds((prev) => prev.filter((id) => !filteredIds.includes(id)));
+    } else {
+      setSelectedIds((prev) => Array.from(new Set([...prev, ...filteredIds])));
+    }
+  };
+
+  const handleDeselectAll = () => {
+    setSelectedIds([]);
+  };
+
+  const confirmBulkDelete = async (force: boolean = false) => {
+    if (selectedIds.length === 0) return;
+    setBulkDeleting(true);
+    try {
+      const res = await fetch("/api/media", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "bulk-delete",
+          ids: selectedIds,
+          force,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || "Bulk delete failed");
+      }
+
+      let msg = `Successfully deleted ${data.deletedCount} asset(s).`;
+      if (data.skippedCount > 0) {
+        msg += ` ${data.skippedCount} asset(s) skipped because they are currently referenced.`;
+      }
+      setFeedback({
+        type: data.deletedCount > 0 ? "success" : "error",
+        message: msg,
+      });
+
+      setSelectedIds([]);
+      setBulkDeleteModalOpen(false);
+      await fetchAssets();
+    } catch (err: any) {
+      setFeedback({
+        type: "error",
+        message: err.message || "Failed to execute bulk deletion",
+      });
+    } finally {
+      setBulkDeleting(false);
+    }
+  };
+
   const handleUploadNew = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -277,7 +344,7 @@ export default function AdminMediaPage() {
       </div>
 
       {/* Filter / Search Toolbar */}
-      <div className="flex flex-col sm:flex-row items-center justify-between gap-3 mb-6">
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-3 mb-4">
         <div className="flex items-center gap-2 w-full sm:w-auto overflow-x-auto pb-1">
           {folders.map((f) => (
             <button
@@ -307,6 +374,55 @@ export default function AdminMediaPage() {
         </div>
       </div>
 
+      {/* Batch Selection Bar */}
+      <div className="flex flex-wrap items-center justify-between gap-3 mb-6 bg-slate-50 border border-slate-200 rounded-lg p-2.5">
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => handleSelectAll(filtered)}
+            className="flex items-center gap-1.5 px-2.5 py-1 bg-white hover:bg-slate-100 border border-slate-200 rounded text-xs font-medium text-slate-700 transition-colors"
+          >
+            {filtered.length > 0 && filtered.every((a) => selectedIds.includes(a.id)) ? (
+              <>
+                <CheckSquare size={13} className="text-primary" />
+                <span>Deselect All</span>
+              </>
+            ) : (
+              <>
+                <Square size={13} className="text-slate-400" />
+                <span>Select All ({filtered.length})</span>
+              </>
+            )}
+          </button>
+
+          {selectedIds.length > 0 && (
+            <span className="text-xs text-primary font-semibold bg-primary/10 px-2 py-0.5 rounded">
+              {selectedIds.length} selected
+            </span>
+          )}
+        </div>
+
+        {selectedIds.length > 0 && (
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={handleDeselectAll}
+              className="text-xs text-slate-500 hover:text-slate-700 underline"
+            >
+              Clear
+            </button>
+            <button
+              type="button"
+              onClick={() => setBulkDeleteModalOpen(true)}
+              className="px-2.5 py-1 bg-red-600 hover:bg-red-700 text-white rounded text-xs font-medium flex items-center gap-1 transition-colors"
+            >
+              <Trash2 size={12} />
+              <span>Delete Selected ({selectedIds.length})</span>
+            </button>
+          </div>
+        )}
+      </div>
+
       {/* Media Assets Grid */}
       {loading ? (
         <div className="text-center py-20 text-slate-400 text-xs flex items-center justify-center gap-2">
@@ -319,25 +435,44 @@ export default function AdminMediaPage() {
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-          {filtered.map((asset) => (
-            <div
-              key={asset.id}
-              className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm hover:shadow transition-all group flex flex-col justify-between"
-            >
-              <div>
-                <div className="relative aspect-video bg-slate-100 overflow-hidden flex items-center justify-center border-b border-slate-100">
-                  <img
-                    src={asset.url}
-                    alt={asset.originalName}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                    loading="lazy"
-                  />
-                  <span className="absolute bottom-2 left-2 px-1.5 py-0.5 rounded bg-black/60 backdrop-blur text-[10px] text-white font-mono uppercase">
-                    {asset.folder}
-                  </span>
-                </div>
+          {filtered.map((asset) => {
+            const isSelected = selectedIds.includes(asset.id);
+            return (
+              <div
+                key={asset.id}
+                className={`bg-white border rounded-xl overflow-hidden shadow-sm hover:shadow transition-all group flex flex-col justify-between ${
+                  isSelected ? "border-primary ring-2 ring-primary/30" : "border-slate-200"
+                }`}
+              >
+                <div>
+                  <div className="relative aspect-video bg-slate-100 overflow-hidden flex items-center justify-center border-b border-slate-100">
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        toggleSelect(asset.id);
+                      }}
+                      className={`absolute top-2 left-2 z-10 w-6 h-6 rounded flex items-center justify-center transition-all ${
+                        isSelected
+                          ? "bg-primary text-white shadow"
+                          : "bg-black/50 text-white/80 hover:bg-black/80 opacity-0 group-hover:opacity-100"
+                      }`}
+                      title={isSelected ? "Deselect" : "Select"}
+                    >
+                      {isSelected ? <Check size={14} /> : <Square size={14} />}
+                    </button>
+                    <img
+                      src={asset.url}
+                      alt={asset.originalName}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                      loading="lazy"
+                    />
+                    <span className="absolute bottom-2 left-2 px-1.5 py-0.5 rounded bg-black/60 backdrop-blur text-[10px] text-white font-mono uppercase">
+                      {asset.folder}
+                    </span>
+                  </div>
 
-                <div className="p-3">
+                  <div className="p-3">
                   <div className="flex items-center justify-between gap-1">
                     <h3
                       className="text-xs font-semibold text-slate-800 truncate"
@@ -397,7 +532,8 @@ export default function AdminMediaPage() {
                 </button>
               </div>
             </div>
-          ))}
+          );
+        })}
         </div>
       )}
 
@@ -543,6 +679,81 @@ export default function AdminMediaPage() {
                   {deleting ? "Deleting..." : "Confirm Delete"}
                 </button>
               )}
+            </div>
+          </div>
+        </div>
+      )}
+      {/* Floating Bulk Action Bar */}
+      {selectedIds.length > 0 && (
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 bg-slate-900 text-white px-5 py-3 rounded-2xl shadow-2xl flex items-center gap-4 border border-slate-700 animate-in fade-in slide-in-from-bottom-4">
+          <span className="text-xs font-semibold">{selectedIds.length} asset(s) selected</span>
+          <div className="h-4 w-px bg-slate-700" />
+          <button
+            type="button"
+            onClick={handleDeselectAll}
+            className="text-xs text-slate-400 hover:text-white transition-colors"
+          >
+            Deselect
+          </button>
+          <button
+            type="button"
+            onClick={() => setBulkDeleteModalOpen(true)}
+            className="px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-colors shadow-sm"
+          >
+            <Trash2 size={13} />
+            <span>Delete Selected</span>
+          </button>
+        </div>
+      )}
+
+      {/* Bulk Delete Modal */}
+      {bulkDeleteModalOpen && (
+        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white rounded-xl max-w-md w-full p-5 shadow-2xl border border-slate-200">
+            <div className="flex items-center gap-2 text-red-600 mb-3">
+              <AlertTriangle size={20} />
+              <h3 className="text-sm font-bold text-slate-900">Bulk Delete Assets</h3>
+            </div>
+
+            <p className="text-xs text-slate-600 mb-3">
+              You are about to delete <strong className="text-slate-900">{selectedIds.length}</strong> selected asset(s).
+            </p>
+
+            <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 mb-4 text-xs text-amber-800">
+              <span className="font-bold block mb-1">Portfolio Reference Guard:</span>
+              <p className="text-[11px] leading-relaxed">
+                By default, any asset actively referenced across your portfolio sections will be <strong>skipped safely</strong> to prevent broken images. You can also choose to force-delete all if intended.
+              </p>
+            </div>
+
+            <div className="flex justify-end gap-2 pt-2 border-t border-slate-100">
+              <button
+                type="button"
+                onClick={() => setBulkDeleteModalOpen(false)}
+                disabled={bulkDeleting}
+                className="adm-btn adm-btn-secondary text-xs"
+              >
+                Cancel
+              </button>
+
+              <button
+                type="button"
+                onClick={() => confirmBulkDelete(false)}
+                disabled={bulkDeleting}
+                className="px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white rounded-lg text-xs font-semibold"
+              >
+                {bulkDeleting ? "Deleting..." : "Safe Delete (Skip In-Use)"}
+              </button>
+
+              <button
+                type="button"
+                onClick={() => confirmBulkDelete(true)}
+                disabled={bulkDeleting}
+                className="px-3 py-1.5 bg-red-800 hover:bg-red-900 text-white rounded-lg text-xs font-semibold"
+                title="Force delete all selected assets even if in use"
+              >
+                {bulkDeleting ? "Force Deleting..." : "Force Delete All"}
+              </button>
             </div>
           </div>
         </div>

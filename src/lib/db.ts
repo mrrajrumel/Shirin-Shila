@@ -573,3 +573,62 @@ export async function logAdminAudit(
     return false;
   }
 }
+
+/**
+ * Synchronizes a media asset record to MySQL media_assets table.
+ */
+export async function syncDbMediaAsset(asset: {
+  id: string;
+  filename: string;
+  url: string;
+  size: number;
+  mimeType: string;
+  hash: string;
+  uploadedAt: string;
+}): Promise<boolean> {
+  const db = getDbPool();
+  if (!db) return false;
+
+  try {
+    await ensureDatabaseSchema();
+    await db.query(
+      `INSERT INTO media_assets (id, filename, url, size, mime_type, sha256, uploaded_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?)
+       ON DUPLICATE KEY UPDATE
+         filename = VALUES(filename),
+         size = VALUES(size),
+         mime_type = VALUES(mime_type),
+         sha256 = VALUES(sha256)`,
+      [
+        asset.id,
+        asset.filename,
+        asset.url,
+        asset.size,
+        asset.mimeType,
+        asset.hash,
+        new Date(asset.uploadedAt),
+      ]
+    );
+    return true;
+  } catch (err) {
+    console.error(`[MySQL Media Asset] Error syncing ${asset.filename}:`, (err as Error).message);
+    return false;
+  }
+}
+
+/**
+ * Removes a media asset from MySQL media_assets table by ID or URL.
+ */
+export async function deleteDbMediaAsset(idOrUrl: string): Promise<boolean> {
+  const db = getDbPool();
+  if (!db) return false;
+
+  try {
+    await ensureDatabaseSchema();
+    await db.query(`DELETE FROM media_assets WHERE id = ? OR url = ?`, [idOrUrl, idOrUrl]);
+    return true;
+  } catch (err) {
+    console.error(`[MySQL Media Asset] Error deleting ${idOrUrl}:`, (err as Error).message);
+    return false;
+  }
+}

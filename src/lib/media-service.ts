@@ -2,7 +2,13 @@ import fs from 'fs';
 import path from 'path';
 import crypto from 'crypto';
 import { getPersistentStoreDir, getPersistentUploadsDir } from './persistent-paths';
-import { getDbContent, saveDbContent, isDatabaseConfigured } from './db';
+import {
+  getDbContent,
+  saveDbContent,
+  isDatabaseConfigured,
+  syncDbMediaAsset,
+  deleteDbMediaAsset,
+} from './db';
 
 export interface MediaAsset {
   id: string;
@@ -212,6 +218,10 @@ export async function saveMediaManifest(manifest: MediaAsset[]): Promise<void> {
   if (isDatabaseConfigured()) {
     try {
       await saveDbContent('media-manifest', manifest, 'media_manifest_update');
+      // Relational sync to MySQL media_assets table
+      for (const asset of manifest) {
+        syncDbMediaAsset(asset).catch(() => {});
+      }
     } catch (dbErr) {
       console.error('[MediaService] MySQL save manifest error:', (dbErr as Error).message);
     }
@@ -416,7 +426,7 @@ export async function checkMediaUsage(assetUrl: string): Promise<MediaUsageRefer
 
 /**
  * Deletes media asset safely. Blocks deletion if asset is actively referenced unless force=true.
- * Only allows deletion inside public/uploads to prevent arbitrary file deletion.
+ * Supports deletion by ID, URL, or filename with automatic disk resync fallback.
  */
 export async function deleteMediaAsset(
   id: string,
@@ -428,16 +438,42 @@ export async function deleteMediaAsset(
   error?: string;
 }> {
   ensureDirectories();
-  const manifest = await getMediaManifest();
-  const index = manifest.findIndex((a) => a.id === id);
+  let manifest = await getMediaManifest();
+  let index = manifest.findIndex(
+    (a) => a.id === id || a.url === id || a.filename === id
+  );
 
+  // If not found in current manifest, rescan physical storage before failing
   if (index === -1) {
-    return { success: false, error: 'Asset not found in media manifest' };
+    manifest = await scanAndIndexExistingMedia();
+    index = manifest.findIndex(
+      (a) => a.id === id || a.url === id || a.filename === id
+    );
+  }
+
+  // If still not found, check if an unindexed file exists physically in uploads
+  if (index === -1) {
+    const rawTarget = typeof id === 'string' ? id : '';
+    if (rawTarget.startsWith('/uploads/') || rawTarget.startsWith('uploads/')) {
+      const rel = rawTarget.replace(/^\/?uploads\//, '');
+      const uploadsRoot = getUploadsDir();
+      const absolutePath = path.resolve(uploadsRoot, rel);
+      if (absolutePath.startsWith(uploadsRoot) && fs.existsSync(absolutePath)) {
+        try {
+          await fs.promises.unlink(absolutePath);
+          deleteDbMediaAsset(rawTarget).catch(() => {});
+          return { success: true };
+        } catch (unlinkErr) {
+          console.error(`[MediaService] Unlink failed for orphan ${absolutePath}:`, unlinkErr);
+        }
+      }
+    }
+    return { success: false, error: 'Asset not found in media manifest or filesystem' };
   }
 
   const asset = manifest[index];
 
-  // Check references
+  // Check references across CMS stores
   const references = await checkMediaUsage(asset.url);
   if (references.length > 0 && !force) {
     return {
@@ -466,10 +502,80 @@ export async function deleteMediaAsset(
     }
   }
 
+  // Sync deletion from MySQL media_assets
+  deleteDbMediaAsset(asset.id).catch(() => {});
+  deleteDbMediaAsset(asset.url).catch(() => {});
+
   // Remove from manifest
   manifest.splice(index, 1);
   await saveMediaManifest(manifest);
 
   return { success: true, references };
+}
+
+/**
+ * Performs bulk deletion of media assets.
+ * Respects usage guards: in-use assets are preserved unless force=true.
+ */
+export async function bulkDeleteMediaAssets(
+  ids: string[],
+  force: boolean = false
+): Promise<{
+  success: boolean;
+  deletedCount: number;
+  skippedCount: number;
+  skippedAssets: Array<{ id: string; url: string; references: MediaUsageReference[] }>;
+  deletedIds: string[];
+}> {
+  ensureDirectories();
+  const manifest = await getMediaManifest();
+  const deletedIds: string[] = [];
+  const skippedAssets: Array<{ id: string; url: string; references: MediaUsageReference[] }> = [];
+
+  const uploadsRoot = getUploadsDir();
+  const idsToRemove = new Set<string>();
+
+  for (const target of ids) {
+    const asset = manifest.find((a) => a.id === target || a.url === target || a.filename === target);
+    if (!asset) continue;
+
+    const references = await checkMediaUsage(asset.url);
+    if (references.length > 0 && !force) {
+      skippedAssets.push({ id: asset.id, url: asset.url, references });
+      continue;
+    }
+
+    // Safe physical unlink
+    if (asset.url.startsWith('/uploads/')) {
+      const rel = asset.url.replace(/^\/uploads\//, '');
+      const absolutePath = path.resolve(uploadsRoot, rel);
+      if (absolutePath.startsWith(uploadsRoot) && fs.existsSync(absolutePath)) {
+        try {
+          await fs.promises.unlink(absolutePath);
+        } catch (unlinkErr) {
+          console.error(`[MediaService] Bulk unlink failed for ${absolutePath}:`, unlinkErr);
+        }
+      }
+    }
+
+    deleteDbMediaAsset(asset.id).catch(() => {});
+    deleteDbMediaAsset(asset.url).catch(() => {});
+    idsToRemove.add(asset.id);
+    deletedIds.push(asset.id);
+  }
+
+  // Update manifest once
+  if (idsToRemove.size > 0) {
+    const updatedManifest = manifest.filter((a) => !idsToRemove.has(a.id));
+    await saveMediaManifest(updatedManifest);
+  }
+
+  return {
+    success: true,
+    deletedCount: deletedIds.length,
+    skippedCount: skippedAssets.length,
+    skippedAssets,
+    deletedIds,
+  };
 }
 
