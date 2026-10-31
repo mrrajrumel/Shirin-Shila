@@ -226,7 +226,7 @@ export default function AdminMediaPage() {
         <div className="adm-card-body">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
-              <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2">
+              <h2 className="adm-header-title text-lg font-bold text-slate-900 flex items-center gap-2">
                 <FolderKanban className="text-primary" size={20} />
                 Central Media Library & Asset Registry
               </h2>

@@ -94,6 +94,15 @@ The interface adheres to a consistent, high-contrast dark palette designed for e
 * **Full Module Index:** All 17 administrative modules are indexed with titles, descriptions, categories, and keywords (e.g. searching "inbox" finds Inquiries CRM; searching "mysql" finds Data & Persistence).
 * **Role-Aware Filtering:** Privileged modules (`/admin/backup` and `/admin/users`) are automatically excluded from search results for users with `manager` roles.
 
+### 5.3 Admin Header Cleanup & Rebalancing
+* **Elimination of Profile Avatar & Chip Container:** Removed the user avatar circle and username chip from the sticky topbar. Profile management remains fully accessible via the dedicated `/admin/profile` module linked in the sidebar under "SEO & SYSTEM SETTINGS" and searchable via `Ctrl+K`.
+* **Removal of Duplicate Header Page Title:** Removed the redundant `<h1>{pageTitle}</h1>` from the sticky topbar. Page headings are maintained directly within each page view (e.g., `<h2 className="adm-header-title">`) with descriptive context and subtitles.
+* **In-Page Headings Restored for Mobile/Tablet:** Removed the legacy CSS rule (`.adm-header .adm-header-title { display: none; }`) so that each module's title is clearly and consistently displayed across desktop, tablet, and mobile viewports.
+* **Rebalanced Topbar Layout:** Topbar now cleanly contains:
+  - Left: Mobile hamburger button (visible on tablet/mobile screens &lt; 1024px).
+  - Center: Global Quick Search / Command Palette (`Ctrl+K`), auto-sizing and flex-scaling smoothly.
+  - Right: Clean, accessible "Sign Out" button with logout icon and text label.
+
 ---
 
 ## 6. Accessibility & Responsiveness

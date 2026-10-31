@@ -7,6 +7,7 @@ import {
   updateUser,
   deleteUser,
   hasMinimumRole,
+  createSessionToken,
 } from '@/lib/auth';
 
 export const dynamic = 'force-dynamic';
@@ -46,12 +47,15 @@ export async function POST(request: NextRequest) {
 
   try {
     const body = await request.json();
-    const result = createUser({
-      username: body.username,
-      displayName: body.displayName,
-      password: body.password,
-      role: body.role,
-    });
+    const result = createUser(
+      {
+        username: body.username,
+        displayName: body.displayName,
+        password: body.password,
+        role: body.role,
+      },
+      auth.session.id
+    );
 
     if (!result.success) {
       return NextResponse.json({ error: result.error }, { status: 400 });
@@ -82,7 +86,27 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json({ error: result.error }, { status: 400 });
     }
 
-    return NextResponse.json({ success: true, user: result.user });
+    const response = NextResponse.json({ success: true, user: result.user });
+
+    // If current authenticated user updated their own record, refresh the session cookie
+    if (auth.session.id === id && result.user) {
+      const refreshedToken = createSessionToken({
+        id: result.user.id,
+        username: result.user.username,
+        displayName: result.user.displayName,
+        role: result.user.role,
+      });
+
+      response.cookies.set(SESSION_COOKIE_NAME, refreshedToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        maxAge: 7 * 24 * 60 * 60, // 7 days
+        path: '/',
+      });
+    }
+
+    return response;
   } catch (err: any) {
     return NextResponse.json({ error: err.message || 'Invalid request body' }, { status: 400 });
   }

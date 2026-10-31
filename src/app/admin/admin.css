@@ -397,9 +397,9 @@
 /* TailAdmin Global Quick Search (Command Palette) */
 .adm-topbar-search {
   position: relative;
-  max-width: 440px;
+  max-width: 480px;
   width: 100%;
-  margin: 0 auto 0 24px;
+  margin: 0;
 }
 
 .adm-topbar-search-input-wrap {
@@ -1151,8 +1151,9 @@
   }
 
   .adm-topbar-search {
-    max-width: 240px;
+    max-width: 280px;
     margin: 0 8px;
+    flex: 1;
   }
 
   .adm-header {
@@ -1167,7 +1168,7 @@
   }
 
   .adm-header .adm-header-title {
-    display: none; /* Eliminated duplicate header - title is already shown in sticky .adm-topbar */
+    font-size: 18px;
   }
 
   .adm-header-actions {
@@ -1194,8 +1195,9 @@
   }
 
   .adm-topbar-search {
-    max-width: 140px;
-    margin: 0 4px;
+    max-width: none;
+    margin: 0 8px;
+    flex: 1;
   }
 
   .adm-topbar-search-input {

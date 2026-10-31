@@ -448,3 +448,128 @@ export async function getPageRevisions(
     return [];
   }
 }
+
+/**
+ * Synchronizes an admin user to MySQL admin_users table with parameterized upsert.
+ */
+export async function syncDbAdminUser(user: {
+  id: string;
+  username: string;
+  displayName: string;
+  passwordHash: string;
+  role: string;
+  createdAt: string;
+  updatedAt: string;
+}): Promise<boolean> {
+  const db = getDbPool();
+  if (!db) return false;
+
+  try {
+    await ensureDatabaseSchema();
+    await db.query(
+      `INSERT INTO admin_users (id, username, display_name, password_hash, role, created_at, updated_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?)
+       ON DUPLICATE KEY UPDATE
+         display_name = VALUES(display_name),
+         password_hash = VALUES(password_hash),
+         role = VALUES(role),
+         updated_at = VALUES(updated_at)`,
+      [
+        user.id,
+        user.username,
+        user.displayName,
+        user.passwordHash,
+        user.role,
+        new Date(user.createdAt),
+        new Date(user.updatedAt),
+      ]
+    );
+    return true;
+  } catch (err) {
+    console.error(`[MySQL Admin User] Error syncing user ${user.username}:`, (err as Error).message);
+    return false;
+  }
+}
+
+/**
+ * Deletes an admin user record from MySQL admin_users table.
+ */
+export async function deleteDbAdminUser(userId: string): Promise<boolean> {
+  const db = getDbPool();
+  if (!db) return false;
+
+  try {
+    await ensureDatabaseSchema();
+    await db.query(`DELETE FROM admin_users WHERE id = ?`, [userId]);
+    return true;
+  } catch (err) {
+    console.error(`[MySQL Admin User] Error deleting user ${userId}:`, (err as Error).message);
+    return false;
+  }
+}
+
+/**
+ * Fetches all admin user records from MySQL admin_users table.
+ */
+export async function getDbAdminUsers(): Promise<Array<{
+  id: string;
+  username: string;
+  displayName: string;
+  passwordHash: string;
+  role: 'admin' | 'manager';
+  createdAt: string;
+  updatedAt: string;
+}>> {
+  const db = getDbPool();
+  if (!db) return [];
+
+  try {
+    await ensureDatabaseSchema();
+    const [rows] = await db.query(
+      `SELECT id, username, display_name, password_hash, role, created_at, updated_at
+       FROM admin_users
+       ORDER BY created_at ASC`
+    );
+
+    return (rows as any[]).map((r) => ({
+      id: r.id,
+      username: r.username,
+      displayName: r.display_name,
+      passwordHash: r.password_hash,
+      role: r.role === 'admin' ? 'admin' : 'manager',
+      createdAt: r.created_at ? new Date(r.created_at).toISOString() : new Date().toISOString(),
+      updatedAt: r.updated_at ? new Date(r.updated_at).toISOString() : new Date().toISOString(),
+    }));
+  } catch (err) {
+    console.error('[MySQL Admin User] Error fetching users from database:', (err as Error).message);
+    return [];
+  }
+}
+
+/**
+ * Records an entry in the MySQL cms_audit_logs table.
+ */
+export async function logAdminAudit(
+  contentKey: string,
+  changedBy: string,
+  action: string,
+  details?: any,
+  ipAddress?: string
+): Promise<boolean> {
+  const db = getDbPool();
+  if (!db) return false;
+
+  try {
+    await ensureDatabaseSchema();
+    const serialized = typeof details === 'string' ? details : JSON.stringify(details || {});
+    await db.query(
+      `INSERT INTO cms_audit_logs (content_key, changed_by, action, content_data, ip_address)
+       VALUES (?, ?, ?, ?, ?)`,
+      [contentKey, changedBy, action, serialized, ipAddress || null]
+    );
+    return true;
+  } catch (err) {
+    console.error('[MySQL Audit] Error recording audit log:', (err as Error).message);
+    return false;
+  }
+}

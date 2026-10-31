@@ -60,6 +60,9 @@ export default function AdminUsersPage() {
   const [isSubmittingDelete, setIsSubmittingDelete] = useState(false);
   const [deleteModalError, setDeleteModalError] = useState<string | null>(null);
 
+  // In-flight role update state (for inline role changer)
+  const [updatingUserId, setUpdatingUserId] = useState<string | null>(null);
+
   const fetchUsers = async () => {
     setLoading(true);
     setError(null);
@@ -179,6 +182,38 @@ export default function AdminUsersPage() {
       setEditModalError(err.message || "Failed to update user");
     } finally {
       setIsSubmittingEdit(false);
+    }
+  };
+
+  // Quick inline role change handler directly from user table
+  const handleQuickRoleChange = async (user: UserRecord, targetRole: "admin" | "manager") => {
+    if (user.role === targetRole) return;
+    setError(null);
+    setSuccessNotice(null);
+    setUpdatingUserId(user.id);
+
+    try {
+      const res = await fetch("/api/admin/users", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          id: user.id,
+          displayName: user.displayName,
+          role: targetRole,
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || "Failed to update user role.");
+      }
+
+      showTempSuccess(`Role for @${user.username} successfully updated to ${roleLabel(targetRole)}.`);
+      await fetchUsers();
+    } catch (err: any) {
+      setError(err.message || "Failed to update user role.");
+    } finally {
+      setUpdatingUserId(null);
     }
   };
 
@@ -509,30 +544,51 @@ export default function AdminUsersPage() {
                       {/* Role Column */}
                       <td>
                         <div>
-                          <span
-                            className={`adm-badge ${
-                              user.role === "admin" ? "adm-badge-blue" : "adm-badge-green"
-                            }`}
-                            style={{ padding: "4px 10px", fontSize: 11.5 }}
-                          >
-                            {user.role === "admin" ? (
-                              <Shield size={12} style={{ marginRight: 4 }} />
-                            ) : (
-                              <UserCheck size={12} style={{ marginRight: 4 }} />
+                          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                            <select
+                              className="adm-select"
+                              style={{
+                                fontSize: 12,
+                                padding: "4px 10px",
+                                height: 32,
+                                width: "auto",
+                                minWidth: 140,
+                                borderRadius: 6,
+                                borderColor: user.role === "admin" ? "#93c5fd" : "#a7f3d0",
+                                background: user.role === "admin" ? "#eff6ff" : "#ecfdf5",
+                                color: user.role === "admin" ? "#1d4ed8" : "#065f46",
+                                fontWeight: 700,
+                                cursor: isFounder ? "not-allowed" : "pointer",
+                              }}
+                              value={user.role}
+                              disabled={updatingUserId === user.id || isFounder}
+                              onChange={(e) => handleQuickRoleChange(user, e.target.value as "admin" | "manager")}
+                              title={
+                                isFounder
+                                  ? "Primary founder account role is permanent Administrator"
+                                  : "Click to change system role"
+                              }
+                            >
+                              <option value="admin">Administrator</option>
+                              <option value="manager">Manager</option>
+                            </select>
+
+                            {updatingUserId === user.id && (
+                              <RefreshCw size={14} className="animate-spin text-tail-primary" />
                             )}
-                            {roleLabel(user.role)}
-                          </span>
+                          </div>
+
                           <span
                             style={{
                               display: "block",
-                              fontSize: 11.5,
+                              fontSize: 11,
                               color: "#64748b",
                               marginTop: 4,
                             }}
                           >
                             {user.role === "admin"
                               ? "Full access (CMS, Users, Backups, SEO)"
-                              : "Content management & inquiries"}
+                              : "Content management & inquiries CRM"}
                           </span>
                         </div>
                       </td>

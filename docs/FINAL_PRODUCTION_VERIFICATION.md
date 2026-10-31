@@ -53,6 +53,15 @@
 - [x] **Interactive Chromatic Text Effect:** Completely removed previous multi-image hover effect (`letterImages` array with 11 image backgrounds) in `src/components/ui/reveal-text.tsx`. Implemented dynamic pointer-tracking illumination (`--pointer-x`, `--pointer-y`), rose-gold/magenta sheen gradients, soft drop-shadow glow, and `prefers-reduced-motion` compliance. Zero `.jpg`/`.png` image references.
 - [x] **Deprecated Email Removal:** Purged `booking@shirinshila.com` and `privacy@shirinshila.com` from `src/app/.well-known/mcp/server-card.json/route.ts`, `src/app/api/markdown/route.ts`, and `src/app/llms-full.txt/route.ts`. Contact emails standardized to authoritative `support@trytso.com`. Confirmed 0 occurrences in `src/`.
 
+### 1.7 Role-Change Bug Fix, User Creation & Admin Header Cleanup
+- [x] **Role Change Bug Resolved:** Removed forced role overwrite in `ensureAdminAccounts()` that previously reset Rumel's role to `manager`. Role updates now persist across server restarts and page refreshes.
+- [x] **Live Session Permission Revalidation:** `verifySessionToken()` dynamically checks the live storage registry; role promotions and demotions take effect on the user's very next request without requiring re-login.
+- [x] **Instant Session Revocation for Deleted Users:** Deleting a user immediately causes `verifySessionToken()` to return `null`, revoking API access in real time.
+- [x] **MySQL Synchronization & Audit Logging:** Added `syncDbAdminUser()`, `deleteDbAdminUser()`, and `logAdminAudit()` in `src/lib/db.ts` to sync user CRUD and role changes with MySQL `admin_users` and `cms_audit_logs`.
+- [x] **Inline & Modal Role Selection:** Added a quick inline role dropdown directly in `/admin/users` table rows with in-flight spinner and instant feedback, while preserving modal editing.
+- [x] **Admin Header Streamlining:** Removed profile avatar icon, username chip container, and duplicate page title from the sticky topbar. Left side preserves mobile hamburger; center features scalable search (`Ctrl+K`); right side has clean Sign Out action.
+- [x] **In-Page Headings Restored:** Removed CSS hiding rule so page headings render clearly on mobile, tablet, and desktop.
+
 ---
 
 ## 2. Test Execution & Build Verification
@@ -68,6 +77,8 @@
 | **Robots & Content-Signals** | `GET /robots.txt` | **PASS** | Directs to `/sitemap.xml`; declares AI crawler policies |
 | **Machine Manifests** | `GET /llms.txt` & `GET /llms-full.txt` | **PASS** | 200 OK; accurate factual context and clean anchor links |
 | **RBAC & User Management Suite** | `npx tsx test_auth_rbac.ts` | **PASS** | All 12 test assertions passed: validation, password hashing, last-admin guard, self-deletion guard, and session tokens |
+| **Role Change & RBAC Deep Test Suite** | `npx tsx test_role_and_user_mgmt.ts` | **PASS** | All 27 assertions passed: user creation, duplicate check, search & filter, role change (promote & demote), persistence, live session permission revalidation, last-admin/founder demotion block, self-deletion block, deleted user token revocation, and production account integrity |
+| **Admin Header & UI Standardization** | `node verify_admin_header.js` | **PASS** | All 14 checks passed: profile avatar removed, page title removed, mobile hamburger preserved, quick search preserved, logout button preserved, and in-page headings active across all views |
 | **Frontend & Header Verification** | `node verify_frontend_updates.js` | **PASS** | All 5 checks passed: AlignRightIcon SVG animation, zero border/box on menu button, menu numbering removed, image-free works preview, solid header background |
 | **Shirin Shila Text Verification** | AST & string check on `reveal-text.tsx` | **PASS** | 0 image references, 0 background images; pure CSS gradients, pointer-tracking illumination, `useReducedMotion()` verified |
 | **Live Hostinger Production Smoke Test** | `GET https://shirinshila.com/*` | **PASS** | Verified live production endpoints: `/` (200), `/terms` (200), `/privacy` (200), `/about` (308 -> `/#about`), `/contact` (308 -> `/#contact`), `/llms.txt` (200), `/sitemap.xml` (200) |

@@ -120,13 +120,20 @@ export default function AdminProfilePage() {
   return (
     <>
       <header className="adm-header">
+        <div>
+          <h2 className="adm-header-title">Profile &amp; Security</h2>
+          <p className="adm-help-text" style={{ marginTop: 4 }}>
+            Manage your personal display name, account credentials, and secure password.
+          </p>
+        </div>
         <div className="adm-header-actions">
           <button
             type="button"
             onClick={loadProfile}
             className="adm-btn adm-btn-secondary adm-btn-sm"
+            disabled={loading}
           >
-            <RefreshCw size={13} />
+            <RefreshCw size={13} className={loading ? "animate-spin" : ""} />
             <span>Refresh</span>
           </button>
         </div>

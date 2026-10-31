@@ -151,23 +151,48 @@ Server-side authorization is enforced at every sensitive Route Handler and API b
 
 ---
 
-## 6. Functional Verification & Test Suite
+## 6. Role-Change Bug Root Cause Analysis & Resolution
 
-The authentication, RBAC hierarchy, and user management features were verified via automated execution of `test_auth_rbac.ts`:
+### Root Causes Identified
+1. **Forced Role Reversion in `ensureAdminAccounts()`:**
+   * *Mechanism:* `ensureAdminAccounts()` contained an `else if (rumelUser.role !== 'manager') { rumelUser.role = 'manager'; }` clause that executed on every request (via `getAllAdminUsers`, login, auth checks).
+   * *Impact:* Whenever an administrator promoted Rumel or any user initialized via seed to Administrator, the very next read or API call immediately reverted their role back to `manager`.
+2. **Static Session Claim Lag:**
+   * *Mechanism:* `verifySessionToken()` previously unpacked the signed token payload and used `payload.role` directly without validating against the live user registry.
+   * *Impact:* Active user sessions retained their obsolete privileges for up to 7 days until session expiration, meaning role changes were not reflected in server-side authorization guards unless the user manually logged out. Furthermore, deleted users' sessions were not immediately invalidated.
+3. **Database & Audit Desynchronization:**
+   * *Mechanism:* `auth.ts` previously only wrote to the file-based `admin-users.json` without updating the MySQL `admin_users` table or recording entries in `cms_audit_logs`.
+
+### Implemented Corrections
+1. **Removed Reversion Guard in `ensureAdminAccounts()`:** `ensureAdminAccounts()` now ensures account existence without overwriting saved roles, while guaranteeing at least one administrator account exists.
+2. **Live Session Revalidation:** `verifySessionToken()` now looks up the user in the live registry after cryptographic HMAC verification. It enforces the live persisted role and display name from storage, and immediately revokes sessions (returns `null` / 401) if an account has been deleted.
+3. **Self-Update Session Refresh:** When an administrator updates their own record in `PUT /api/admin/users`, a fresh session token is generated and attached to the HTTP response cookies.
+4. **Full MySQL Synchronization & Audit Logging:** Added `syncDbAdminUser()`, `deleteDbAdminUser()`, and `logAdminAudit()` in `src/lib/db.ts`. User creation, role modifications, and deletions are transactional across both persistent JSON storage and MySQL `admin_users` / `cms_audit_logs`.
+5. **Inline & Modal Role Selection:** Added an inline role selector dropdown directly in the user table with in-flight spinner, instant real-time feedback, and error reporting, while preserving full editing in the modal.
+
+---
+
+## 7. Functional Verification & Test Suite
+
+The authentication, RBAC hierarchy, user creation, and role change features were verified via automated execution of `test_role_and_user_mgmt.ts` (27 passed / 0 failed):
 
 | Test Case | Execution Command | Result | Verification Detail |
 |---|---|---|---|
-| Account Initialization | `npx tsx test_auth_rbac.ts` | **PASS** | `ensureAdminAccounts()` initialized default accounts without data loss |
-| Weak Password Rejection | `npx tsx test_auth_rbac.ts` | **PASS** | Passwords under 8 chars rejected with descriptive validation error |
-| Number Missing Rejection | `npx tsx test_auth_rbac.ts` | **PASS** | Passwords without numbers rejected |
-| Invalid Username Format | `npx tsx test_auth_rbac.ts` | **PASS** | Spaces and disallowed symbols rejected |
-| Safe User Creation | `npx tsx test_auth_rbac.ts` | **PASS** | User created; `passwordHash` omitted from response |
-| Duplicate Username Guard | `npx tsx test_auth_rbac.ts` | **PASS** | Duplicate usernames rejected case-insensitively |
-| User Search & Role Filter | `npx tsx test_auth_rbac.ts` | **PASS** | Queries match username, display name, and role filter |
-| User Profile Update | `npx tsx test_auth_rbac.ts` | **PASS** | Display name updated and timestamp recorded |
-| Self Deletion Prevention | `npx tsx test_auth_rbac.ts` | **PASS** | Blocked self-deletion while logged in |
-| Founder Deletion Prevention | `npx tsx test_auth_rbac.ts` | **PASS** | Blocked deleting `@Shirin` founder account |
-| Last Admin Protection | `npx tsx test_auth_rbac.ts` | **PASS** | Blocked demoting/deleting sole remaining administrator |
-| Session Token Verification | `npx tsx test_auth_rbac.ts` | **PASS** | Token HMAC signing, verification, and role hierarchy verified |
+| Account Initialization | `npx tsx test_role_and_user_mgmt.ts` | **PASS** | `ensureAdminAccounts()` initialized default accounts without data loss |
+| User Creation | `npx tsx test_role_and_user_mgmt.ts` | **PASS** | Created new manager user with bcrypt 10 rounds; `passwordHash` omitted from return |
+| Weak Password Rejection | `npx tsx test_role_and_user_mgmt.ts` | **PASS** | Passwords under 8 chars or without numbers rejected with descriptive error |
+| Duplicate Username Guard | `npx tsx test_role_and_user_mgmt.ts` | **PASS** | Duplicate usernames rejected case-insensitively |
+| User Search & Role Filter | `npx tsx test_role_and_user_mgmt.ts` | **PASS** | Queries match username, display name, and role filter |
+| Role Promotion | `npx tsx test_role_and_user_mgmt.ts` | **PASS** | Promoted manager to admin; verified in return payload |
+| Role Persistence | `npx tsx test_role_and_user_mgmt.ts` | **PASS** | User remains admin after store re-read / `ensureAdminAccounts` |
+| Live Session Revalidation | `npx tsx test_role_and_user_mgmt.ts` | **PASS** | Existing session token immediately resolves to updated admin role without re-login |
+| RBAC Authorization Elevation | `npx tsx test_role_and_user_mgmt.ts` | **PASS** | Promoted user receives full administrator authorization |
+| Role Demotion | `npx tsx test_role_and_user_mgmt.ts` | **PASS** | Demoted admin back to manager |
+| Immediate Privilege Revocation | `npx tsx test_role_and_user_mgmt.ts` | **PASS** | Session immediately loses admin privileges on next check |
+| Last-Admin Protection | `npx tsx test_role_and_user_mgmt.ts` | **PASS** | Blocked demoting founder (`@Shirin`) or the last remaining administrator |
+| Self-Deletion Prevention | `npx tsx test_role_and_user_mgmt.ts` | **PASS** | Blocked self-deletion while logged in |
+| User Deletion | `npx tsx test_role_and_user_mgmt.ts` | **PASS** | Deleted test user cleanly from storage and MySQL |
+| Session Invalidation | `npx tsx test_role_and_user_mgmt.ts` | **PASS** | Deleted user session token immediately revoked (`verifySessionToken` returns null) |
+| Production Integrity | `npx tsx test_role_and_user_mgmt.ts` | **PASS** | Verified Shirin and Rumel accounts preserved |
 
 

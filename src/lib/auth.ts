@@ -3,6 +3,7 @@ import fs from 'fs';
 import path from 'path';
 import bcrypt from 'bcryptjs';
 import { getPersistentStoreDir } from './persistent-paths';
+import { syncDbAdminUser, deleteDbAdminUser, logAdminAudit } from './db';
 
 const ADMIN_SECRET =
   process.env.ADMIN_SECRET || 'shirin_shila_secret_session_token_2026_secured_tso';
@@ -103,7 +104,7 @@ export function ensureAdminAccounts(): AdminUserRecord[] {
     modified = true;
   }
 
-  // Account 2: Rumel
+  // Account 2: Rumel (Default initial account: Manager)
   let rumelUser = users.find(
     (u) => u.username && u.username.toLowerCase() === 'rumel'
   );
@@ -121,10 +122,6 @@ export function ensureAdminAccounts(): AdminUserRecord[] {
     };
     users.push(rumelUser);
     modified = true;
-  } else if (rumelUser.role !== 'manager') {
-    rumelUser.role = 'manager';
-    rumelUser.updatedAt = new Date().toISOString();
-    modified = true;
   }
 
   // Ensure at least one account has admin role (fallback protection)
@@ -136,6 +133,11 @@ export function ensureAdminAccounts(): AdminUserRecord[] {
 
   if (modified || !fs.existsSync(usersFile)) {
     fs.writeFileSync(usersFile, JSON.stringify(users, null, 2), 'utf-8');
+  }
+
+  // Asynchronously ensure database records are in sync
+  for (const user of users) {
+    syncDbAdminUser(user).catch(() => {});
   }
 
   return users;
@@ -329,11 +331,25 @@ export function verifySessionToken(token?: string | null): SessionUser | null {
       return null;
     }
 
+    // Live session revalidation: Lookup user in live registry to ensure account is active and role is fresh
+    const users = ensureAdminAccounts();
+    const liveUser = users.find(
+      (u) =>
+        u.id === payload.sub ||
+        (payload.username && u.username.toLowerCase() === payload.username.toLowerCase())
+    );
+
+    // If account was deleted or removed from registry, invalidate session immediately
+    if (!liveUser) {
+      return null;
+    }
+
+    // Always enforce the live persisted role and display name from the storage registry
     return {
-      id: payload.sub,
-      username: payload.username,
-      displayName: payload.displayName || payload.username,
-      role: payload.role as 'admin' | 'manager',
+      id: liveUser.id,
+      username: liveUser.username,
+      displayName: liveUser.displayName || liveUser.username,
+      role: liveUser.role,
     };
   } catch {
     return null;
@@ -380,7 +396,10 @@ export interface CreateUserInput {
  * Creates a new administrator or manager user.
  * Validates unique username, strong password, and hashes with bcrypt.
  */
-export function createUser(input: CreateUserInput): {
+export function createUser(
+  input: CreateUserInput,
+  requestingUserId?: string
+): {
   success: boolean;
   user?: Omit<AdminUserRecord, 'passwordHash'>;
   error?: string;
@@ -388,7 +407,7 @@ export function createUser(input: CreateUserInput): {
   const username = (input.username || '').trim();
   const displayName = (input.displayName || '').trim();
   const password = input.password || '';
-  const role = input.role;
+  const role = input.role || 'manager';
 
   if (!username || !/^[a-zA-Z0-9_-]{3,30}$/.test(username)) {
     return {
@@ -456,6 +475,15 @@ export function createUser(input: CreateUserInput): {
   const usersFile = getUsersFile();
   fs.writeFileSync(usersFile, JSON.stringify(users, null, 2), 'utf-8');
 
+  // Sync to MySQL admin_users and record audit log
+  syncDbAdminUser(newUser).catch(() => {});
+  logAdminAudit('admin_users', requestingUserId || 'system', 'create_user', {
+    id: newUser.id,
+    username: newUser.username,
+    displayName: newUser.displayName,
+    role: newUser.role,
+  }).catch(() => {});
+
   const { passwordHash: _, ...safeUser } = newUser;
   return {
     success: true,
@@ -470,7 +498,7 @@ export interface UpdateUserInput {
 
 /**
  * Updates an admin or manager user's display name or role.
- * Protects against demoting the only remaining administrator.
+ * Protects against demoting the founder or the only remaining administrator.
  */
 export function updateUser(
   userId: string,
@@ -488,13 +516,23 @@ export function updateUser(
   }
 
   const targetUser = users[idx];
+  const previousRole = targetUser.role;
 
   // Role modification validation
   if (input.role && input.role !== targetUser.role) {
     if (input.role !== 'admin' && input.role !== 'manager') {
-      return { success: false, error: 'Invalid role specified.' };
+      return { success: false, error: 'Invalid role specified. Role must be "admin" or "manager".' };
     }
 
+    // Founder protection: Shirin cannot be demoted from admin
+    if (targetUser.username.toLowerCase() === 'shirin' && input.role === 'manager') {
+      return {
+        success: false,
+        error: 'The primary founder account (@Shirin) must remain an Administrator.',
+      };
+    }
+
+    // Last administrator protection
     if (targetUser.role === 'admin' && input.role === 'manager') {
       const otherAdmins = users.filter((u) => u.id !== userId && u.role === 'admin');
       if (otherAdmins.length === 0) {
@@ -520,6 +558,16 @@ export function updateUser(
 
   const usersFile = getUsersFile();
   fs.writeFileSync(usersFile, JSON.stringify(users, null, 2), 'utf-8');
+
+  // Sync to MySQL admin_users and record audit log
+  syncDbAdminUser(targetUser).catch(() => {});
+  logAdminAudit('admin_users', requestingUserId, 'update_user', {
+    id: targetUser.id,
+    username: targetUser.username,
+    previousRole,
+    newRole: targetUser.role,
+    displayName: targetUser.displayName,
+  }).catch(() => {});
 
   const { passwordHash: _, ...safeUser } = targetUser;
   return {
@@ -573,10 +621,17 @@ export function deleteUser(
     }
   }
 
-  users.splice(idx, 1);
+  const [deletedUser] = users.splice(idx, 1);
 
   const usersFile = getUsersFile();
   fs.writeFileSync(usersFile, JSON.stringify(users, null, 2), 'utf-8');
+
+  // Sync to MySQL admin_users and record audit log
+  deleteDbAdminUser(userId).catch(() => {});
+  logAdminAudit('admin_users', requestingUserId, 'delete_user', {
+    id: deletedUser.id,
+    username: deletedUser.username,
+  }).catch(() => {});
 
   return { success: true };
 }

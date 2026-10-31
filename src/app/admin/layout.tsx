@@ -365,15 +365,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     },
   ];
 
-  const currentNav = navGroups
-    .flatMap((g) => g.items)
-    .find((item) => item.href === pathname);
-  const pageTitle = currentNav
-    ? currentNav.label
-    : pathname === "/admin"
-    ? "Dashboard Overview"
-    : "Management Console";
-
   // Filter modules based on search query and current user's role
   const filteredModules = ALL_SEARCHABLE_MODULES.filter((mod) => {
     if (mod.adminOnly && currentUser?.role !== "admin") return false;
@@ -559,10 +550,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             >
               <Menu size={20} />
             </button>
-
-            <div>
-              <h1 className="adm-header-title">{pageTitle}</h1>
-            </div>
           </div>
 
           {/* Global Quick Search / Command Palette */}
@@ -645,38 +632,15 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
           {/* Header Right Actions */}
           <div className="adm-header-actions">
-            <div className="adm-user-chip">
-              <div className="adm-user-avatar">
-                <span>
-                  {currentUser?.displayName
-                    ? currentUser.displayName
-                        .split(" ")
-                        .map((n) => n[0])
-                        .join("")
-                        .slice(0, 2)
-                        .toUpperCase()
-                    : "SS"}
-                </span>
-                <span className="adm-user-online-dot" />
-              </div>
-              <div className="hidden md:block text-left leading-tight">
-                <span className="block text-xs font-semibold text-slate-800">
-                  {currentUser?.displayName || "Administrator"}
-                </span>
-                <span className="block text-[11px] text-slate-500 font-mono">
-                  @{currentUser?.username || "admin"}
-                </span>
-              </div>
-            </div>
-
             <button
               type="button"
               onClick={handleLogout}
               disabled={isLoggingOut}
               className="adm-btn adm-btn-secondary adm-btn-sm"
-              title="Sign out"
+              title="Sign out of admin session"
             >
               <LogOut size={14} />
+              <span className="hidden sm:inline">Sign Out</span>
             </button>
           </div>
         </header>
