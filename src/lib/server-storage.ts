@@ -14,6 +14,8 @@ import {
   careerTimeline,
   JourneyItem,
   TimelineMilestone,
+  TimelineMetaConfig,
+  defaultTimelineMeta,
 } from '../data/timeline';
 import {
   initialContactInfo,
@@ -33,6 +35,7 @@ export interface TimelineStoreData {
   milestones: TimelineMilestone[];
   items?: JourneyItem[];
   deletedIds?: string[];
+  meta?: TimelineMetaConfig;
 }
 
 export type StoreKey =
@@ -146,6 +149,7 @@ export async function readStore<T>(key: StoreKey): Promise<T> {
               items: cleanItems,
               milestones: Array.isArray(t.milestones) ? t.milestones : [],
               deletedIds: Array.from(deleted),
+              meta: t.meta || defaultTimelineMeta,
             } as unknown as T;
           }
         }
@@ -198,6 +202,7 @@ export async function readStore<T>(key: StoreKey): Promise<T> {
             items: cleanItems,
             milestones: Array.isArray(t.milestones) ? t.milestones : [],
             deletedIds: Array.from(deleted),
+            meta: t.meta || defaultTimelineMeta,
           } as unknown as T;
         }
       }

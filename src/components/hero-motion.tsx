@@ -5,7 +5,6 @@ import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
 import { motion, useMotionValue, useSpring, useTransform } from "framer-motion";
 import { heroProfile, HeroProfile } from "@/data/hero";
-import { RevealText } from "@/components/ui/reveal-text";
 
 export interface HeroSectionProps {
   id?: string;
@@ -16,7 +15,6 @@ export function HeroMotion({ id = "home", initialProfile }: HeroSectionProps) {
   const containerRef = useRef<HTMLElement>(null);
   const [isClient, setIsClient] = useState(false);
   const [profile, setProfile] = useState<HeroProfile>(initialProfile || heroProfile);
-  const [galleryImages, setGalleryImages] = useState<string[]>([]);
 
   const loadHeroData = () => {
     fetch("/api/hero", { cache: "no-store" })
@@ -29,49 +27,25 @@ export function HeroMotion({ id = "home", initialProfile }: HeroSectionProps) {
       .catch(() => {});
   };
 
-  const loadGalleryData = () => {
-    fetch("/api/gallery", { cache: "no-store" })
-      .then((res) => (res.ok ? res.json() : null))
-      .then((data) => {
-        if (data && Array.isArray(data.images) && data.images.length > 0) {
-          const valid = data.images
-            .map((item: any) => (typeof item === "string" ? item : item.src))
-            .filter((src: string) => src && typeof src === "string" && !src.includes("placeholder") && !src.includes("demo"));
-          if (valid.length > 0) {
-            setGalleryImages(valid);
-          }
-        }
-      })
-      .catch(() => {});
-  };
-
   useEffect(() => {
     setIsClient(true);
     // Only fetch on initial mount if server profile was not supplied
     if (!initialProfile) {
       loadHeroData();
     }
-    loadGalleryData();
 
     const handleUpdate = () => {
       loadHeroData();
     };
 
-    const handleGalleryUpdate = () => {
-      loadGalleryData();
-    };
-
     window.addEventListener("shirin_shila_hero_updated", handleUpdate);
-    window.addEventListener("shirin_shila_gallery_updated", handleGalleryUpdate);
     window.addEventListener("shirin_shila_reset", handleUpdate);
     window.addEventListener("storage", (e) => {
       if (e.key === "shirin_shila_sync_hero") loadHeroData();
-      if (e.key === "shirin_shila_sync_gallery") loadGalleryData();
     });
 
     return () => {
       window.removeEventListener("shirin_shila_hero_updated", handleUpdate);
-      window.removeEventListener("shirin_shila_gallery_updated", handleGalleryUpdate);
       window.removeEventListener("shirin_shila_reset", handleUpdate);
     };
   }, [initialProfile]);
@@ -110,21 +84,6 @@ export function HeroMotion({ id = "home", initialProfile }: HeroSectionProps) {
   const nameParts = profile.name.split(" ");
   const firstName = nameParts[0];
   const lastName = nameParts.slice(1).join(" ");
-
-  const activeLetterImages =
-    galleryImages.length > 0
-      ? [profile.image, ...galleryImages].filter(Boolean)
-      : [
-          profile.image,
-          "/images/award-diff-stage.jpg",
-          "/images/poster-begum-jaan.jpg",
-          "/images/award-trophy-gala.jpg",
-          "/images/poster-hitman.jpg",
-          "/images/poster-seshbazi.jpg",
-          "/images/award-trophy-stage.jpg",
-          "/images/poster-birangona71.jpg",
-          "/images/portrait.jpg",
-        ].filter(Boolean);
 
   return (
     <section
@@ -184,25 +143,15 @@ export function HeroMotion({ id = "home", initialProfile }: HeroSectionProps) {
           <span>{profile.eyebrow}</span>
         </motion.div>
 
-        {/* SEO Heading (Screen Readers & Search Engines) */}
-        <h1 className="sr-only">{profile.name || "Shirin Shila"}</h1>
-
-        {/* Interactive Kinetic Reveal Title */}
-        <div style={{ margin: "0 0 24px" }} aria-hidden="true">
-          <RevealText
-            text={profile.name ? profile.name.toUpperCase() : "SHIRIN SHILA"}
-            textColor="text-white"
-            highlightTextColor="text-[#ff3f79]"
-            overlayColor="text-[#ff3f79]"
-            fontSize="text-[clamp(44px,7.8vw,125px)]"
-            fontClassName="font-serif font-black tracking-tight"
-            letterDelay={0.08}
-            overlayDelay={0.05}
-            overlayDuration={0.45}
-            springDuration={600}
-            letterImages={activeLetterImages}
-          />
-        </div>
+        {/* Large Cinematic Serif Title */}
+        <motion.h1
+          className="serif"
+          initial={{ opacity: 0, y: 28 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.28, ease: [0.16, 1, 0.3, 1] }}
+        >
+          {firstName} <span className="pink">{lastName}</span>
+        </motion.h1>
 
         {/* Roles Banner */}
         <motion.div

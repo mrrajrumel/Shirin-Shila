@@ -14,8 +14,21 @@ import {
   Award,
   ArrowUpRight,
   FolderKanban,
+  Trophy,
+  Sparkles,
+  Image as ImageIcon,
+  Layers,
+  Save,
+  Eye,
 } from 'lucide-react';
-import { JourneyItem, Month, monthOrder, computeTimelinePeriodLabel } from '@/data/timeline';
+import {
+  JourneyItem,
+  Month,
+  monthOrder,
+  computeTimelinePeriodLabel,
+  TimelineMetaConfig,
+  defaultTimelineMeta,
+} from '@/data/timeline';
 import { MediaPickerModal } from '@/components/admin/media-picker-modal';
 
 const monthsList: Month[] = [
@@ -47,6 +60,14 @@ export default function AdminTimelinePage() {
     }
   }, []);
 
+  // Featured Intro Card & Dynamic Rotating Cover state
+  const [meta, setMeta] = useState<TimelineMetaConfig>(defaultTimelineMeta);
+  const [savingMeta, setSavingMeta] = useState(false);
+  const [metaSavedSuccess, setMetaSavedSuccess] = useState(false);
+  const [coverPickerOpen, setCoverPickerOpen] = useState(false);
+  const [addCoverPickerOpen, setAddCoverPickerOpen] = useState(false);
+  const [previewIndex, setPreviewIndex] = useState(0);
+
   // Modal / Form state
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<JourneyItem | null>(null);
@@ -69,11 +90,57 @@ export default function AdminTimelinePage() {
     image: '/images/award-trophy-gala.jpg',
   });
 
+  // Calculate the active pool of cycling award images for live preview
+  const previewCycleImages = React.useMemo(() => {
+    const fromItems = items
+      .map((it) => it.image)
+      .filter(
+        (img): img is string =>
+          Boolean(img && typeof img === 'string' && img.trim().length > 0 && !img.includes('placeholder') && !img.includes('demo'))
+      );
+
+    const fromMeta = Array.isArray(meta?.images)
+      ? meta.images.filter(
+          (img): img is string =>
+            Boolean(img && typeof img === 'string' && img.trim().length > 0 && !img.includes('placeholder') && !img.includes('demo'))
+        )
+      : [];
+
+    if (meta?.image && typeof meta.image === 'string' && meta.image.trim() && !meta.image.includes('placeholder')) {
+      if (!fromMeta.includes(meta.image)) {
+        fromMeta.unshift(meta.image);
+      }
+    }
+
+    const combined = Array.from(new Set([...fromMeta, ...fromItems]));
+    if (combined.length === 0) {
+      return ['/images/award-diff-stage.jpg', '/images/award-trophy-stage.jpg', '/images/award-trophy-gala.jpg'];
+    }
+    return combined;
+  }, [items, meta]);
+
+  // Preview cycle timer
+  useEffect(() => {
+    if (previewCycleImages.length <= 1) return;
+    if (meta.autoRotate === false) return;
+    const intervalSec = Math.max(2, meta.rotationInterval || 4);
+    const t = setInterval(() => {
+      setPreviewIndex((prev) => (prev + 1) % previewCycleImages.length);
+    }, intervalSec * 1000);
+    return () => clearInterval(t);
+  }, [previewCycleImages.length, meta.autoRotate, meta.rotationInterval]);
+
   const loadTimeline = async () => {
     setLoading(true);
     try {
       const res = await fetch('/api/timeline', { cache: 'no-store' });
       const data = await res.json();
+      if (data.data?.meta) {
+        setMeta(data.data.meta);
+      } else if (data.meta) {
+        setMeta(data.meta);
+      }
+
       if (data.data && Array.isArray(data.data.items)) {
         setItems(data.data.items);
       } else if (data.data) {
@@ -94,6 +161,33 @@ export default function AdminTimelinePage() {
       console.error('Error fetching timeline:', err);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleSaveMeta = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    setSavingMeta(true);
+    setMetaSavedSuccess(false);
+
+    try {
+      const res = await fetch('/api/timeline', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'update_meta', meta }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed to save intro card settings');
+
+      setMetaSavedSuccess(true);
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('shirin_shila_timeline_updated'));
+        localStorage.setItem('shirin_shila_sync_timeline', Date.now().toString());
+      }
+      setTimeout(() => setMetaSavedSuccess(false), 3000);
+    } catch (err: any) {
+      alert(`Save error: ${err.message}`);
+    } finally {
+      setSavingMeta(false);
     }
   };
 
@@ -226,6 +320,16 @@ export default function AdminTimelinePage() {
           </button>
           <button
             type="button"
+            onClick={handleSaveMeta}
+            disabled={savingMeta}
+            className="adm-btn adm-btn-secondary adm-btn-sm"
+            style={{ color: metaSavedSuccess ? '#22c55e' : 'var(--pink)' }}
+          >
+            {metaSavedSuccess ? <Check size={13} /> : <Save size={13} />}
+            <span>{savingMeta ? 'Saving Intro...' : metaSavedSuccess ? 'Intro Saved!' : 'Save Intro Card'}</span>
+          </button>
+          <button
+            type="button"
             onClick={handleOpenAddModal}
             className="adm-btn adm-btn-primary adm-btn-sm"
           >
@@ -236,6 +340,523 @@ export default function AdminTimelinePage() {
       </header>
 
       <main className="adm-content">
+        {/* Featured Archive Intro Card & Dynamic Background Showcase */}
+        <div className="adm-card" style={{ marginBottom: '24px', borderColor: 'rgba(255, 63, 121, 0.25)' }}>
+          <div
+            className="adm-card-header"
+            style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              flexWrap: 'wrap',
+              gap: '10px',
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <div
+                style={{
+                  width: '28px',
+                  height: '28px',
+                  borderRadius: '6px',
+                  background: 'rgba(255, 63, 121, 0.15)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  color: 'var(--pink)',
+                }}
+              >
+                <Trophy size={16} />
+              </div>
+              <div>
+                <span className="adm-card-title" style={{ fontSize: '15px' }}>
+                  Awards Archive Intro Card &amp; Dynamic Background Cover
+                </span>
+                <span className="adm-help-text" style={{ margin: 0 }}>
+                  Customize the front-facing trophy banner and configure continuous auto-cycling background cover images.
+                </span>
+              </div>
+            </div>
+
+            <button
+              type="button"
+              onClick={handleSaveMeta}
+              disabled={savingMeta}
+              className="adm-btn adm-btn-primary adm-btn-sm"
+            >
+              {metaSavedSuccess ? <Check size={13} /> : <Save size={13} />}
+              <span>{savingMeta ? 'Saving...' : metaSavedSuccess ? 'Saved Live!' : 'Save Intro Settings'}</span>
+            </button>
+          </div>
+
+          <div className="adm-card-body">
+            <div
+              style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+                gap: '24px',
+                alignItems: 'start',
+              }}
+            >
+              {/* Left Column: Form Settings */}
+              <div>
+                <div className="adm-grid-2fields">
+                  <div className="adm-form-group">
+                    <label className="adm-label">Intro Card Badge *</label>
+                    <input
+                      type="text"
+                      className="adm-input"
+                      value={meta.badge || 'Dhallywood Honors'}
+                      onChange={(e) => setMeta({ ...meta, badge: e.target.value })}
+                      placeholder="e.g. Dhallywood Honors"
+                    />
+                    <span className="adm-help-text">Small uppercase tag above the card title</span>
+                  </div>
+
+                  <div className="adm-form-group">
+                    <label className="adm-label">Card Headline Title *</label>
+                    <input
+                      type="text"
+                      className="adm-input"
+                      value={meta.cardTitle || 'Recognized Excellence'}
+                      onChange={(e) => setMeta({ ...meta, cardTitle: e.target.value })}
+                      placeholder="e.g. Recognized Excellence"
+                    />
+                    <span className="adm-help-text">Prominent card serif headline</span>
+                  </div>
+                </div>
+
+                <div className="adm-form-group">
+                  <label className="adm-label">Card Accolade Description *</label>
+                  <textarea
+                    className="adm-input adm-textarea"
+                    rows={2}
+                    value={meta.cardSubtitle || ''}
+                    onChange={(e) => setMeta({ ...meta, cardSubtitle: e.target.value })}
+                    placeholder="e.g. Honoring a decade of memorable cinematic performances..."
+                  />
+                  <span className="adm-help-text">Editorial text rendered in the intro card</span>
+                </div>
+
+                {/* Primary Cover Image */}
+                <div className="adm-form-group">
+                  <label className="adm-label">Primary Featured Cover Image *</label>
+                  <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+                    <div
+                      style={{
+                        width: '64px',
+                        height: '64px',
+                        borderRadius: '8px',
+                        overflow: 'hidden',
+                        background: '#09050b',
+                        border: '1px solid var(--adm-border)',
+                        flexShrink: 0,
+                      }}
+                    >
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={meta.image || '/images/award-diff-stage.jpg'}
+                        alt="Primary Cover"
+                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                        onError={(e) => {
+                          (e.currentTarget as HTMLImageElement).src = '/images/award-trophy-stage.jpg';
+                        }}
+                      />
+                    </div>
+
+                    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                      <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                        <button
+                          type="button"
+                          onClick={() => setCoverPickerOpen(true)}
+                          className="adm-btn adm-btn-primary adm-btn-sm"
+                        >
+                          <FolderKanban size={13} />
+                          <span>Choose from Media Library</span>
+                        </button>
+                      </div>
+                      <input
+                        type="text"
+                        className="adm-input"
+                        value={meta.image || ''}
+                        onChange={(e) => setMeta({ ...meta, image: e.target.value })}
+                        placeholder="/images/award-... or /uploads/..."
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Auto-Rotation Controls */}
+                <div
+                  style={{
+                    padding: '14px',
+                    borderRadius: '8px',
+                    background: 'var(--adm-surface-raised)',
+                    border: '1px solid var(--adm-border)',
+                    marginTop: '16px',
+                  }}
+                >
+                  <div
+                    style={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      gap: '12px',
+                      flexWrap: 'wrap',
+                    }}
+                  >
+                    <div>
+                      <div style={{ fontWeight: 600, fontSize: '13px', color: 'var(--adm-text)' }}>
+                        Dynamic Auto-Cycling Background Cover
+                      </div>
+                      <div style={{ fontSize: '12px', color: 'var(--adm-text-muted)' }}>
+                        Smoothly crossfades between all award photos in the background of the intro card
+                      </div>
+                    </div>
+
+                    <label
+                      style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '8px',
+                        cursor: 'pointer',
+                        fontSize: '13px',
+                      }}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={meta.autoRotate !== false}
+                        onChange={(e) => setMeta({ ...meta, autoRotate: e.target.checked })}
+                      />
+                      <span>{meta.autoRotate !== false ? 'Auto-Cycle ON' : 'Auto-Cycle OFF'}</span>
+                    </label>
+                  </div>
+
+                  <div
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '12px',
+                      marginTop: '12px',
+                      paddingTop: '10px',
+                      borderTop: '1px solid rgba(255, 255, 255, 0.06)',
+                    }}
+                  >
+                    <span style={{ fontSize: '12px', color: 'var(--adm-text-muted)' }}>
+                      Transition Interval:
+                    </span>
+                    <select
+                      className="adm-select"
+                      style={{ width: 'auto', padding: '4px 10px', fontSize: '12px' }}
+                      value={meta.rotationInterval || 4}
+                      onChange={(e) =>
+                        setMeta({ ...meta, rotationInterval: parseInt(e.target.value, 10) || 4 })
+                      }
+                    >
+                      <option value={2}>Fast (2 seconds)</option>
+                      <option value={3}>Smooth (3 seconds)</option>
+                      <option value={4}>Standard (4 seconds)</option>
+                      <option value={5}>Cinematic (5 seconds)</option>
+                      <option value={6}>Relaxed (6 seconds)</option>
+                    </select>
+
+                    <button
+                      type="button"
+                      onClick={() => setAddCoverPickerOpen(true)}
+                      className="adm-btn adm-btn-secondary adm-btn-sm"
+                      style={{ marginLeft: 'auto' }}
+                    >
+                      <Plus size={12} />
+                      <span>Add Extra Showcase Photo</span>
+                    </button>
+                  </div>
+
+                  {/* Extra Showcase Images Pills */}
+                  {Array.isArray(meta.images) && meta.images.length > 0 && (
+                    <div style={{ marginTop: '12px', display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                      {meta.images.map((imgUrl, i) => (
+                        <div
+                          key={i}
+                          style={{
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '6px',
+                            padding: '3px 8px 3px 4px',
+                            background: 'rgba(0,0,0,0.5)',
+                            borderRadius: '6px',
+                            border: '1px solid var(--adm-border)',
+                            fontSize: '11px',
+                          }}
+                        >
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img
+                            src={imgUrl}
+                            alt=""
+                            style={{ width: '20px', height: '20px', objectFit: 'cover', borderRadius: '4px' }}
+                          />
+                          <span
+                            style={{
+                              maxWidth: '120px',
+                              overflow: 'hidden',
+                              textOverflow: 'ellipsis',
+                              whiteSpace: 'nowrap',
+                            }}
+                          >
+                            {imgUrl.split('/').pop()}
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setMeta((prev) => ({
+                                ...prev,
+                                images: (prev.images || []).filter((_, idx) => idx !== i),
+                              }));
+                            }}
+                            style={{
+                              background: 'transparent',
+                              border: 0,
+                              color: 'var(--adm-text-muted)',
+                              cursor: 'pointer',
+                              padding: 0,
+                            }}
+                            title="Remove photo"
+                          >
+                            <X size={12} />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  <div
+                    style={{
+                      fontSize: '11px',
+                      color: '#22c55e',
+                      marginTop: '10px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '5px',
+                    }}
+                  >
+                    <Check size={12} />
+                    <span>
+                      Live Award Pool: {previewCycleImages.length} images will cycle continuously (all active milestone awards with photos are automatically included).
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Right Column: Live Interactive Card Preview */}
+              <div
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
+              >
+                <div
+                  style={{
+                    fontSize: '11px',
+                    textTransform: 'uppercase',
+                    letterSpacing: '1px',
+                    color: 'var(--adm-text-muted)',
+                    marginBottom: '8px',
+                    alignSelf: 'flex-start',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                  }}
+                >
+                  <Eye size={13} color="var(--pink)" />
+                  <span>Live Frontend Preview ({previewCycleImages.length} Images in Pool)</span>
+                </div>
+
+                {/* Replica of the Frontend Featured Card */}
+                <div
+                  style={{
+                    width: '100%',
+                    maxWidth: '310px',
+                    minHeight: '380px',
+                    borderRadius: '16px',
+                    overflow: 'hidden',
+                    border: '1px solid rgba(255, 255, 255, 0.12)',
+                    background: '#140e16',
+                    position: 'relative',
+                    boxShadow: '0 20px 40px rgba(0,0,0,0.85)',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    justifyContent: 'flex-end',
+                    padding: '24px',
+                  }}
+                >
+                  {/* Layered Cycling Images */}
+                  {previewCycleImages.map((src, idx) => {
+                    const isCurrent = idx === previewIndex;
+                    return (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        key={`${src}-${idx}`}
+                        src={src}
+                        alt="Preview"
+                        style={{
+                          position: 'absolute',
+                          inset: 0,
+                          width: '100%',
+                          height: '100%',
+                          objectFit: 'cover',
+                          filter: 'saturate(0.9)',
+                          transition: 'all 1s ease-in-out',
+                          opacity: isCurrent ? 0.75 : 0,
+                          transform: isCurrent ? 'scale(1)' : 'scale(1.05)',
+                          pointerEvents: 'none',
+                        }}
+                        onError={(e) => {
+                          (e.currentTarget as HTMLImageElement).src = '/images/award-trophy-stage.jpg';
+                        }}
+                      />
+                    );
+                  })}
+
+                  {/* Gradient Overlay */}
+                  <div
+                    style={{
+                      position: 'absolute',
+                      inset: 0,
+                      background: 'linear-gradient(to top, #0e0810 0%, rgba(14, 8, 16, 0.6) 60%, rgba(0,0,0,0.35) 100%)',
+                      pointerEvents: 'none',
+                    }}
+                  />
+
+                  {/* Badge Counter */}
+                  {previewCycleImages.length > 1 && (
+                    <div
+                      style={{
+                        position: 'absolute',
+                        top: '14px',
+                        right: '14px',
+                        zIndex: 10,
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '6px',
+                        padding: '4px 10px',
+                        borderRadius: '999px',
+                        background: 'rgba(0, 0, 0, 0.65)',
+                        backdropFilter: 'blur(8px)',
+                        border: '1px solid rgba(255, 255, 255, 0.15)',
+                        fontSize: '10px',
+                        fontFamily: 'monospace',
+                        color: '#d4d4d8',
+                      }}
+                    >
+                      <span
+                        style={{
+                          width: '6px',
+                          height: '6px',
+                          borderRadius: '50%',
+                          background: 'var(--pink)',
+                        }}
+                      />
+                      <span>
+                        {String(previewIndex + 1).padStart(2, '0')} / {String(previewCycleImages.length).padStart(2, '0')}
+                      </span>
+                    </div>
+                  )}
+
+                  {/* Content */}
+                  <div style={{ position: 'relative', zIndex: 10 }}>
+                    <div
+                      style={{
+                        width: '38px',
+                        height: '38px',
+                        borderRadius: '10px',
+                        background: 'rgba(255, 63, 121, 0.2)',
+                        border: '1px solid rgba(255, 63, 121, 0.4)',
+                        color: 'var(--pink)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        marginBottom: '12px',
+                      }}
+                    >
+                      <Trophy size={18} />
+                    </div>
+
+                    <span
+                      style={{
+                        fontSize: '11px',
+                        textTransform: 'uppercase',
+                        letterSpacing: '1px',
+                        color: 'var(--pink)',
+                        fontFamily: 'monospace',
+                        display: 'block',
+                        marginBottom: '4px',
+                      }}
+                    >
+                      {meta.badge || 'Dhallywood Honors'}
+                    </span>
+
+                    <h3
+                      style={{
+                        fontSize: '20px',
+                        color: '#ffffff',
+                        fontWeight: 600,
+                        lineHeight: 1.25,
+                        margin: '0 0 8px 0',
+                      }}
+                    >
+                      {meta.cardTitle || 'Recognized Excellence'}
+                    </h3>
+
+                    <p
+                      style={{
+                        fontSize: '11px',
+                        color: 'rgba(212, 212, 216, 0.85)',
+                        lineHeight: 1.5,
+                        margin: 0,
+                      }}
+                    >
+                      {meta.cardSubtitle ||
+                        'Honoring a decade of memorable cinematic performances across television, mainstream film, and cultural festivals.'}
+                    </p>
+
+                    {/* Dots */}
+                    {previewCycleImages.length > 1 && (
+                      <div
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '6px',
+                          marginTop: '14px',
+                          paddingTop: '10px',
+                          borderTop: '1px solid rgba(255, 255, 255, 0.1)',
+                        }}
+                      >
+                        {previewCycleImages.map((_, i) => (
+                          <button
+                            key={i}
+                            type="button"
+                            onClick={() => setPreviewIndex(i)}
+                            style={{
+                              height: '4px',
+                              width: i === previewIndex ? '20px' : '6px',
+                              borderRadius: '4px',
+                              background: i === previewIndex ? 'var(--pink)' : 'rgba(255,255,255,0.3)',
+                              border: 0,
+                              padding: 0,
+                              cursor: 'pointer',
+                              transition: 'all 0.3s ease',
+                            }}
+                          />
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
         {/* Search & Actions Bar */}
         <div
           style={{
@@ -593,13 +1214,37 @@ export default function AdminTimelinePage() {
         </div>
       )}
 
-      {/* Media Picker Modal */}
+      {/* Media Picker Modal for Milestone Item */}
       <MediaPickerModal
         isOpen={pickerOpen}
         onClose={() => setPickerOpen(false)}
         onSelect={(url) => setFormData((prev) => ({ ...prev, image: url }))}
         title="Select Award / Trophy Photo"
         currentValue={formData.image}
+        targetFolder="timeline"
+      />
+
+      {/* Media Picker Modal for Primary Intro Cover Image */}
+      <MediaPickerModal
+        isOpen={coverPickerOpen}
+        onClose={() => setCoverPickerOpen(false)}
+        onSelect={(url) => setMeta((prev) => ({ ...prev, image: url }))}
+        title="Select Primary Award Cover Photo"
+        currentValue={meta.image}
+        targetFolder="timeline"
+      />
+
+      {/* Media Picker Modal for Additional Showcase Cover Images */}
+      <MediaPickerModal
+        isOpen={addCoverPickerOpen}
+        onClose={() => setAddCoverPickerOpen(false)}
+        onSelect={(url) => {
+          setMeta((prev) => ({
+            ...prev,
+            images: Array.from(new Set([...(prev.images || []), url])),
+          }));
+        }}
+        title="Add Image to Dynamic Awards Cover Showcase"
         targetFolder="timeline"
       />
     </>

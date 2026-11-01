@@ -32,9 +32,19 @@ function WikipediaIcon({ size = 16, color = "currentColor" }: { size?: number; c
   );
 }
 
-export function Footer() {
+export interface FooterProps {
+  initialSocials?: SocialChannels;
+}
+
+export function Footer({ initialSocials }: FooterProps = {}) {
   const [links, setLinks] = useState<FooterLink[]>(defaultFooterLinks);
-  const [socials, setSocials] = useState<SocialChannels>(initialContactInfo.socials);
+  const [socials, setSocials] = useState<SocialChannels>(initialSocials || initialContactInfo.socials);
+
+  useEffect(() => {
+    if (initialSocials) {
+      setSocials(initialSocials);
+    }
+  }, [initialSocials]);
 
   useEffect(() => {
     const loadLinks = async () => {
@@ -90,15 +100,26 @@ export function Footer() {
     loadLinks();
     loadContact();
 
+    const handleStorage = (e: StorageEvent) => {
+      if (e.key === "shirin_shila_sync_contact") {
+        loadContact();
+      }
+      if (e.key === "shirin_shila_sync_seo") {
+        loadLinks();
+      }
+    };
+
     window.addEventListener("shirin_shila_seo_updated", loadLinks);
     window.addEventListener("shirin_shila_pages_updated", loadLinks);
     window.addEventListener("shirin_shila_contact_updated", loadContact);
     window.addEventListener("shirin_shila_contact_info_updated", loadContact);
+    window.addEventListener("storage", handleStorage);
     return () => {
       window.removeEventListener("shirin_shila_seo_updated", loadLinks);
       window.removeEventListener("shirin_shila_pages_updated", loadLinks);
       window.removeEventListener("shirin_shila_contact_updated", loadContact);
       window.removeEventListener("shirin_shila_contact_info_updated", loadContact);
+      window.removeEventListener("storage", handleStorage);
     };
   }, []);
 
@@ -147,7 +168,7 @@ export function Footer() {
           <ImdbIcon size={20} color="var(--pink)" />
         </a>
         <a
-          href={socials.facebookPage || "https://www.facebook.com/shirinshilaofficial"}
+          href={socials.facebookPage || socials.facebookProfile || "https://www.facebook.com/shirinshilaofficial"}
           target="_blank"
           rel="noopener noreferrer"
           className="footer-social-icon"

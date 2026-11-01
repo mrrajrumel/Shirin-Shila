@@ -95,6 +95,7 @@ export default async function Home() {
         id="timeline"
         topData={timelineTopData}
         bottomData={timelineBottomData}
+        initialMeta={timeline.meta}
       />
 
       {/* 8. Media coverage, newspaper clippings, and interviews */}
@@ -107,7 +108,7 @@ export default async function Home() {
       <MediaTickerSection id="broadcasters" initialPartners={mediaPartners && mediaPartners.length > 0 ? mediaPartners : defaultMediaPartners} />
 
       {/* 11. Copyright and back to top */}
-      <Footer />
+      <Footer initialSocials={contact?.socials} />
     </main>
   );
 }

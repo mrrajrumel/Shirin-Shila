@@ -163,13 +163,41 @@ export function computeTimelinePeriodLabel(items?: JourneyItem[]): string {
   return startYear === endYear ? `${startYear}` : `${startYear} — ${endYear}`;
 }
 
-export const timelineMeta = {
+export interface TimelineMetaConfig {
+  kicker: string;
+  title: string;
+  sectionSubtitle?: string;
+  periodLabel: string;
+  image: string;
+  imageAlt: string;
+  badge?: string;
+  cardTitle?: string;
+  cardSubtitle?: string;
+  images?: string[];
+  autoRotate?: boolean;
+  rotationInterval?: number; // seconds
+}
+
+export const defaultTimelineMeta: TimelineMetaConfig = {
   kicker: "Honors & Accolades",
   title: "Awards & Honors",
+  sectionSubtitle: "Chronological journey of prestigious Dhallywood awards, television honors, and film industry recognitions from 2014 to present.",
   periodLabel: computeTimelinePeriodLabel([...topJourneyData, ...bottomJourneyData]),
   image: "/images/award-diff-stage.jpg",
   imageAlt: "Shirin Shila receiving Awards & Trophies",
+  badge: "Dhallywood Honors",
+  cardTitle: "Recognized Excellence",
+  cardSubtitle: "Honoring a decade of memorable cinematic performances across television, mainstream film, and cultural festivals.",
+  images: [
+    "/images/award-diff-stage.jpg",
+    "/images/award-trophy-stage.jpg",
+    "/images/award-trophy-gala.jpg",
+  ],
+  autoRotate: true,
+  rotationInterval: 4,
 };
+
+export const timelineMeta = defaultTimelineMeta;
 
 export const timeline = careerTimeline;
 export default timeline;

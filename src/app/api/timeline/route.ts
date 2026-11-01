@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { revalidatePath } from 'next/cache';
 import { readStore, writeStore, TimelineStoreData } from '@/lib/server-storage';
-import { JourneyItem } from '@/data/timeline';
+import { JourneyItem, defaultTimelineMeta } from '@/data/timeline';
 import { SESSION_COOKIE_NAME, verifySessionToken } from '@/lib/auth';
 
 export const dynamic = 'force-dynamic';
@@ -84,7 +84,9 @@ export async function GET() {
           bottom,
           milestones: (store.milestones || []).filter((m: any) => !m.id || !deletedSet.has(m.id)),
           deletedIds: Array.from(deletedSet),
+          meta: store.meta || defaultTimelineMeta,
         },
+        meta: store.meta || defaultTimelineMeta,
       },
       {
         headers: { 'Cache-Control': 'no-store, no-cache, must-revalidate' },
@@ -103,6 +105,31 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     const store = await readStore<TimelineStoreData>('timeline');
+
+    // Handle Meta & Featured Intro Card Update
+    if (body.action === 'update_meta' || (body.meta && !body.year && !body.content)) {
+      store.meta = {
+        ...(store.meta || defaultTimelineMeta),
+        ...body.meta,
+      };
+      await writeStore('timeline', store);
+      revalidatePath('/');
+      revalidatePath('/admin/timeline');
+      revalidatePath('/admin/pages');
+
+      return NextResponse.json({
+        success: true,
+        meta: store.meta,
+        data: {
+          items: store.items || [],
+          top: store.top || [],
+          bottom: store.bottom || [],
+          milestones: store.milestones || [],
+          deletedIds: store.deletedIds || [],
+          meta: store.meta,
+        },
+      });
+    }
 
     // Collect all existing items
     const rawItems: JourneyItem[] = [
@@ -178,6 +205,31 @@ export async function PUT(request: NextRequest) {
   try {
     const body = await request.json();
     const store = await readStore<TimelineStoreData>('timeline');
+
+    // Handle Meta & Featured Intro Card Update
+    if (body.action === 'update_meta' || (body.meta && !body.year && !body.content)) {
+      store.meta = {
+        ...(store.meta || defaultTimelineMeta),
+        ...body.meta,
+      };
+      await writeStore('timeline', store);
+      revalidatePath('/');
+      revalidatePath('/admin/timeline');
+      revalidatePath('/admin/pages');
+
+      return NextResponse.json({
+        success: true,
+        meta: store.meta,
+        data: {
+          items: store.items || [],
+          top: store.top || [],
+          bottom: store.bottom || [],
+          milestones: store.milestones || [],
+          deletedIds: store.deletedIds || [],
+          meta: store.meta,
+        },
+      });
+    }
 
     let allItems: JourneyItem[] = [];
 
