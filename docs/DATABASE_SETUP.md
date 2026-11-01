@@ -25,7 +25,7 @@ Configure the following variables in the Hostinger server environment (via Hosti
 
 ## 2. Configuration Steps in Hostinger hPanel
 
-1. **Log in to Hostinger hPanel**: Navigate to **Websites** $\rightarrow$ select `cornflowerblue-wildcat-675604.hostingersite.com`.
+1. **Log in to Hostinger hPanel**: Navigate to **Websites** $\rightarrow$ select `shirinshila.com`.
 2. **Access Node.js Settings**: Click on the **Node.js** panel.
 3. **Set Environment Variables**:
    - Scroll to **Environment Variables**.
