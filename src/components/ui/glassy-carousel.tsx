@@ -538,7 +538,7 @@ export default function GlassyCarousel({
             </div>
 
             {/* Video / Poster Screen */}
-            <div className="gc-project-preview">
+            <div className={`gc-project-preview ${video ? "is-video" : "is-image"}`}>
               {video ? (
                 <iframe
                   src={video}
@@ -548,13 +548,24 @@ export default function GlassyCarousel({
                   referrerPolicy="strict-origin-when-cross-origin"
                 />
               ) : (
-                <img
-                  src={preview.image}
-                  alt={`${preview.title} preview`}
-                  onError={(e) => {
-                    (e.currentTarget as HTMLImageElement).src = "/images/poster-begum-jaan.jpg";
-                  }}
-                />
+                <div className="gc-poster-stage">
+                  {/* Atmospheric blurred ambient halo from poster colors */}
+                  <img
+                    src={preview.image}
+                    alt=""
+                    aria-hidden="true"
+                    className="gc-poster-backdrop"
+                  />
+                  {/* Full sharp uncropped movie poster */}
+                  <img
+                    src={preview.image}
+                    alt={`${preview.title} preview`}
+                    className="gc-poster-foreground"
+                    onError={(e) => {
+                      (e.currentTarget as HTMLImageElement).src = "/images/poster-begum-jaan.jpg";
+                    }}
+                  />
+                </div>
               )}
             </div>
 
