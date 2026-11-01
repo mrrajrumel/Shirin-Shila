@@ -92,32 +92,56 @@ export default function AdminTimelinePage() {
 
   // Calculate the active pool of cycling award images for live preview
   const previewCycleImages = React.useMemo(() => {
-    const fromItems = items
-      .map((it) => it.image)
-      .filter(
-        (img): img is string =>
-          Boolean(img && typeof img === 'string' && img.trim().length > 0 && !img.includes('placeholder') && !img.includes('demo'))
-      );
+    const pool: string[] = [];
 
-    const fromMeta = Array.isArray(meta?.images)
-      ? meta.images.filter(
-          (img): img is string =>
-            Boolean(img && typeof img === 'string' && img.trim().length > 0 && !img.includes('placeholder') && !img.includes('demo'))
-        )
-      : [];
+    // 1. Primary cover image
+    const primary = (meta?.image && typeof meta.image === 'string' && meta.image.trim()) 
+      ? meta.image.trim() 
+      : '';
 
-    if (meta?.image && typeof meta.image === 'string' && meta.image.trim() && !meta.image.includes('placeholder')) {
-      if (!fromMeta.includes(meta.image)) {
-        fromMeta.unshift(meta.image);
+    if (primary && !primary.includes('placeholder') && !primary.includes('demo')) {
+      pool.push(primary);
+    }
+
+    // 2. Extra showcase photos explicitly added by admin
+    if (Array.isArray(meta?.images)) {
+      for (const img of meta.images) {
+        if (img && typeof img === 'string' && img.trim() && !img.includes('placeholder') && !img.includes('demo')) {
+          if (!pool.includes(img.trim())) {
+            pool.push(img.trim());
+          }
+        }
       }
     }
 
-    const combined = Array.from(new Set([...fromMeta, ...fromItems]));
-    if (combined.length === 0) {
-      return ['/images/award-diff-stage.jpg', '/images/award-trophy-stage.jpg', '/images/award-trophy-gala.jpg'];
+    // 3. Only include milestone photos if explicitly enabled by admin OR if pool is completely empty
+    if (meta?.includeMilestonePhotos === true || pool.length === 0) {
+      const fromItems = items
+        .map((it) => it.image)
+        .filter(
+          (img): img is string =>
+            Boolean(img && typeof img === 'string' && img.trim().length > 0 && !img.includes('placeholder') && !img.includes('demo'))
+        );
+      for (const img of fromItems) {
+        if (!pool.includes(img)) {
+          pool.push(img);
+        }
+      }
     }
-    return combined;
+
+    if (pool.length === 0) {
+      return ['/images/award-trophy-stage.jpg', '/images/award-trophy-gala.jpg'];
+    }
+
+    return pool;
   }, [items, meta]);
+
+  // Keep preview index in bounds
+  useEffect(() => {
+    if (previewIndex >= previewCycleImages.length) {
+      setPreviewIndex(0);
+    }
+  }, [previewCycleImages.length, previewIndex]);
 
   // Preview cycle timer
   useEffect(() => {
@@ -399,6 +423,55 @@ export default function AdminTimelinePage() {
             >
               {/* Left Column: Form Settings */}
               <div>
+                {/* Section Header Controls */}
+                <div style={{ paddingBottom: '16px', marginBottom: '16px', borderBottom: '1px solid var(--adm-border)' }}>
+                  <div style={{ fontSize: '12px', fontWeight: 600, color: 'var(--pink)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '12px' }}>
+                    1. Main Section Heading & Kicker
+                  </div>
+                  <div className="adm-grid-2fields">
+                    <div className="adm-form-group">
+                      <label className="adm-label">Section Kicker</label>
+                      <input
+                        type="text"
+                        className="adm-input"
+                        value={meta.kicker || 'Career Milestones'}
+                        onChange={(e) => setMeta({ ...meta, kicker: e.target.value })}
+                        placeholder="e.g. Career Milestones"
+                      />
+                      <span className="adm-help-text">Small subtitle badge above the main title</span>
+                    </div>
+
+                    <div className="adm-form-group">
+                      <label className="adm-label">Section Title</label>
+                      <input
+                        type="text"
+                        className="adm-input"
+                        value={meta.title || 'Awards & Honors Archive'}
+                        onChange={(e) => setMeta({ ...meta, title: e.target.value })}
+                        placeholder="e.g. Awards & Honors Archive"
+                      />
+                      <span className="adm-help-text">Main section heading on front-end</span>
+                    </div>
+                  </div>
+
+                  <div className="adm-form-group" style={{ marginBottom: 0 }}>
+                    <label className="adm-label">Section Subtitle</label>
+                    <textarea
+                      className="adm-input adm-textarea"
+                      rows={2}
+                      value={meta.sectionSubtitle || ''}
+                      onChange={(e) => setMeta({ ...meta, sectionSubtitle: e.target.value })}
+                      placeholder="e.g. Chronological journey of prestigious Dhallywood awards..."
+                    />
+                    <span className="adm-help-text">Descriptive editorial sentence below heading</span>
+                  </div>
+                </div>
+
+                {/* Intro Card Controls */}
+                <div style={{ fontSize: '12px', fontWeight: 600, color: 'var(--pink)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '12px' }}>
+                  2. Featured Intro Card (Recognized Excellence)
+                </div>
+
                 <div className="adm-grid-2fields">
                   <div className="adm-form-group">
                     <label className="adm-label">Intro Card Badge *</label>
@@ -454,7 +527,7 @@ export default function AdminTimelinePage() {
                     >
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img
-                        src={meta.image || '/images/award-diff-stage.jpg'}
+                        src={meta.image || '/uploads/timeline/whatsapp-image-2026-10-28-at-4-1793518045150-j95n.jpeg'}
                         alt="Primary Cover"
                         style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                         onError={(e) => {
@@ -479,7 +552,7 @@ export default function AdminTimelinePage() {
                         className="adm-input"
                         value={meta.image || ''}
                         onChange={(e) => setMeta({ ...meta, image: e.target.value })}
-                        placeholder="/images/award-... or /uploads/..."
+                        placeholder="/uploads/timeline/... or /images/..."
                       />
                     </div>
                   </div>
@@ -509,7 +582,7 @@ export default function AdminTimelinePage() {
                         Dynamic Auto-Cycling Background Cover
                       </div>
                       <div style={{ fontSize: '12px', color: 'var(--adm-text-muted)' }}>
-                        Smoothly crossfades between all award photos in the background of the intro card
+                        Smoothly crossfades between showcase award photos without any flickering or glitch
                       </div>
                     </div>
 
@@ -568,6 +641,36 @@ export default function AdminTimelinePage() {
                       <Plus size={12} />
                       <span>Add Extra Showcase Photo</span>
                     </button>
+                  </div>
+
+                  {/* Include milestone items toggle */}
+                  <div
+                    style={{
+                      marginTop: '10px',
+                      paddingTop: '10px',
+                      borderTop: '1px solid rgba(255, 255, 255, 0.06)',
+                    }}
+                  >
+                    <label
+                      style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '8px',
+                        cursor: 'pointer',
+                        fontSize: '12px',
+                        color: 'var(--adm-text-muted)',
+                      }}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={meta.includeMilestonePhotos === true}
+                        onChange={(e) => setMeta({ ...meta, includeMilestonePhotos: e.target.checked })}
+                      />
+                      <span>Also include all milestone timeline photos in background rotation</span>
+                    </label>
+                    <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.4)', marginTop: '2px', marginLeft: '22px' }}>
+                      When unchecked (recommended), only your Primary Cover Photo and extra showcase photos are used.
+                    </div>
                   </div>
 
                   {/* Extra Showcase Images Pills */}
@@ -639,7 +742,7 @@ export default function AdminTimelinePage() {
                   >
                     <Check size={12} />
                     <span>
-                      Live Award Pool: {previewCycleImages.length} images will cycle continuously (all active milestone awards with photos are automatically included).
+                      Live Award Pool: {previewCycleImages.length} {previewCycleImages.length === 1 ? 'image active (single cover mode)' : 'images will cycle continuously'}.
                     </span>
                   </div>
                 </div>
@@ -705,9 +808,9 @@ export default function AdminTimelinePage() {
                           height: '100%',
                           objectFit: 'cover',
                           filter: 'saturate(0.9)',
-                          transition: 'all 1s ease-in-out',
+                          transition: 'opacity 0.7s ease-in-out',
                           opacity: isCurrent ? 0.75 : 0,
-                          transform: isCurrent ? 'scale(1)' : 'scale(1.05)',
+                          willChange: 'opacity',
                           pointerEvents: 'none',
                         }}
                         onError={(e) => {

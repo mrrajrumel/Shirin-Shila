@@ -16,7 +16,7 @@ import { aboutData } from "@/data/about";
 import { showreelVideos, ShowreelItem } from "@/data/showreel";
 import { filmography, ProjectItem } from "@/data/filmography";
 import { galleryImages, GalleryImage } from "@/data/gallery";
-import { defaultTopJourneyData, defaultBottomJourneyData, careerTimeline } from "@/data/timeline";
+import { defaultTopJourneyData, defaultBottomJourneyData, careerTimeline, defaultTimelineMeta } from "@/data/timeline";
 import { pressItems, PressItem } from "@/data/press";
 import { initialContactInfo, ContactInfo } from "@/data/contact";
 import { defaultMediaPartners, MediaPartner } from "@/data/media-partners";
@@ -95,7 +95,7 @@ export default async function Home() {
         id="timeline"
         topData={timelineTopData}
         bottomData={timelineBottomData}
-        initialMeta={timeline.meta}
+        initialMeta={timeline?.meta || defaultTimelineMeta}
       />
 
       {/* 8. Media coverage, newspaper clippings, and interviews */}

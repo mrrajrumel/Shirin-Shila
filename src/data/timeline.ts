@@ -176,25 +176,23 @@ export interface TimelineMetaConfig {
   images?: string[];
   autoRotate?: boolean;
   rotationInterval?: number; // seconds
+  includeMilestonePhotos?: boolean;
 }
 
 export const defaultTimelineMeta: TimelineMetaConfig = {
   kicker: "Honors & Accolades",
-  title: "Awards & Honors",
+  title: "Awards & Honors Archive",
   sectionSubtitle: "Chronological journey of prestigious Dhallywood awards, television honors, and film industry recognitions from 2014 to present.",
   periodLabel: computeTimelinePeriodLabel([...topJourneyData, ...bottomJourneyData]),
-  image: "/images/award-diff-stage.jpg",
+  image: "/uploads/timeline/whatsapp-image-2026-10-28-at-4-1793518045150-j95n.jpeg",
   imageAlt: "Shirin Shila receiving Awards & Trophies",
   badge: "Dhallywood Honors",
   cardTitle: "Recognized Excellence",
   cardSubtitle: "Honoring a decade of memorable cinematic performances across television, mainstream film, and cultural festivals.",
-  images: [
-    "/images/award-diff-stage.jpg",
-    "/images/award-trophy-stage.jpg",
-    "/images/award-trophy-gala.jpg",
-  ],
-  autoRotate: true,
+  images: [],
+  autoRotate: false,
   rotationInterval: 4,
+  includeMilestonePhotos: false,
 };
 
 export const timelineMeta = defaultTimelineMeta;

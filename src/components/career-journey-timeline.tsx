@@ -30,16 +30,39 @@ export type TimelineProps = {
   initialMeta?: TimelineMetaConfig;
 };
 
+function renderFormattedTitle(rawTitle: string) {
+  if (!rawTitle) return <>Awards &amp; <span className="pink">Honors Archive</span></>;
+  if (rawTitle.includes('&')) {
+    const parts = rawTitle.split('&');
+    return (
+      <>
+        {parts[0].trim()} &amp; <span className="pink">{parts.slice(1).join('&').trim()}</span>
+      </>
+    );
+  }
+  const words = rawTitle.split(' ');
+  if (words.length > 1) {
+    const main = words.slice(0, -1).join(' ');
+    const last = words[words.length - 1];
+    return (
+      <>
+        {main} <span className="pink">{last}</span>
+      </>
+    );
+  }
+  return <>{rawTitle}</>;
+}
+
 export default function CareerJourneyTimeline({
   id = "timeline",
-  title = timelineMeta.title,
-  periodLabel = timelineMeta.periodLabel,
+  title,
+  periodLabel,
   textColor = "#f8f1f5",
   mutedTextColor = "#b6a7b2",
   activeColor = "#ff3f79",
   backgroundColor = "#0b080c",
-  imageUrl = timelineMeta.image,
-  imageAlt = timelineMeta.imageAlt,
+  imageUrl,
+  imageAlt,
   topData = defaultTopJourneyData,
   bottomData = defaultBottomJourneyData,
   initialMeta,
@@ -59,50 +82,73 @@ export default function CareerJourneyTimeline({
   const [canScrollRight, setCanScrollRight] = useState(true);
   const [activeIndex, setActiveIndex] = useState(0);
 
-  // Dynamic pool of all authentic award images for background cycling cover
+  // Dynamic pool of authentic award images for background cycling cover
   const cycleImages = useMemo(() => {
-    // 1. Gather all non-empty award images from the current timeline items
-    const fromItems = liveItems
-      .map((it) => it.image)
-      .filter(
-        (img): img is string =>
-          Boolean(img && typeof img === "string" && img.trim().length > 0 && !img.includes("placeholder") && !img.includes("demo"))
-      );
+    const pool: string[] = [];
 
-    // 2. Gather custom showcase cover images from admin settings
-    const fromMeta = Array.isArray(meta?.images)
-      ? meta.images.filter(
+    // 1. Primary cover image (Admin chosen image takes highest priority)
+    const primary = (meta?.image && typeof meta.image === "string" && meta.image.trim()) 
+      ? meta.image.trim() 
+      : (imageUrl && typeof imageUrl === "string" && imageUrl.trim() && !imageUrl.includes("placeholder")) 
+        ? imageUrl.trim() 
+        : "";
+
+    if (primary && !primary.includes("placeholder") && !primary.includes("demo")) {
+      pool.push(primary);
+    }
+
+    // 2. Extra showcase photos explicitly added by admin
+    if (Array.isArray(meta?.images)) {
+      for (const img of meta.images) {
+        if (img && typeof img === "string" && img.trim() && !img.includes("placeholder") && !img.includes("demo")) {
+          if (!pool.includes(img.trim())) {
+            pool.push(img.trim());
+          }
+        }
+      }
+    }
+
+    // 3. Only include milestone photos if explicitly enabled by admin OR if pool is completely empty
+    if (meta?.includeMilestonePhotos === true || pool.length === 0) {
+      const fromItems = liveItems
+        .map((it) => it.image)
+        .filter(
           (img): img is string =>
             Boolean(img && typeof img === "string" && img.trim().length > 0 && !img.includes("placeholder") && !img.includes("demo"))
-        )
-      : [];
-
-    if (meta?.image && typeof meta.image === "string" && meta.image.trim() && !meta.image.includes("placeholder")) {
-      if (!fromMeta.includes(meta.image)) {
-        fromMeta.unshift(meta.image);
+        );
+      for (const img of fromItems) {
+        if (!pool.includes(img)) {
+          pool.push(img);
+        }
       }
     }
 
-    if (imageUrl && typeof imageUrl === "string" && imageUrl.trim() && !imageUrl.includes("placeholder")) {
-      if (!fromMeta.includes(imageUrl)) {
-        fromMeta.push(imageUrl);
-      }
+    // 4. Guaranteed authentic fallback if pool is still empty
+    if (pool.length === 0) {
+      return ["/images/award-trophy-stage.jpg", "/images/award-trophy-gala.jpg"];
     }
 
-    // Deduplicate and combine
-    const combined = Array.from(new Set([...fromMeta, ...fromItems]));
-
-    if (combined.length === 0) {
-      return [
-        "/images/award-diff-stage.jpg",
-        "/images/award-trophy-stage.jpg",
-        "/images/award-trophy-gala.jpg",
-      ];
-    }
-    return combined;
+    return pool;
   }, [liveItems, meta, imageUrl]);
 
-  // Automatic background crossfade timer
+  // Keep index within bounds whenever the pool changes
+  useEffect(() => {
+    if (currentCoverIndex >= cycleImages.length) {
+      setCurrentCoverIndex(0);
+    }
+  }, [cycleImages.length, currentCoverIndex]);
+
+  // Preload cycling images in browser memory to eliminate decoding / layout stutter
+  useEffect(() => {
+    if (typeof window !== "undefined" && cycleImages.length > 1) {
+      cycleImages.forEach((src) => {
+        const img = new window.Image();
+        img.src = src;
+      });
+    }
+  }, [cycleImages]);
+
+  // Automatic background crossfade timer (only if > 1 image and autoRotate is not disabled)
   useEffect(() => {
     if (cycleImages.length <= 1) return;
     if (meta?.autoRotate === false) return;
@@ -183,6 +229,7 @@ export default function CareerJourneyTimeline({
   };
 
   useEffect(() => {
+    loadTimeline();
     const handleUpdate = () => loadTimeline();
     window.addEventListener("shirin_shila_timeline_updated", handleUpdate);
     window.addEventListener("shirin_shila_reset", handleUpdate);
@@ -245,12 +292,12 @@ export default function CareerJourneyTimeline({
         {/* Section Header */}
         <div className="flex flex-col md:flex-row md:items-end justify-between mb-8 sm:mb-12 gap-6">
           <div>
-            <div className="section-kicker">Career Milestones</div>
+            <div className="section-kicker">{meta.kicker || "Career Milestones"}</div>
             <h2 className="serif text-3xl sm:text-4xl lg:text-5xl font-normal tracking-tight text-white mt-1">
-              Awards &amp; <span className="pink">Honors Archive</span>
+              {renderFormattedTitle(meta.title || "Awards & Honors Archive")}
             </h2>
             <p className="muted mt-2 text-sm sm:text-base max-w-2xl leading-relaxed">
-              Chronological journey of prestigious Dhallywood awards, television honors, and film industry recognitions from 2014 to present.
+              {meta.sectionSubtitle || "Chronological journey of prestigious Dhallywood awards, television honors, and film industry recognitions from 2014 to present."}
             </p>
           </div>
 
@@ -302,7 +349,7 @@ export default function CareerJourneyTimeline({
           >
             {/* Featured Portrait Intro Card with Auto-cycling Background Cover */}
             <div className="w-[280px] sm:w-[320px] flex-shrink-0 snap-start rounded-2xl overflow-hidden border border-white/10 bg-[#140e16] relative shadow-2xl flex flex-col justify-end p-6 min-h-[380px] group/card">
-              {/* Dynamic crossfading background images */}
+              {/* Dynamic crossfading background images with zero glitch */}
               {cycleImages.map((src, idx) => {
                 const isCurrent = idx === currentCoverIndex;
                 return (
@@ -310,9 +357,10 @@ export default function CareerJourneyTimeline({
                     key={`${src}-${idx}`}
                     src={src}
                     alt={meta.imageAlt || `${meta.cardTitle || "Awards & Honors"} - Shirin Shila`}
-                    className={`absolute inset-0 w-full h-full object-cover filter saturate-[0.9] transition-all duration-1000 ease-in-out ${
-                      isCurrent ? "opacity-75 scale-100" : "opacity-0 scale-105 pointer-events-none"
+                    className={`absolute inset-0 w-full h-full object-cover filter saturate-[0.9] transition-opacity duration-700 ease-in-out ${
+                      isCurrent ? "opacity-75 z-0" : "opacity-0 -z-10 pointer-events-none"
                     }`}
+                    style={{ willChange: "opacity" }}
                     onError={(e) => {
                       (e.currentTarget as HTMLImageElement).src = "/images/award-trophy-stage.jpg";
                     }}
@@ -321,12 +369,12 @@ export default function CareerJourneyTimeline({
               })}
 
               {/* Deep cinematic vignette / gradient backdrop */}
-              <div className="absolute inset-0 bg-gradient-to-t from-[#0e0810] via-[#0e0810]/60 to-black/35 pointer-events-none" />
+              <div className="absolute inset-0 bg-gradient-to-t from-[#0e0810] via-[#0e0810]/60 to-black/35 pointer-events-none z-[1]" />
 
-              {/* Dynamic rotating indicator badge */}
+              {/* Dynamic rotating indicator badge (only if more than 1 image) */}
               {cycleImages.length > 1 && (
                 <div className="absolute top-4 right-4 z-10 flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-black/60 backdrop-blur-md border border-white/15 text-[10px] font-mono text-zinc-300 shadow-md">
-                  <span className="size-1.5 rounded-full bg-pink-400 animate-pulse" />
+                  <span className={`size-1.5 rounded-full ${meta.autoRotate !== false ? "bg-pink-400 animate-pulse" : "bg-zinc-400"}`} />
                   <span>
                     {String(currentCoverIndex + 1).padStart(2, "0")} / {String(cycleImages.length).padStart(2, "0")}
                   </span>
@@ -348,7 +396,7 @@ export default function CareerJourneyTimeline({
                   {meta.cardSubtitle || "Honoring a decade of memorable cinematic performances across television, mainstream film, and cultural festivals."}
                 </p>
 
-                {/* Interactive dot indicators */}
+                {/* Interactive dot indicators (only if more than 1 image) */}
                 {cycleImages.length > 1 && (
                   <div className="flex items-center gap-1.5 mt-4 pt-3 border-t border-white/10">
                     {cycleImages.map((_, i) => (

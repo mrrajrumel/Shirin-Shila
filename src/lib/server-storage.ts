@@ -86,6 +86,7 @@ function getDefaultData(key: StoreKey): any {
         top: defaultTopJourneyData,
         bottom: defaultBottomJourneyData,
         milestones: careerTimeline,
+        meta: defaultTimelineMeta,
       };
     case 'inquiries':
       return initialInquiries;
