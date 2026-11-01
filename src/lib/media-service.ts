@@ -358,6 +358,99 @@ export async function uploadMediaAsset({
 }
 
 /**
+ * Safely downloads a remote image and registers it into the Central Media Library & Asset Registry.
+ * If the download, validation, or network times out, returns the original remote URL or fallback URL.
+ */
+export async function downloadAndRegisterMedia({
+  url,
+  fallbackName = 'media-asset',
+  folder = 'general',
+}: {
+  url: string;
+  fallbackName?: string;
+  folder?: string;
+}): Promise<string> {
+  if (!url || typeof url !== 'string' || !url.startsWith('http')) {
+    return url;
+  }
+
+  // Prevent SSRF: Disallow loopback, private networks, or internal metadata addresses
+  try {
+    const parsed = new URL(url);
+    const host = parsed.hostname.toLowerCase();
+    if (
+      host === 'localhost' ||
+      host === '127.0.0.1' ||
+      host === '::1' ||
+      host === '0.0.0.0' ||
+      /^10\./.test(host) ||
+      /^192\.168\./.test(host) ||
+      /^172\.(1[6-9]|2[0-9]|3[0-1])\./.test(host) ||
+      /^169\.254\./.test(host)
+    ) {
+      return url;
+    }
+  } catch {
+    return url;
+  }
+
+  try {
+    const res = await fetch(url, {
+      headers: {
+        'User-Agent':
+          'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36',
+        'Accept': 'image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8',
+      },
+      signal: AbortSignal.timeout(8000),
+    });
+
+    if (!res.ok) {
+      return url;
+    }
+
+    const arrayBuffer = await res.arrayBuffer();
+    const buffer = Buffer.from(arrayBuffer);
+    if (buffer.length < 50) {
+      return url;
+    }
+
+    // Determine safe extension
+    const contentType = (res.headers.get('content-type') || '').toLowerCase();
+    let ext = '.jpg';
+    if (contentType.includes('png') || url.toLowerCase().includes('.png')) {
+      ext = '.png';
+    } else if (contentType.includes('webp') || url.toLowerCase().includes('.webp')) {
+      ext = '.webp';
+    } else if (contentType.includes('gif') || url.toLowerCase().includes('.gif')) {
+      ext = '.gif';
+    } else if (contentType.includes('svg') || url.toLowerCase().includes('.svg')) {
+      ext = '.svg';
+    }
+
+    const sanitizedBase =
+      fallbackName
+        .toLowerCase()
+        .replace(/[^a-z0-9]/g, '-')
+        .replace(/-+/g, '-')
+        .replace(/^-|-$/g, '')
+        .slice(0, 30) || 'asset';
+
+    const filename = `${sanitizedBase}${ext}`;
+
+    const uploaded = await uploadMediaAsset({
+      buffer,
+      originalFilename: filename,
+      folder,
+    });
+
+    return uploaded.asset.url;
+  } catch (err) {
+    console.warn(`[MediaService] Remote download & register failed for ${url}:`, (err as Error).message);
+    return url;
+  }
+}
+
+/**
  * Scans all store JSON files to find where a media asset is actively referenced.
  */
 export async function checkMediaUsage(assetUrl: string): Promise<MediaUsageReference[]> {

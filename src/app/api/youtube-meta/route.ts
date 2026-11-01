@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { SESSION_COOKIE_NAME, verifySessionToken } from '@/lib/auth';
+import { downloadAndRegisterMedia } from '@/lib/media-service';
 
 export const dynamic = 'force-dynamic';
 
@@ -72,23 +73,45 @@ export async function GET(request: NextRequest) {
     const maxresThumbnail = `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`;
     const hqThumbnail = `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`;
 
+    // Automatically download and register in Central Media Library & Asset Registry
+    let registeredThumb = await downloadAndRegisterMedia({
+      url: maxresThumbnail,
+      fallbackName: `youtube-${videoId}-cover`,
+      folder: 'showreels',
+    });
+
+    // If maxres was not available on YouTube (returned external url unchanged or failed), try HQ thumbnail
+    if (registeredThumb === maxresThumbnail) {
+      registeredThumb = await downloadAndRegisterMedia({
+        url: hqThumbnail,
+        fallbackName: `youtube-${videoId}-cover`,
+        folder: 'showreels',
+      });
+    }
+
     return NextResponse.json({
       success: true,
       videoId,
       title,
       author,
-      thumbnail: maxresThumbnail,
-      fallbackThumbnail: hqThumbnail,
+      thumbnail: registeredThumb,
+      fallbackThumbnail: registeredThumb,
       embedUrl: `https://www.youtube-nocookie.com/embed/${videoId}`,
       youtubeUrl: targetUrl,
     });
   } catch (err: any) {
+    const fallbackThumb = await downloadAndRegisterMedia({
+      url: `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`,
+      fallbackName: `youtube-${videoId}-cover`,
+      folder: 'showreels',
+    });
+
     return NextResponse.json({
       success: true,
       videoId,
       title: 'YouTube Video Reel',
       author: 'Dhallywood Media',
-      thumbnail: `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`,
+      thumbnail: fallbackThumb,
       embedUrl: `https://www.youtube-nocookie.com/embed/${videoId}`,
       youtubeUrl: targetUrl,
     });

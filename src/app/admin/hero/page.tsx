@@ -233,15 +233,6 @@ export default function AdminHeroPage() {
                       <span>{isUploading ? 'Uploading...' : 'Direct Upload'}</span>
                     </button>
                   </div>
-
-                  <MediaPickerModal
-                    isOpen={pickerOpen}
-                    onClose={() => setPickerOpen(false)}
-                    onSelect={(url) => setHero((prev) => (prev ? { ...prev, image: url } : null))}
-                    title="Select Hero Portrait Photo"
-                    currentValue={hero.image}
-                    targetFolder="hero"
-                  />
                 </div>
 
                 <div className="adm-form-group">
@@ -268,6 +259,15 @@ export default function AdminHeroPage() {
             </div>
           </div>
         </form>
+
+        <MediaPickerModal
+          isOpen={pickerOpen}
+          onClose={() => setPickerOpen(false)}
+          onSelect={(url) => setHero((prev) => (prev ? { ...prev, image: url } : null))}
+          title="Select Hero Portrait Photo"
+          currentValue={hero?.image || ""}
+          targetFolder="hero"
+        />
       </main>
     </>
   );

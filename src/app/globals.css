@@ -3862,6 +3862,41 @@ a {
   font-size: 13px;
 }
 
+.footer-social-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding: 14px 0 10px;
+}
+
+.footer-social-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: #c4b5c1;
+  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.footer-social-icon:hover {
+  background: rgba(236, 72, 153, 0.15);
+  border-color: rgba(236, 72, 153, 0.4);
+  color: #ffffff;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 14px rgba(236, 72, 153, 0.25);
+}
+
+.footer-social-icon.footer-imdb-icon:hover {
+  background: rgba(245, 197, 24, 0.16);
+  border-color: rgba(245, 197, 24, 0.5);
+  box-shadow: 0 4px 14px rgba(245, 197, 24, 0.25);
+}
+
 .one-page-footer .footer-links {
   display: flex;
   flex-wrap: wrap;

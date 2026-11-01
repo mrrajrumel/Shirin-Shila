@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { SESSION_COOKIE_NAME, verifySessionToken } from '@/lib/auth';
+import { downloadAndRegisterMedia } from '@/lib/media-service';
 
 export const dynamic = 'force-dynamic';
 
@@ -310,8 +311,13 @@ export async function GET(request: NextRequest) {
         detectedRole = 'Lead Protagonist';
       }
 
-      // Use YouTube high quality thumbnail
+      // Automatically download and register thumbnail in Central Media Library & Asset Registry
       const ytThumbnail = `https://img.youtube.com/vi/${ytId}/hqdefault.jpg`;
+      const registeredPoster = await downloadAndRegisterMedia({
+        url: oembedThumbnail || ytThumbnail,
+        fallbackName: `${cleanedTitle || 'youtube-work'}-poster`,
+        folder: 'works',
+      });
 
       // Extract Co-Star from title if "with" or "ft" or "featuring" is found
       let coStar = '';
@@ -333,13 +339,19 @@ export async function GET(request: NextRequest) {
           productionHouse: authorName,
           role: detectedRole,
           description: `Official ${detectedCategory.toLowerCase()} presentation featuring Shirin Shila. Broadcast and released on ${authorName}.`,
-          image: ytThumbnail,
+          image: registeredPoster,
           videoUrl: targetUrl,
           youtubeId: ytId,
         },
       });
     } catch (ytErr) {
       // Fallback with YouTube ID thumbnail even if oembed fails
+      const fallbackPoster = await downloadAndRegisterMedia({
+        url: `https://img.youtube.com/vi/${ytId}/hqdefault.jpg`,
+        fallbackName: `youtube-${ytId}-poster`,
+        folder: 'works',
+      });
+
       return NextResponse.json({
         success: true,
         source: 'youtube-fallback',
@@ -353,7 +365,7 @@ export async function GET(request: NextRequest) {
           productionHouse: 'YouTube Broadcast',
           role: 'Lead Performer',
           description: 'Official screen appearance starring Shirin Shila.',
-          image: `https://img.youtube.com/vi/${ytId}/hqdefault.jpg`,
+          image: fallbackPoster,
           videoUrl: `https://www.youtube.com/watch?v=${ytId}`,
           youtubeId: ytId,
         },
@@ -383,7 +395,14 @@ export async function GET(request: NextRequest) {
           const rawTitle = item.l || 'Dhallywood Film';
           const releaseYear = item.y ? item.y.toString() : new Date().getFullYear().toString();
           const stars = item.s || '';
-          const poster = item.i?.imageUrl || '/images/poster-begum-jaan.jpg';
+          const rawPoster = item.i?.imageUrl || '/images/poster-begum-jaan.jpg';
+
+          // Automatically download and register poster in Central Media Library & Asset Registry
+          const poster = await downloadAndRegisterMedia({
+            url: rawPoster,
+            fallbackName: `${rawTitle || 'imdb-work'}-poster`,
+            folder: 'works',
+          });
 
           let category: 'Film' | 'Television Drama' | 'TV Show Judge' | 'Music Video' | 'Commercial & Modelling' = 'Film';
           if (item.q && /tv|series|episode/i.test(item.q)) {
@@ -497,6 +516,13 @@ export async function GET(request: NextRequest) {
           cat = 'Commercial & Modelling';
         }
 
+        // Automatically download and register scraped web image in Central Media Library
+        const registeredImage = await downloadAndRegisterMedia({
+          url: image || '',
+          fallbackName: `${rawTitle || 'web-work'}-poster`,
+          folder: 'works',
+        });
+
         return NextResponse.json({
           success: true,
           source: 'scraped',
@@ -510,7 +536,7 @@ export async function GET(request: NextRequest) {
             productionHouse: urlObj.hostname.replace('www.', ''),
             role: cat === 'TV Show Judge' ? 'Grand Jury / Judge (বিচারক)' : 'Lead Performer',
             description: rawDesc || `Production work starring Bangladeshi film actress Shirin Shila.`,
-            image: image || '/images/poster-begum-jaan.jpg',
+            image: registeredImage || '/images/poster-begum-jaan.jpg',
             videoUrl: input.startsWith('http') ? input : `https://${input}`,
           },
         });
@@ -537,6 +563,13 @@ export async function GET(request: NextRequest) {
         const match = data.d.find((d: any) => d.i?.imageUrl) || data.d[0];
         if (match && match.l) {
           const isTv = match.q && /tv|series|episode/i.test(match.q);
+          const rawPoster = match.i?.imageUrl || '/images/poster-hitman.jpg';
+          const poster = await downloadAndRegisterMedia({
+            url: rawPoster,
+            fallbackName: `${match.l || 'imdb-work'}-poster`,
+            folder: 'works',
+          });
+
           return NextResponse.json({
             success: true,
             source: 'imdb-search',
@@ -550,7 +583,7 @@ export async function GET(request: NextRequest) {
               productionHouse: 'Cinema Production',
               role: 'Lead Role',
               description: `Cinema production starring Shirin Shila, officially cataloged on IMDb.`,
-              image: match.i?.imageUrl || '/images/poster-hitman.jpg',
+              image: poster,
               imdbUrl: match.id ? `https://www.imdb.com/title/${match.id}/` : undefined,
             },
           });

@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState, useRef } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import {
   LayoutDashboard,
@@ -477,10 +478,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         <div className="adm-sidebar-brand">
           <div className="adm-brand-left">
             <div className="adm-brand-logo-icon" style={{ background: "transparent", padding: 0 }}>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
+              <Image
                 src="/assets/logos/tso-logo-white.svg"
                 alt="Tune Soul Ocean"
+                width={32}
+                height={32}
+                priority
                 className="w-full h-full object-contain"
               />
             </div>

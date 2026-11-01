@@ -416,20 +416,6 @@ export default function AdminAboutPage() {
                       <span>{isUploading ? 'Uploading...' : 'Direct Upload'}</span>
                     </button>
                   </div>
-
-                  <MediaPickerModal
-                    isOpen={pickerOpen}
-                    onClose={() => setPickerOpen(false)}
-                    onSelect={(url) =>
-                      setAbout((prev: any) => ({
-                        ...prev,
-                        meta: { ...prev.meta, portraitSrc: url },
-                      }))
-                    }
-                    title="Select About Portrait Photo"
-                    currentValue={about.meta.portraitSrc}
-                    targetFolder="about"
-                  />
                 </div>
 
                 <div className="adm-form-group">
@@ -631,6 +617,20 @@ export default function AdminAboutPage() {
             </div>
           </div>
         </form>
+
+        <MediaPickerModal
+          isOpen={pickerOpen}
+          onClose={() => setPickerOpen(false)}
+          onSelect={(url) =>
+            setAbout((prev: any) => ({
+              ...prev,
+              meta: { ...prev.meta, portraitSrc: url },
+            }))
+          }
+          title="Select About Portrait Photo"
+          currentValue={about?.meta?.portraitSrc}
+          targetFolder="about"
+        />
       </main>
     </>
   );

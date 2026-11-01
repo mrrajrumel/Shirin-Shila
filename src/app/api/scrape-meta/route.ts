@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { SESSION_COOKIE_NAME, verifySessionToken } from '@/lib/auth';
+import { downloadAndRegisterMedia } from '@/lib/media-service';
 
 export const dynamic = 'force-dynamic';
 
@@ -331,12 +332,22 @@ export async function GET(request: NextRequest) {
     let description = extractMetaTag(html, 'description');
     if (description) description = cleanHtmlText(description);
 
+    // Automatically download and register news image in Central Media Library & Asset Registry
+    let registeredImage = image || '/images/gallery-1.jpg';
+    if (image && image.startsWith('http')) {
+      registeredImage = await downloadAndRegisterMedia({
+        url: image,
+        fallbackName: `${title || 'press-article'}-image`,
+        folder: 'press',
+      });
+    }
+
     return NextResponse.json(
       {
         success: true,
         title: title || 'News Article Headline',
         publisher: publisher || 'News Media',
-        image: image || '/images/gallery-1.jpg',
+        image: registeredImage,
         date,
         description: description || '',
         url: urlObj.toString(),
