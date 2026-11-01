@@ -39,7 +39,7 @@ export function ShowreelSection({ id = "showreel", initialVideos }: ShowreelSect
       window.removeEventListener("shirin_shila_showreels_updated", handleUpdate);
       window.removeEventListener("shirin_shila_reset", handleUpdate);
     };
-  }, []);
+  }, [initialVideos]);
 
   const slides: CoverflowSlide[] = videos.map((v) => {
     // Prefer valid custom/local poster thumbnail if provided, otherwise YouTube thumbnail

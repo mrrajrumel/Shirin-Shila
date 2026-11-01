@@ -517,15 +517,6 @@ export default function AdminPressPage() {
                         </button>
                       </div>
 
-                      <MediaPickerModal
-                        isOpen={pickerOpen}
-                        onClose={() => setPickerOpen(false)}
-                        onSelect={(url) => setFormData((prev) => ({ ...prev, image: url }))}
-                        title="Select Press Clipping / Cover Photo"
-                        currentValue={formData.image}
-                        targetFolder="press"
-                      />
-
                       <input
                         type="text"
                         className="adm-input"
@@ -618,6 +609,16 @@ export default function AdminPressPage() {
           </div>
         </div>
       )}
+
+      {/* Media Picker Modal */}
+      <MediaPickerModal
+        isOpen={pickerOpen}
+        onClose={() => setPickerOpen(false)}
+        onSelect={(url) => setFormData((prev) => ({ ...prev, image: url }))}
+        title="Select Press Clipping / Cover Photo"
+        currentValue={formData.image}
+        targetFolder="press"
+      />
     </>
   );
 }

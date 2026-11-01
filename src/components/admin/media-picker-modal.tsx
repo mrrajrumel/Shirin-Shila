@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import {
   X,
   Search,
@@ -49,6 +50,11 @@ export function MediaPickerModal({
   const [uploading, setUploading] = useState(false);
   const [selectedAsset, setSelectedAsset] = useState<MediaAsset | null>(null);
   const [feedback, setFeedback] = useState<{ type: "success" | "error" | "info"; message: string } | null>(null);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const fetchAssets = async () => {
     setLoading(true);
@@ -81,7 +87,7 @@ export function MediaPickerModal({
     }
   }, [isOpen]);
 
-  if (!isOpen) return null;
+  if (!isOpen || !mounted) return null;
 
   const filteredAssets = assets.filter((asset) => {
     const matchesFolder =
@@ -154,12 +160,12 @@ export function MediaPickerModal({
     return `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
   };
 
-  return (
+  return createPortal(
     <div
       style={{
         position: "fixed",
         inset: 0,
-        zIndex: 9999,
+        zIndex: 99999,
         backgroundColor: "rgba(15, 23, 42, 0.65)",
         backdropFilter: "blur(4px)",
         display: "flex",
@@ -602,7 +608,8 @@ export function MediaPickerModal({
           </div>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
 

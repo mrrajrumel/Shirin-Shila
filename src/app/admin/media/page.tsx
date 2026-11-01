@@ -244,14 +244,16 @@ export default function AdminMediaPage() {
   };
 
   const handleUploadNew = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+    const fileList = e.target.files;
+    if (!fileList || fileList.length === 0) return;
 
     setRefreshing(true);
     setFeedback(null);
 
     const formData = new FormData();
-    formData.append("file", file);
+    for (let i = 0; i < fileList.length; i++) {
+      formData.append("files", fileList[i]);
+    }
     formData.append("folder", selectedFolder === "all" ? "general" : selectedFolder);
 
     try {
@@ -263,11 +265,10 @@ export default function AdminMediaPage() {
       if (!res.ok) {
         throw new Error(data.error || "Upload failed");
       }
+      const count = data.count || fileList.length;
       setFeedback({
         type: "success",
-        message: data.isDuplicate
-          ? "Identical file content detected; canonical asset reused!"
-          : "New asset uploaded and indexed into manifest.",
+        message: data.message || `Successfully processed and indexed ${count} media file(s).`,
       });
       await fetchAssets();
     } catch (err: any) {
@@ -329,6 +330,7 @@ export default function AdminMediaPage() {
                 <span>Upload New Media</span>
                 <input
                   type="file"
+                  multiple
                   accept="image/jpeg,image/png,image/webp,image/gif,image/svg+xml"
                   style={{ display: "none" }}
                   onChange={handleUploadNew}

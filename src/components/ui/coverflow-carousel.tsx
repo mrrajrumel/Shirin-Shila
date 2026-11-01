@@ -227,15 +227,22 @@ export function CoverflowCarousel({
     const measure = () => {
       const card = cardRefs.current[0];
       if (!card) return;
-      widthRef.current = card.offsetWidth;
-      paint();
+      const w = card.offsetWidth;
+      if (w > 0) {
+        widthRef.current = w;
+        paint();
+      }
     };
 
     measure();
+    const rId = requestAnimationFrame(measure);
     const observer = new ResizeObserver(measure);
     observer.observe(frame);
-    return () => observer.disconnect();
-  }, [paint]);
+    return () => {
+      cancelAnimationFrame(rId);
+      observer.disconnect();
+    };
+  }, [paint, slides]);
 
   React.useEffect(
     () => () => {

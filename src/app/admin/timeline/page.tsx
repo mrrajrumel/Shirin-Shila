@@ -504,15 +504,6 @@ export default function AdminTimelinePage() {
                         </button>
                       </div>
 
-                      <MediaPickerModal
-                        isOpen={pickerOpen}
-                        onClose={() => setPickerOpen(false)}
-                        onSelect={(url) => setFormData((prev) => ({ ...prev, image: url }))}
-                        title="Select Award / Trophy Photo"
-                        currentValue={formData.image}
-                        targetFolder="timeline"
-                      />
-
                       <input
                         type="text"
                         className="adm-input"
@@ -601,6 +592,16 @@ export default function AdminTimelinePage() {
           </div>
         </div>
       )}
+
+      {/* Media Picker Modal */}
+      <MediaPickerModal
+        isOpen={pickerOpen}
+        onClose={() => setPickerOpen(false)}
+        onSelect={(url) => setFormData((prev) => ({ ...prev, image: url }))}
+        title="Select Award / Trophy Photo"
+        currentValue={formData.image}
+        targetFolder="timeline"
+      />
     </>
   );
 }

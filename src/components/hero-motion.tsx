@@ -154,11 +154,11 @@ export function HeroMotion({ id = "home", initialProfile }: HeroSectionProps) {
             textColor="text-white"
             highlightTextColor="text-[#ff3f79]"
             overlayColor="text-[#ff3f79]"
-            fontSize="text-[clamp(32px,6.8vw,118px)]"
+            fontSize="text-[clamp(44px,7.8vw,125px)]"
             fontClassName="font-serif font-black tracking-tight"
-            letterDelay={0.07}
-            overlayDelay={0.045}
-            overlayDuration={0.4}
+            letterDelay={0.08}
+            overlayDelay={0.05}
+            overlayDuration={0.45}
             springDuration={600}
           />
         </div>

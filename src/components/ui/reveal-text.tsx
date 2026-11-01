@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
-import { motion, useReducedMotion } from "framer-motion";
+import React, { useState, useEffect } from "react";
+import { motion } from "framer-motion";
 
 export interface RevealTextProps {
   text?: string;
@@ -14,6 +14,7 @@ export interface RevealTextProps {
   overlayDelay?: number;
   overlayDuration?: number;
   springDuration?: number;
+  letterImages?: string[];
   className?: string;
 }
 
@@ -22,67 +23,53 @@ export function RevealText({
   textColor = "text-white",
   highlightTextColor = "text-[#ff3f79]",
   overlayColor = "text-[#ff3f79]",
-  fontSize = "text-[clamp(32px,6.8vw,118px)]",
+  fontSize = "text-[clamp(44px,7.8vw,125px)]",
   fontClassName = "font-serif font-black tracking-tight",
-  letterDelay = 0.07,
-  overlayDelay = 0.045,
-  overlayDuration = 0.4,
+  letterDelay = 0.08,
+  overlayDelay = 0.05,
+  overlayDuration = 0.45,
   springDuration = 600,
+  letterImages = [
+    "/images/hero.jpg",
+    "/images/poster-hitman.jpg",
+    "/images/gallery-1.jpg",
+    "/images/award-diff-stage.jpg",
+    "/images/gallery-2.jpg",
+    "/images/poster-begum-jaan.jpg",
+    "/images/award-trophy-gala.jpg",
+    "/images/poster-seshbazi.jpg",
+    "/images/gallery-3.jpg",
+    "/images/poster-birangona71.jpg",
+    "/images/gallery-4.jpg",
+  ],
   className = "",
 }: RevealTextProps) {
-  const containerRef = useRef<HTMLDivElement>(null);
   const [hoveredGlobalIndex, setHoveredGlobalIndex] = useState<number | null>(null);
-  const [mousePos, setMousePos] = useState<{ x: number; y: number }>({ x: 50, y: 50 });
-  const [isPointerOver, setIsPointerOver] = useState(false);
-  const [showSweepEffect, setShowSweepEffect] = useState(false);
-  const shouldReduceMotion = useReducedMotion();
+  const [showRedText, setShowRedText] = useState(false);
 
   // Split into words so lines wrap cleanly on mobile
   const words = text.split(" ");
   const totalLetters = text.replace(/\s+/g, "").length;
 
   useEffect(() => {
-    // Initial entrance sweep animation
+    // Calculate when the last letter animation completes
     const lastLetterDelay = (totalLetters - 1) * letterDelay;
     const totalDelay = lastLetterDelay * 1000 + springDuration;
 
     const timer = setTimeout(() => {
-      setShowSweepEffect(true);
+      setShowRedText(true);
     }, totalDelay);
 
     return () => clearTimeout(timer);
   }, [totalLetters, letterDelay, springDuration]);
 
-  // Track pointer position across the container to drive dynamic gradient illumination
-  const handlePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
-    if (shouldReduceMotion || !containerRef.current) return;
-    const rect = containerRef.current.getBoundingClientRect();
-    const x = Math.max(0, Math.min(100, ((e.clientX - rect.left) / rect.width) * 100));
-    const y = Math.max(0, Math.min(100, ((e.clientY - rect.top) / rect.height) * 100));
-    setMousePos({ x, y });
-    setIsPointerOver(true);
-  };
-
-  const handlePointerLeave = () => {
-    setIsPointerOver(false);
-    setHoveredGlobalIndex(null);
-  };
-
+  // Keep track of running index across words
   let runningIndex = 0;
 
   return (
-    <div
-      ref={containerRef}
-      onPointerMove={handlePointerMove}
-      onPointerLeave={handlePointerLeave}
-      className={`flex flex-wrap items-center gap-x-[0.3em] gap-y-1 relative select-none ${className}`}
-      style={{
-        // Dynamic CSS variables driven by pointer position for smooth color interpolation
-        ["--pointer-x" as any]: `${mousePos.x}%`,
-        ["--pointer-y" as any]: `${mousePos.y}%`,
-      }}
-    >
+    <div className={`flex flex-wrap items-center gap-x-[0.3em] gap-y-1 relative select-none ${className}`}>
       {words.map((word, wordIndex) => {
+        // Second word (e.g. "SHILA") gets the signature brand highlight color
         const isSecondWord = wordIndex > 0;
         const currentTextColor = isSecondWord && highlightTextColor ? highlightTextColor : textColor;
 
@@ -91,25 +78,14 @@ export function RevealText({
             {word.split("").map((letter) => {
               const globalIndex = runningIndex++;
               const isHovered = hoveredGlobalIndex === globalIndex;
-
-              // Color system styling based on whether it is first word (white/platinum) or second word (rose/magenta)
-              const normalGradient = isSecondWord
-                ? "linear-gradient(135deg, #ff7ca0 0%, #ff3f79 60%, #e51c44 100%)"
-                : "linear-gradient(135deg, #ffffff 0%, #f1f5f9 60%, #cbd5e1 100%)";
-
-              const interactiveGradient = isSecondWord
-                ? "linear-gradient(135deg, #ffffff 0%, #ff7ca0 35%, #ff3f79 75%, #ff1f68 100%)"
-                : "linear-gradient(135deg, #ffffff 0%, #ffe4ec 40%, #ff7ca0 85%, #ff3f79 100%)";
+              const imgUrl = letterImages[globalIndex % letterImages.length];
 
               return (
                 <motion.span
                   key={globalIndex}
-                  onPointerEnter={() => setHoveredGlobalIndex(globalIndex)}
-                  onPointerLeave={() => setHoveredGlobalIndex(null)}
-                  className={`${fontSize} ${fontClassName} cursor-pointer relative overflow-visible leading-[0.88] inline-block transition-transform duration-200`}
-                  style={{
-                    transform: isHovered && !shouldReduceMotion ? "translateY(-2px) scale(1.03)" : "none",
-                  }}
+                  onMouseEnter={() => setHoveredGlobalIndex(globalIndex)}
+                  onMouseLeave={() => setHoveredGlobalIndex(null)}
+                  className={`${fontSize} ${fontClassName} cursor-pointer relative overflow-hidden leading-[0.88] inline-block`}
                   initial={{
                     scale: 0,
                     opacity: 0,
@@ -119,46 +95,54 @@ export function RevealText({
                     opacity: 1,
                   }}
                   transition={{
-                    delay: shouldReduceMotion ? 0 : globalIndex * letterDelay,
+                    delay: globalIndex * letterDelay,
                     type: "spring",
-                    damping: 10,
-                    stiffness: 220,
+                    damping: 8,
+                    stiffness: 200,
                     mass: 0.8,
                   }}
                 >
-                  {/* Base chromatic letter layer */}
-                  <span
-                    className="inline-block transition-all duration-300"
+                  {/* Base text layer */}
+                  <motion.span
+                    className={`inline-block ${currentTextColor}`}
+                    animate={{
+                      opacity: isHovered ? 0 : 1,
+                    }}
+                    transition={{ duration: 0.12 }}
+                  >
+                    {letter}
+                  </motion.span>
+
+                  {/* Image text layer with cinematic background panning */}
+                  <motion.span
+                    className="absolute inset-0 text-transparent bg-clip-text bg-cover bg-no-repeat"
+                    animate={{
+                      opacity: isHovered ? 1 : 0,
+                      backgroundPosition: isHovered ? "20% center" : "0% center",
+                    }}
+                    transition={{
+                      opacity: { duration: 0.12 },
+                      backgroundPosition: {
+                        duration: 3,
+                        ease: "easeInOut",
+                      },
+                    }}
                     style={{
-                      background: isHovered
-                        ? interactiveGradient
-                        : isPointerOver
-                        ? normalGradient
-                        : undefined,
-                      WebkitBackgroundClip: isHovered || isPointerOver ? "text" : undefined,
-                      WebkitTextFillColor: isHovered || isPointerOver ? "transparent" : undefined,
-                      color: !(isHovered || isPointerOver)
-                        ? isSecondWord
-                          ? "#ff3f79"
-                          : "#ffffff"
-                        : undefined,
-                      filter: isHovered
-                        ? isSecondWord
-                          ? "drop-shadow(0 0 18px rgba(255, 63, 121, 0.65))"
-                          : "drop-shadow(0 0 16px rgba(255, 255, 255, 0.5))"
-                        : "none",
+                      backgroundImage: `url('${imgUrl}')`,
+                      WebkitBackgroundClip: "text",
+                      WebkitTextFillColor: "transparent",
                     }}
                   >
                     {letter}
-                  </span>
+                  </motion.span>
 
-                  {/* Initial cinematic sweep overlay across letters on page reveal */}
-                  {showSweepEffect && !shouldReduceMotion && (
+                  {/* Overlay text layer that sweeps across each letter */}
+                  {showRedText && (
                     <motion.span
                       className={`absolute inset-0 ${overlayColor} pointer-events-none`}
                       initial={{ opacity: 0 }}
                       animate={{
-                        opacity: [0, 0.85, 0.85, 0],
+                        opacity: [0, 1, 1, 0],
                       }}
                       transition={{
                         delay: globalIndex * overlayDelay,
